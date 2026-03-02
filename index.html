@@ -5,13 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Écoles fermées</title>
 <style>
-body{
-  font-family: Arial, sans-serif;
-  margin: 0;
-}
-
-#app{
-  padding: 16px;
+body {
+    font-family: Arial, sans-serif;
+    margin: 40px;
 }
 
 .school {
@@ -88,63 +84,9 @@ body{
   border-top: 2px solid #ddd;
   background: #fafafa;
 }
-/* --- FIX MOBILE pour sous-catégories (CSS + écoles) --- */
-@media (max-width: 720px) {
-
-  /* On garde le mode carte */
-  #schools thead { display:none; }
-  #schools, #schools tbody, #schools tr, #schools td { display:block; width:100%; }
-
-  /* Chaque ligne devient une carte */
-  #schools tbody tr {
-    border: 1px solid #eee;
-    border-radius: 10px;
-    padding: 12px;
-    margin: 10px 0;
-    background: #fff;
-  }
-
-  /* Les cellules n'ont plus de padding-left qui “mange” la largeur */
-  #schools td { padding: 6px 0; border: none; }
-  #schools td[style*="padding-left"] { padding-left: 0 !important; }
-
-  /* Région : plus “header”, moins carte */
-  #schools tr.region-row {
-    border: none;
-    padding: 0;
-    margin: 14px 0 8px 0;
-    background: transparent;
-  }
-  #schools tr.region-row td{
-    border: 1px solid #eee;
-    border-radius: 10px;
-    padding: 12px;
-    background: #fafafa;
-  }
-
-  /* CSS header (Centre de services scolaire) : style distinct */
-  #schools tr.css-row {
-    background: #f7f7f7;
-    font-weight: 700;
-  }
-  #schools tr.css-row td {
-    padding: 10px 0;
-  }
-
-  /* Étiquettes Cours / Service de garde */
-  #schools tr:not(.region-row):not(.css-row) td:nth-child(2)::before {
-    content: "Cours : ";
-    font-weight: 700;
-  }
-  #schools tr:not(.region-row):not(.css-row) td:nth-child(3)::before {
-    content: "Service de garde : ";
-    font-weight: 700;
-  }
-}
 </style>
 </head>
-<body> 
-    <div id="app">
+<body>
 
 <h1>Écoles fermées au Québec</h1>
 <input 
@@ -174,21 +116,6 @@ body{
 const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSbpkb1SYuK-BMOQSXlbxcqkvWo6imOXjVCwptnPWXHOst2QZ4XCn3QTVti7XyfztGnxUGD50BVoOl3/pub?gid=314921254&single=true&output=csv";
 
 let allRows = [];
-
-function onTap(el, fn){
-  // desktop + la plupart des cas
-  el.addEventListener("click", fn);
-
-  // mobile (iframe/iOS) : le click sur <tr> peut ne pas partir
-  el.addEventListener("touchend", (e) => {
-    e.preventDefault(); // empêche le scroll de “manger” le tap
-    fn(e);
-  }, { passive: false });
-}  
-
-function showDisplay() {
-  return window.matchMedia("(max-width: 720px)").matches ? "block" : "table-row";
-}
 
 function formatCours(status) {
   if (status === "Fermé") {
@@ -316,7 +243,7 @@ groups[region].forEach(r => {
       const row = document.createElement("tr");
       row.setAttribute("data-region", regionId);
       row.setAttribute("data-css", cssRegionId);
-      row.style.display = showDisplay();
+      row.style.display = "table-row";
       row.innerHTML = `
         <td style="padding-left:34px;">
           <strong>${r.name}</strong>
@@ -328,13 +255,13 @@ groups[region].forEach(r => {
     });
 
     // Toggle CSS
-    onTap(cssHeader, (e) => {
+    cssHeader.addEventListener("click", (e) => {
       e.stopPropagation(); // IMPORTANT: sinon ça déclenche aussi le toggle de région
       const rows = Array.from(tbody.querySelectorAll(`tr[data-css="${cssRegionId}"]`));
       // on exclut le header CSS lui-même
       const schoolRows = rows.filter(tr => !tr.classList.contains("css-row"));
       const anyVisible = schoolRows.some(tr => tr.style.display !== "none");
-      schoolRows.forEach(tr => tr.style.display = anyVisible ? "none" : showDisplay());
+      schoolRows.forEach(tr => tr.style.display = anyVisible ? "none" : "table-row");
       document.getElementById(`${cssRegionId}-icon`).textContent = anyVisible ? "▶" : "▼";
     });
 
@@ -346,7 +273,7 @@ return;
     // Sinon (<5), on ne crée AUCUNE ligne au chargement.
     // On les crée au clic, puis toggle.
     
-onTap(headerTr, () => {
+headerTr.addEventListener("click", () => {
 
   // 1) Si pas encore créé : créer d'abord les CSS headers + écoles (écoles cachées)
   let regionRows = Array.from(tbody.querySelectorAll(`tr[data-region="${regionId}"]`));
@@ -395,7 +322,7 @@ onTap(headerTr, () => {
         headerTr.insertAdjacentElement("afterend", cssHeader);
 
         // Toggle CSS (montre/cache seulement ses écoles)
-        onTap(cssHeader, (e) => {
+        cssHeader.addEventListener("click", (e) => {
           e.stopPropagation(); // ne pas déclencher la région
 
           const schoolRows = Array.from(
@@ -403,7 +330,7 @@ onTap(headerTr, () => {
           ).filter(tr => !tr.classList.contains("css-row"));
 
           const anyVisible = schoolRows.some(tr => tr.style.display !== "none");
-          schoolRows.forEach(tr => tr.style.display = anyVisible ? "none" : showDisplay());
+          schoolRows.forEach(tr => tr.style.display = anyVisible ? "none" : "table-row");
 
           const icon = document.getElementById(`${cssRegionId}-icon`);
           if (icon) icon.textContent = anyVisible ? "▶" : "▼";
@@ -424,7 +351,7 @@ onTap(headerTr, () => {
     document.getElementById(`${regionId}-icon`).textContent = "▶";
   } else {
     // ouvrir région => montrer CSS headers, laisser écoles cachées
-    ssHeaders.forEach(tr => tr.style.display = showDisplay());
+    cssHeaders.forEach(tr => tr.style.display = "table-row");
 
     // reset icônes CSS à ▶ et cacher écoles (au cas où)
     regionRows.forEach(tr => {
@@ -529,7 +456,5 @@ document.getElementById("search")
   .catch(error => {
     document.getElementById("schools").innerText = "Erreur : " + error;
   });
-</script>
-</div>
-</body>
+</script></body>
 </html>
