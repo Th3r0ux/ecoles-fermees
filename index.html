@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Écoles fermées</title>
 <style>
-body {
-    font-family: Arial, sans-serif;
-    margin: 40px;
+body{
+  font-family: Arial, sans-serif;
+  margin: 0 !important;
 }
 
 .school {
@@ -117,6 +117,37 @@ body {
   #schools tbody tr{
     padding-left: 16px !important;
     padding-right: 16px !important;
+  }
+}
+
+@media (max-width: 720px){
+
+  /* Air global autour du tableau dans mobile */
+  #schools{
+    padding: 0 10px;
+  }
+
+  /* Cartes : padding plus généreux */
+  #schools tbody tr{
+    padding: 14px 16px !important; /* top/bottom, left/right */
+    margin: 12px 0 !important;
+    box-sizing: border-box;
+  }
+
+  /* IMPORTANT : les cellules prennent toute la largeur et respirent */
+  #schools td{
+    padding: 8px 0 !important;
+  }
+
+  /* Les libellés ne doivent pas coller au bord */
+  #schools tr:not(.region-row):not(.css-row) td:nth-child(2),
+  #schools tr:not(.region-row):not(.css-row) td:nth-child(3){
+    padding-left: 2px !important;
+  }
+
+  /* Et on neutralise TOUTES les indentations inline (padding-left) */
+  #schools td[style*="padding-left"]{
+    padding-left: 0 !important;
   }
 }
     
