@@ -110,7 +110,29 @@ body{
 #schools tr:not(.region-row):not(.css-row) td:first-child strong{
   font-weight: 300;     /* enlève le bold */
 }
-    
+
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.logo{
+  height:55px;   /* ajuste si trop gros */
+  object-fit:contain;
+}
+
+@media (max-width: 720px){
+  .header{
+    flex-direction:column;
+    align-items:flex-start;
+    gap:10px;
+  }
+
+  .logo{
+    height:45px;
+  }
+  
 </style>
 </head>
 <body>
