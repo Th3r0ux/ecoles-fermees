@@ -175,6 +175,17 @@ const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSbpkb1SYuK-BMOQ
 
 let allRows = [];
 
+function onTap(el, fn){
+  // desktop + la plupart des cas
+  el.addEventListener("click", fn);
+
+  // mobile (iframe/iOS) : le click sur <tr> peut ne pas partir
+  el.addEventListener("touchend", (e) => {
+    e.preventDefault(); // empêche le scroll de “manger” le tap
+    fn(e);
+  }, { passive: false });
+}  
+
 function showDisplay() {
   return window.matchMedia("(max-width: 720px)").matches ? "block" : "table-row";
 }
@@ -317,7 +328,7 @@ groups[region].forEach(r => {
     });
 
     // Toggle CSS
-    cssHeader.addEventListener("click", (e) => {
+    onTap(cssHeader, (e) => {
       e.stopPropagation(); // IMPORTANT: sinon ça déclenche aussi le toggle de région
       const rows = Array.from(tbody.querySelectorAll(`tr[data-css="${cssRegionId}"]`));
       // on exclut le header CSS lui-même
@@ -335,7 +346,7 @@ return;
     // Sinon (<5), on ne crée AUCUNE ligne au chargement.
     // On les crée au clic, puis toggle.
     
-headerTr.addEventListener("click", () => {
+onTap(headerTr, () => {
 
   // 1) Si pas encore créé : créer d'abord les CSS headers + écoles (écoles cachées)
   let regionRows = Array.from(tbody.querySelectorAll(`tr[data-region="${regionId}"]`));
@@ -384,7 +395,7 @@ headerTr.addEventListener("click", () => {
         headerTr.insertAdjacentElement("afterend", cssHeader);
 
         // Toggle CSS (montre/cache seulement ses écoles)
-        cssHeader.addEventListener("click", (e) => {
+        onTap(cssHeader, (e) => {
           e.stopPropagation(); // ne pas déclencher la région
 
           const schoolRows = Array.from(
