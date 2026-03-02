@@ -475,7 +475,11 @@ function loadFromCSVText(data){
     }));
 
   render();
-  document.getElementById("loading").style.display = "none";
+  const searchEl = document.getElementById("search");
+if (searchEl && !searchEl.dataset.bound){
+  searchEl.addEventListener("input", (e) => render(e.target.value));
+  searchEl.dataset.bound = "1";
+}
 }
 
 // 1) Tenter cache d'abord
