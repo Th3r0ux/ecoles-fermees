@@ -109,6 +109,12 @@ body{
   font-weight: 300;     /* enlève le bold */
 }
 
+.container{
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
 .top-bar{
   display:flex;
   justify-content:flex-end;
@@ -116,22 +122,27 @@ body{
 }
 
 .logo{
-  height:95px;
-}
-
+  height:140px;   /* beaucoup plus visible */
+  object-fit:contain;
+}  
+  
 @media (max-width: 720px){
   .logo{
     height:45px;
   }
 }
-  
+
 </style>
 </head>
 <body>
 
-<div class="top-bar">
-  <img src="Noovo-info_couleur_RVB.png" alt="Noovo Info" class="logo">
-</div>
+<div class="container">
+
+  <div class="top-bar">
+    <img src="Noovo-info_couleur_RVB.png" alt="Noovo Info" class="logo">
+  </div>
+
+  <h1>Écoles fermées au Québec</h1>
 
 <h1>Écoles fermées au Québec</h1>
 <input 
@@ -520,5 +531,5 @@ fetch(csvUrl, { cache: "no-store" })
     const loading = document.getElementById("loading");
     if (loading) loading.textContent = "Erreur de chargement des données.";
   });
-</script></body>
+</script></div></body>
 </html>
