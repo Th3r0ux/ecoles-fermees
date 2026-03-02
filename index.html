@@ -88,6 +88,59 @@ body{
   border-top: 2px solid #ddd;
   background: #fafafa;
 }
+/* --- FIX MOBILE pour sous-catégories (CSS + écoles) --- */
+@media (max-width: 720px) {
+
+  /* On garde le mode carte */
+  #schools thead { display:none; }
+  #schools, #schools tbody, #schools tr, #schools td { display:block; width:100%; }
+
+  /* Chaque ligne devient une carte */
+  #schools tbody tr {
+    border: 1px solid #eee;
+    border-radius: 10px;
+    padding: 12px;
+    margin: 10px 0;
+    background: #fff;
+  }
+
+  /* Les cellules n'ont plus de padding-left qui “mange” la largeur */
+  #schools td { padding: 6px 0; border: none; }
+  #schools td[style*="padding-left"] { padding-left: 0 !important; }
+
+  /* Région : plus “header”, moins carte */
+  #schools tr.region-row {
+    border: none;
+    padding: 0;
+    margin: 14px 0 8px 0;
+    background: transparent;
+  }
+  #schools tr.region-row td{
+    border: 1px solid #eee;
+    border-radius: 10px;
+    padding: 12px;
+    background: #fafafa;
+  }
+
+  /* CSS header (Centre de services scolaire) : style distinct */
+  #schools tr.css-row {
+    background: #f7f7f7;
+    font-weight: 700;
+  }
+  #schools tr.css-row td {
+    padding: 10px 0;
+  }
+
+  /* Étiquettes Cours / Service de garde */
+  #schools tr:not(.region-row):not(.css-row) td:nth-child(2)::before {
+    content: "Cours : ";
+    font-weight: 700;
+  }
+  #schools tr:not(.region-row):not(.css-row) td:nth-child(3)::before {
+    content: "Service de garde : ";
+    font-weight: 700;
+  }
+}
 </style>
 </head>
 <body> 
