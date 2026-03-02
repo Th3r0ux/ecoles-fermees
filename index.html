@@ -377,7 +377,7 @@ groups[region].forEach(r => {
       // on exclut le header CSS lui-même
       const schoolRows = rows.filter(tr => !tr.classList.contains("css-row"));
       const anyVisible = schoolRows.some(tr => tr.style.display !== "none");
-      schoolRows.forEach(tr => tr.style.display = anyVisible ? "none" : "");
+      schoolRows.forEach(tr => tr.style.display = anyVisible ? "none" : "table-row");
       document.getElementById(`${cssRegionId}-icon`).textContent = anyVisible ? "▶" : "▼";
     });
 
