@@ -163,6 +163,44 @@ body{
   padding-left: 14px !important;
   padding-right: 14px !important;
 }
+
+@media (max-width: 720px){
+
+  /* Chaque "carte école" devient une grille: nom | statuts */
+  #schools tr:not(.region-row):not(.css-row){
+    display: grid !important;
+    grid-template-columns: 1fr 130px; /* ajuste 130px si tu veux plus large */
+    column-gap: 14px;
+    align-items: start;
+  }
+
+  /* Colonne 1: nom */
+  #schools tr:not(.region-row):not(.css-row) td:first-child{
+    padding: 0 !important;
+  }
+
+  /* Colonne 2: statuts (Cours, Garde) */
+  #schools tr:not(.region-row):not(.css-row) td:nth-child(2),
+  #schools tr:not(.region-row):not(.css-row) td:nth-child(3){
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Enlève les libellés auto "Cours :" / "Service de garde :" pour éviter le retour à la ligne */
+  #schools tr:not(.region-row):not(.css-row) td:nth-child(2)::before,
+  #schools tr:not(.region-row):not(.css-row) td:nth-child(3)::before{
+    content: "" !important;
+  }
+
+  /* Optionnel: petits labels compacts dans la colonne statuts */
+  #schools tr:not(.region-row):not(.css-row) td:nth-child(2){
+    font-weight: 700;
+  }
+  #schools tr:not(.region-row):not(.css-row) td:nth-child(3){
+    margin-top: 6px !important;
+    font-weight: 700;
+  }
+}
   
 </style>
 </head>
