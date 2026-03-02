@@ -54,17 +54,17 @@ body {
     width: 100%;
   }
 
-  #schools tbody tr {
-    border: 1px solid #eee;
-    border-radius: 10px;
-    padding: 12px;
-    margin: 12px 0;
-  }
+#schools tbody tr {
+  border: 1px solid #eee;
+  border-radius: 10px;
+  margin: 12px 0;
+  overflow: hidden; /* important pour border-radius */
+}
 
-  #schools td {
-    border: none;
-    padding: 6px 0;
-  }
+#schools td {
+  padding: 12px 14px;
+  border: none;
+}
 
   /* Étiquettes avant les valeurs */
   #schools td:nth-child(2)::before {
