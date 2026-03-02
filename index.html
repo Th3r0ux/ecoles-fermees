@@ -138,7 +138,9 @@ body{
 </table>
 <script>
 const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSbpkb1SYuK-BMOQSXlbxcqkvWo6imOXjVCwptnPWXHOst2QZ4XCn3QTVti7XyfztGnxUGD50BVoOl3/pub?gid=314921254&single=true&output=csv";
-
+const CACHE_KEY = "ecoles_csv_cache_v1";
+const CACHE_TTL_MS = 60 * 1000; // 1 minute (tu peux mettre 5 min)
+  
 let allRows = [];
 
 function formatCours(status) {
@@ -450,41 +452,52 @@ function parseCSV(text) {
   return rows;
 }
 
-fetch(csvUrl)
-  .then(response => response.text())
-  .then(data => {
+function loadFromCSVText(data){
+  const parsed = parseCSV(data);
+  const header = parsed[0].map(h => h.trim());
+  const idx = (name) => header.indexOf(name);
 
-    const parsed = parseCSV(data);
-const header = parsed[0].map(h => h.trim());
+  const iName = idx("Nom d'établissement");
+  const iCSS = idx("Centre de service scolaire");
+  const iRegion = idx("Région");
+  const iStatutCours = idx("statut_cours");
+  const iStatutGarde = idx("statut_garde");
 
-// helper pour trouver les index par nom de colonne
-const idx = (name) => header.indexOf(name);
+  allRows = parsed.slice(1)
+    .filter(cols => cols.length && (cols[iName] || "").trim() !== "")
+    .map(cols => ({
+      name: (cols[iName] || "").trim(),
+      css: (cols[iCSS] || "").trim(),
+      region: (cols[iRegion] || "").trim(),
+      statutCours: (cols[iStatutCours] || "").trim(),
+      statutGarde: (cols[iStatutGarde] || "").trim(),
+    }));
 
-// ⚠️ adapte les noms EXACTS de tes colonnes CSV :
-const iName = idx("Nom d'établissement");
-const iCSS = idx("Centre de service scolaire");
-const iRegion = idx("Région");
-const iStatutCours = idx("statut_cours");
-const iStatutGarde = idx("statut_garde");
+  render();
+  document.getElementById("loading").style.display = "none";
+}
 
-allRows = parsed.slice(1)
-  .filter(cols => cols.length && (cols[iName] || "").trim() !== "")
-  .map(cols => ({
-    name: (cols[iName] || "").trim(),
-    css: (cols[iCSS] || "").trim(),
-    region: (cols[iRegion] || "").trim(),
-    statutCours: (cols[iStatutCours] || "").trim(),
-    statutGarde: (cols[iStatutGarde] || "").trim(),
-  }));
+// 1) Tenter cache d'abord
+try{
+  const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || "null");
+  if (cached && cached.text && cached.time && (Date.now() - cached.time) < CACHE_TTL_MS){
+    loadFromCSVText(cached.text); // rendu instantané
+  }
+}catch(e){ /* ignore */ }
 
-    render();
-document.getElementById("search")
-  .addEventListener("input", (e) => {
-    render(e.target.value);
-  });
+// 2) Fetch réseau ensuite (mise à jour)
+fetch(csvUrl, { cache: "no-store" })
+  .then(r => r.text())
+  .then(text => {
+    try{
+      localStorage.setItem(CACHE_KEY, JSON.stringify({ text, time: Date.now() }));
+    }catch(e){ /* ignore */ }
+    // si on avait déjà rendu via cache, on rerender avec data fraîche
+    loadFromCSVText(text);
   })
-  .catch(error => {
-    document.getElementById("schools").innerText = "Erreur : " + error;
+  .catch(err => {
+    const loading = document.getElementById("loading");
+    if (loading) loading.textContent = "Erreur de chargement des données.";
   });
 </script></body>
 </html>
