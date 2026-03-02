@@ -5,9 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Écoles fermées</title>
 <style>
-body {
-    font-family: Arial, sans-serif;
-    margin: 40px;
+body{
+  font-family: Arial, sans-serif;
+  margin: 0;
+}
+
+#app{
+  padding: 16px;
 }
 
 .school {
@@ -86,7 +90,8 @@ body {
 }
 </style>
 </head>
-<body>
+<body> 
+    <div id="app">
 
 <h1>Écoles fermées au Québec</h1>
 <input 
@@ -456,5 +461,7 @@ document.getElementById("search")
   .catch(error => {
     document.getElementById("schools").innerText = "Erreur : " + error;
   });
-</script></body>
+</script>
+</div>
+</body>
 </html>
