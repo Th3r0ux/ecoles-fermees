@@ -175,6 +175,10 @@ const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSbpkb1SYuK-BMOQ
 
 let allRows = [];
 
+function showDisplay() {
+  return window.matchMedia("(max-width: 720px)").matches ? "block" : "table-row";
+}
+
 function formatCours(status) {
   if (status === "Fermé") {
     return '<span style="color:#c62828;font-weight:600;">Suspendus</span>';
@@ -301,7 +305,7 @@ groups[region].forEach(r => {
       const row = document.createElement("tr");
       row.setAttribute("data-region", regionId);
       row.setAttribute("data-css", cssRegionId);
-      row.style.display = "table-row";
+      row.style.display = showDisplay();
       row.innerHTML = `
         <td style="padding-left:34px;">
           <strong>${r.name}</strong>
@@ -319,7 +323,7 @@ groups[region].forEach(r => {
       // on exclut le header CSS lui-même
       const schoolRows = rows.filter(tr => !tr.classList.contains("css-row"));
       const anyVisible = schoolRows.some(tr => tr.style.display !== "none");
-      schoolRows.forEach(tr => tr.style.display = anyVisible ? "none" : "table-row");
+      schoolRows.forEach(tr => tr.style.display = anyVisible ? "none" : showDisplay());
       document.getElementById(`${cssRegionId}-icon`).textContent = anyVisible ? "▶" : "▼";
     });
 
@@ -388,7 +392,7 @@ headerTr.addEventListener("click", () => {
           ).filter(tr => !tr.classList.contains("css-row"));
 
           const anyVisible = schoolRows.some(tr => tr.style.display !== "none");
-          schoolRows.forEach(tr => tr.style.display = anyVisible ? "none" : "table-row");
+          schoolRows.forEach(tr => tr.style.display = anyVisible ? "none" : showDisplay());
 
           const icon = document.getElementById(`${cssRegionId}-icon`);
           if (icon) icon.textContent = anyVisible ? "▶" : "▼";
@@ -409,7 +413,7 @@ headerTr.addEventListener("click", () => {
     document.getElementById(`${regionId}-icon`).textContent = "▶";
   } else {
     // ouvrir région => montrer CSS headers, laisser écoles cachées
-    cssHeaders.forEach(tr => tr.style.display = "table-row");
+    ssHeaders.forEach(tr => tr.style.display = showDisplay());
 
     // reset icônes CSS à ▶ et cacher écoles (au cas où)
     regionRows.forEach(tr => {
