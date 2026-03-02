@@ -158,6 +158,10 @@ body{
     padding-right: 10px;
   }
 }
+
+@media (max-width: 720px){
+  #schools tbody tr { background: #fff3cd !important; }
+}
   
 </style>
 </head>
@@ -318,7 +322,7 @@ groups[region].forEach(r => {
       const row = document.createElement("tr");
       row.setAttribute("data-region", regionId);
       row.setAttribute("data-css", cssRegionId);
-      row.style.display = "table-row";
+      row.style.display = "";
       row.innerHTML = `
   <td style="padding-left:34px;"><div class="cell"><strong>${r.name}</strong></div></td>
   <td><div class="cell">${formatCours(r.statutCours)}</div></td>
@@ -401,7 +405,7 @@ headerTr.addEventListener("click", () => {
           ).filter(tr => !tr.classList.contains("css-row"));
 
           const anyVisible = schoolRows.some(tr => tr.style.display !== "none");
-          schoolRows.forEach(tr => tr.style.display = anyVisible ? "none" : "table-row");
+          schoolRows.forEach(tr => tr.style.display = anyVisible ? "none" : "");
 
           const icon = document.getElementById(`${cssRegionId}-icon`);
           if (icon) icon.textContent = anyVisible ? "▶" : "▼";
@@ -422,7 +426,7 @@ headerTr.addEventListener("click", () => {
     document.getElementById(`${regionId}-icon`).textContent = "▶";
   } else {
     // ouvrir région => montrer CSS headers, laisser écoles cachées
-    cssHeaders.forEach(tr => tr.style.display = "table-row");
+    cssHeaders.forEach(tr => tr.style.display = "");
 
     // reset icônes CSS à ▶ et cacher écoles (au cas où)
     regionRows.forEach(tr => {
