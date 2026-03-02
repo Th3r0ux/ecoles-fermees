@@ -76,12 +76,12 @@ body{
   /* Étiquettes avant les valeurs */
   #schools td:nth-child(2)::before {
     content: "Cours : ";
-    font-weight: normal;
+    font-weight: 200;
   }
 
   #schools td:nth-child(3)::before {
     content: "Service de garde : ";
-    font-weight: normal;
+    font-weight: 200;
   }
 }
 
@@ -104,7 +104,10 @@ body{
   }
 }
 
-
+#schools tr:not(.region-row):not(.css-row) td:first-child strong{
+  font-weight: 200;     /* enlève le bold */
+  text-decoration: underline;
+}
     
 </style>
 </head>
