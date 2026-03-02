@@ -315,12 +315,10 @@ groups[region].forEach(r => {
       row.setAttribute("data-css", cssRegionId);
       row.style.display = "table-row";
       row.innerHTML = `
-        <td style="padding-left:34px;">
-          <strong>${r.name}</strong>
-        </td>
-        <td>${formatCours(r.statutCours)}</td>
-        <td>${formatGarde(r.statutGarde)}</td>
-      `;
+  <td style="padding-left:34px;"><div class="cell"><strong>${r.name}</strong></div></td>
+  <td><div class="cell">${formatCours(r.statutCours)}</div></td>
+  <td><div class="cell">${formatGarde(r.statutGarde)}</div></td>
+`;
       tbody.appendChild(row);
     });
 
@@ -367,12 +365,10 @@ headerTr.addEventListener("click", () => {
           row.setAttribute("data-css", cssRegionId);
           row.style.display = "none";
           row.innerHTML = `
-            <td style="padding-left:34px;">
-              <strong>${r.name}</strong>
-            </td>
-            <td>${formatCours(r.statutCours)}</td>
-            <td>${formatGarde(r.statutGarde)}</td>
-          `;
+  <td style="padding-left:34px;"><div class="cell"><strong>${r.name}</strong></div></td>
+  <td><div class="cell">${formatCours(r.statutCours)}</div></td>
+  <td><div class="cell">${formatGarde(r.statutGarde)}</div></td>
+`;
           headerTr.insertAdjacentElement("afterend", row);
         }
 
