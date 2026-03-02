@@ -5,14 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Écoles fermées</title>
 <style>
-  
-body{
-  font-family: Arial, sans-serif;
-  margin: 10px !important;
+body {
+    font-family: Arial, sans-serif;
+    margin: 40px;
 }
 
 .school {
-    padding: 2px;
+    padding: 10px;
     margin-bottom: 8px;
     border-radius: 6px;
 }
@@ -26,7 +25,7 @@ body{
 }
 
 .nd {
-    background-color: #f0f0f0;
+    background-color: #f0f0f0;10:34 2026-02-27
 }
 
 #schools {
@@ -85,123 +84,6 @@ body{
   border-top: 2px solid #ddd;
   background: #fafafa;
 }
-
-#app{
-  padding: 16px;
-  max-width: 900px;   /* ou enlève carrément cette ligne si tu veux full width */
-  margin: 0 auto;
-}
-
-@media (max-width: 720px){
-  #app{
-    padding-left: 14px;
-    padding-right: 14px;
-  }
-}
-
-@media (max-width: 720px){
-
-  /* Réduire indentation CSS header */
-  #schools tr.css-row td{
-    padding-left: 10px !important;
-  }
-
-  /* Réduire indentation écoles */
-  #schools tr[data-css] td:first-child{
-    padding-left: 14px !important;
-  }
-
-}    
-
-@media (max-width: 720px){
-  /* plus d’air dans les cartes */
-  #schools tbody tr{
-    padding-left: 16px !important;
-    padding-right: 16px !important;
-  }
-}
-
-@media (max-width: 720px){
-
-  /* Air global autour du tableau dans mobile */
-  #schools{
-    padding: 0 10px;
-  }
-
-  /* Cartes : padding plus généreux */
-  #schools tbody tr{
-    padding: 14px 16px !important; /* top/bottom, left/right */
-    margin: 12px 0 !important;
-    box-sizing: border-box;
-  }
-
-  /* IMPORTANT : les cellules prennent toute la largeur et respirent */
-  #schools td{
-    padding: 8px 0 !important;
-  }
-
-  /* Les libellés ne doivent pas coller au bord */
-  #schools tr:not(.region-row):not(.css-row) td:nth-child(2),
-  #schools tr:not(.region-row):not(.css-row) td:nth-child(3){
-    padding-left: 2px !important;
-  }
-
-  /* Et on neutralise TOUTES les indentations inline (padding-left) */
-  #schools td[style*="padding-left"]{
-    padding-left: 0 !important;
-  }
-}
-
-@media (max-width: 720px){
-  .cell{
-    padding-left: 10px;
-    padding-right: 10px;
-  }
-}
-
-#schools td{
-  padding-left: 14px !important;
-  padding-right: 14px !important;
-}
-
-@media (max-width: 720px){
-
-  /* Chaque "carte école" devient une grille: nom | statuts */
-  #schools tr:not(.region-row):not(.css-row){
-    display: grid !important;
-    grid-template-columns: 1fr 130px; /* ajuste 130px si tu veux plus large */
-    column-gap: 14px;
-    align-items: start;
-  }
-
-  /* Colonne 1: nom */
-  #schools tr:not(.region-row):not(.css-row) td:first-child{
-    padding: 0 !important;
-  }
-
-  /* Colonne 2: statuts (Cours, Garde) */
-  #schools tr:not(.region-row):not(.css-row) td:nth-child(2),
-  #schools tr:not(.region-row):not(.css-row) td:nth-child(3){
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-
-  /* Enlève les libellés auto "Cours :" / "Service de garde :" pour éviter le retour à la ligne */
-  #schools tr:not(.region-row):not(.css-row) td:nth-child(2)::before,
-  #schools tr:not(.region-row):not(.css-row) td:nth-child(3)::before{
-    content: "" !important;
-  }
-
-  /* Optionnel: petits labels compacts dans la colonne statuts */
-  #schools tr:not(.region-row):not(.css-row) td:nth-child(2){
-    font-weight: 700;
-  }
-  #schools tr:not(.region-row):not(.css-row) td:nth-child(3){
-    margin-top: 6px !important;
-    font-weight: 700;
-  }
-}
-  
 </style>
 </head>
 <body>
@@ -361,12 +243,14 @@ groups[region].forEach(r => {
       const row = document.createElement("tr");
       row.setAttribute("data-region", regionId);
       row.setAttribute("data-css", cssRegionId);
-      row.style.display = "";
+      row.style.display = "table-row";
       row.innerHTML = `
-  <td style="padding-left:34px;"><div class="cell"><strong>${r.name}</strong></div></td>
-  <td><div class="cell">${formatCours(r.statutCours)}</div></td>
-  <td><div class="cell">${formatGarde(r.statutGarde)}</div></td>
-`;
+        <td style="padding-left:34px;">
+          <strong>${r.name}</strong>
+        </td>
+        <td>${formatCours(r.statutCours)}</td>
+        <td>${formatGarde(r.statutGarde)}</td>
+      `;
       tbody.appendChild(row);
     });
 
@@ -413,10 +297,12 @@ headerTr.addEventListener("click", () => {
           row.setAttribute("data-css", cssRegionId);
           row.style.display = "none";
           row.innerHTML = `
-  <td style="padding-left:34px;"><div class="cell"><strong>${r.name}</strong></div></td>
-  <td><div class="cell">${formatCours(r.statutCours)}</div></td>
-  <td><div class="cell">${formatGarde(r.statutGarde)}</div></td>
-`;
+            <td style="padding-left:34px;">
+              <strong>${r.name}</strong>
+            </td>
+            <td>${formatCours(r.statutCours)}</td>
+            <td>${formatGarde(r.statutGarde)}</td>
+          `;
           headerTr.insertAdjacentElement("afterend", row);
         }
 
@@ -444,7 +330,7 @@ headerTr.addEventListener("click", () => {
           ).filter(tr => !tr.classList.contains("css-row"));
 
           const anyVisible = schoolRows.some(tr => tr.style.display !== "none");
-          schoolRows.forEach(tr => tr.style.display = anyVisible ? "none" : "");
+          schoolRows.forEach(tr => tr.style.display = anyVisible ? "none" : "table-row");
 
           const icon = document.getElementById(`${cssRegionId}-icon`);
           if (icon) icon.textContent = anyVisible ? "▶" : "▼";
@@ -465,7 +351,7 @@ headerTr.addEventListener("click", () => {
     document.getElementById(`${regionId}-icon`).textContent = "▶";
   } else {
     // ouvrir région => montrer CSS headers, laisser écoles cachées
-    cssHeaders.forEach(tr => tr.style.display = "");
+    cssHeaders.forEach(tr => tr.style.display = "table-row");
 
     // reset icônes CSS à ▶ et cacher écoles (au cas où)
     regionRows.forEach(tr => {
