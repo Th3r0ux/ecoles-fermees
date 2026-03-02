@@ -254,12 +254,15 @@ groups[region].forEach(r => {
     cssHeader.style.cursor = "pointer";
     cssHeader.setAttribute("data-region", regionId);
     cssHeader.setAttribute("data-css", cssRegionId);
+    const cssClosedCount = cssGroups[cssName].filter(r => r.statutCours === "Fermé").length;
+const cssClosedLabel = `${cssClosedCount} ${cssClosedCount > 1 ? "écoles fermées" : "école fermée"}`;
     cssHeader.innerHTML = `
-      <td colspan="3" style="padding-left:26px;font-weight:700;">
-        <span id="${cssRegionId}-icon" style="display:inline-block;width:18px;">▼</span>
-        ${cssName}
-      </td>
-    `;
+  <td colspan="3" style="padding-left:26px;font-weight:700;">
+    <span id="${cssRegionId}-icon" style="display:inline-block;width:18px;">▶</span>
+    ${cssName}
+    <span style="font-weight:400;color:#666;">(${cssClosedLabel})</span>
+  </td>
+`;
     tbody.appendChild(cssHeader);
 
     // Écoles (avec data-css)
@@ -337,12 +340,15 @@ headerTr.addEventListener("click", () => {
         cssHeader.setAttribute("data-region", regionId);
         cssHeader.setAttribute("data-css", cssRegionId);
         cssHeader.style.display = "none";
+        const cssClosedCount = cssGroups[cssName].filter(r => r.statutCours === "Fermé").length;
+const cssClosedLabel = `${cssClosedCount} ${cssClosedCount > 1 ? "écoles fermées" : "école fermée"}`;
         cssHeader.innerHTML = `
-          <td colspan="3" style="padding-left:26px;font-weight:700;">
-            <span id="${cssRegionId}-icon" style="display:inline-block;width:18px;">▶</span>
-            ${cssName}
-          </td>
-        `;
+  <td colspan="3" style="padding-left:26px;font-weight:700;">
+    <span id="${cssRegionId}-icon" style="display:inline-block;width:18px;">▶</span>
+    ${cssName}
+    <span style="font-weight:400;color:#666;">(${cssClosedLabel})</span>
+  </td>
+`;
         headerTr.insertAdjacentElement("afterend", cssHeader);
 
         // Toggle CSS (montre/cache seulement ses écoles)
