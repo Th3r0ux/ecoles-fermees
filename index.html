@@ -381,6 +381,7 @@ const db = getFirestore(app);
     if (loadingEl) loadingEl.style.display = "block";
 
     const snap = await getDocs(collection(db, "schools"));
+    console.log("Firestore docs:", snap.size);
     allRows = snap.docs.map(d => {
   const x = d.data() || {};
   return {
