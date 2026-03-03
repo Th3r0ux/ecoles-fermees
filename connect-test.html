@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Firestore connect test</title>
+</head>
+<body>
+  <h1>Firestore test</h1>
+  <pre id="out">Starting…</pre>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA6RX7tzUI7aOKNwpzr3dUf8XyPI_JqM8g",
+      authDomain: "ecoles-fermees-interface.firebaseapp.com",
+      projectId: "ecoles-fermees-interface",
+      storageBucket: "ecoles-fermees-interface.firebasestorage.app",
+      messagingSenderId: "462706468888",
+      appId: "1:462706468888:web:e33ba594ebfeb36871fb6d",
+      measurementId: "G-1KCL6RLLN1"
+    };
+
+    const out = document.getElementById("out");
+
+    try {
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+
+      const snap = await getDocs(collection(db, "schools"));
+      out.textContent =
+        `OK ✅\nDocs: ${snap.size}\n\n` +
+        snap.docs.slice(0, 5).map(d => JSON.stringify(d.data(), null, 2)).join("\n\n");
+
+      console.log("OK docs:", snap.size, snap.docs.map(d => d.data()));
+    } catch (err) {
+      out.textContent = "ERROR ❌\n" + (err?.message || err);
+      console.error(err);
+    }
+  </script>
+</body>
+</html>
