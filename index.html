@@ -280,11 +280,11 @@ const db = getFirestore(app);
 
           cssHeader.addEventListener("click", (e) => {
             e.stopPropagation();
-            const rows = Array.from(tbody.querySelectorAll(\`tr[data-css="\${cssRegionId}"]\`));
+            const rows = Array.from(tbody.querySelectorAll(`tr[data-css="${cssRegionId}"]`));
             const schoolRows = rows.filter(tr => !tr.classList.contains("css-row"));
             const anyVisible = schoolRows.some(tr => tr.style.display !== "none");
             schoolRows.forEach(tr => tr.style.display = anyVisible ? "none" : "table-row");
-            document.getElementById(\`\${cssRegionId}-icon\`).textContent = anyVisible ? "▶" : "▼";
+            document.getElementById(`${cssRegionId}-icon`).textContent = anyVisible ? "▶" : "▼";
           });
         });
 
@@ -292,7 +292,7 @@ const db = getFirestore(app);
       }
 
       headerTr.addEventListener("click", () => {
-        let regionRows = Array.from(tbody.querySelectorAll(\`tr[data-region="\${regionId}"]\`));
+        let regionRows = Array.from(tbody.querySelectorAll(`tr[data-region="${regionId}"]`));
 
         if (regionRows.length === 0) {
           Object.keys(cssGroups).sort((a,b)=>a.localeCompare(b,"fr")).reverse().forEach(cssName => {
@@ -334,18 +334,18 @@ const db = getFirestore(app);
             cssHeader.addEventListener("click", (e) => {
               e.stopPropagation();
               const schoolRows = Array.from(
-                tbody.querySelectorAll(\`tr[data-css="\${cssRegionId}"]\`)
+                tbody.querySelectorAll(`tr[data-css="${cssRegionId}"]`)
               ).filter(tr => !tr.classList.contains("css-row"));
 
               const anyVisible = schoolRows.some(tr => tr.style.display !== "none");
               schoolRows.forEach(tr => tr.style.display = anyVisible ? "none" : "table-row");
 
-              const icon = document.getElementById(\`\${cssRegionId}-icon\`);
+              const icon = document.getElementById(`${cssRegionId}-icon`);
               if (icon) icon.textContent = anyVisible ? "▶" : "▼";
             });
           });
 
-          regionRows = Array.from(tbody.querySelectorAll(\`tr[data-region="\${regionId}"]\`));
+          regionRows = Array.from(tbody.querySelectorAll(`tr[data-region="${regionId}"]`));
         }
 
         const cssHeaders = regionRows.filter(tr => tr.classList.contains("css-row"));
@@ -353,16 +353,16 @@ const db = getFirestore(app);
 
         if (regionIsOpen) {
           regionRows.forEach(tr => tr.style.display = "none");
-          document.getElementById(\`\${regionId}-icon\`).textContent = "▶";
+          document.getElementById(`${regionId}-icon`).textContent = "▶";
         } else {
           cssHeaders.forEach(tr => tr.style.display = "table-row");
           regionRows.forEach(tr => { if (!tr.classList.contains("css-row")) tr.style.display = "none"; });
           cssHeaders.forEach(h => {
             const cssRegionId = h.getAttribute("data-css");
-            const icon = document.getElementById(\`\${cssRegionId}-icon\`);
+            const icon = document.getElementById(`${cssRegionId}-icon`);
             if (icon) icon.textContent = "▶";
           });
-          document.getElementById(\`\${regionId}-icon\`).textContent = "▼";
+          document.getElementById(`${regionId}-icon`).textContent = "▼";
         }
       });
     });
