@@ -33,7 +33,7 @@ body{
 }
 
 .nd {
-    background-color: #f0f0f0;10:34 2026-02-27
+    background-color: #f0f0f0;
 }
 
 #schools {
@@ -120,6 +120,7 @@ body{
   placeholder="Rechercher une école, un centre de services scolaire ou une région…" 
   style="width:100%;max-width:500px;padding:10px;font-size:15px;margin:15px 0;"
 >
+  
 <div id="lastUpdate" style="margin:10px 0 15px 0;font-size:14px;color:#444;"></div>
 <div style="margin-top:4px;1px solid #ddd;font-size:14px;color:#555;">
   <strong>n.d.</strong> = L'information n'est pas encore disponible. 
@@ -177,6 +178,13 @@ const db = getFirestore(app);
     return '<span style="color:#000;">n.d.</span>';
   }
 
+  function normalizeStatus(s){
+  const v = (s || "").trim().toLowerCase();
+  if (v === "ouvert") return "Ouvert";
+  if (v === "fermé" || v === "ferme") return "Fermé";
+  return "ND";
+}
+
   function render(filterText = "") {
     const tbody = document.querySelector("#schools tbody");
     tbody.innerHTML = "";
@@ -207,7 +215,7 @@ const db = getFirestore(app);
     function priorityRank(r) {
       if (r.statutCours === "Fermé") return 0;
       if (r.statutGarde === "Fermé") return 1;
-      if (r.statutCours === "n.d." || r.statutGarde === "n.d.") return 3;
+      if (r.statutCours === "ND" || r.statutGarde === "ND") return 3;
       return 2;
     }
 
@@ -388,13 +396,17 @@ allRows = snap.docs.map(d => {
     name: (x.name || "").trim(),
     css: (x.css || "").trim(),
     region: (x.region || "").trim(),
-    statutCours: (x.statut_cours || x.statutCours || "ND").trim(),
-    statutGarde: (x.statut_garde || x.statutGarde || "ND").trim(),
+    statutCours: normalizeStatus(x.statut_cours ?? x.statutCours),
+    statutGarde: normalizeStatus(x.statut_garde ?? x.statutGarde),
   };
 });
 
 render(""); // première render, autoExpand intact
 
+    document.getElementById("lastUpdate").textContent =
+  `Dernière mise à jour: ${new Date().toLocaleTimeString("fr-CA",{hour:"2-digit",minute:"2-digit"})} | ` +
+  `${new Date().toLocaleDateString("fr-CA",{day:"numeric",month:"long",year:"numeric"})}`;
+    
     if (loadingEl) loadingEl.style.display = "none";
   }
 
