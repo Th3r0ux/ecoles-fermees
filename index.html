@@ -142,6 +142,7 @@ body{
   </thead>
   <tbody></tbody>
 </table>
+
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
   import {
@@ -189,18 +190,6 @@ function setLastUpdateFromRows(rows){
   // fallback si rien
   el.textContent = formatLastUpdate(maxMs ? new Date(maxMs) : new Date());
 }
-  
-  function formatCours(status) {
-    if (status === "Fermé") return '<span style="color:#c62828;font-weight:600;">Suspendus</span>';
-    if (status === "Ouvert") return '<span style="color:#2e7d32;font-weight:600;">Classes ouvertes</span>';
-    return '<span style="color:#000;">n.d.</span>';
-  }
-
-  function formatGarde(status) {
-    if (status === "Fermé") return '<span style="color:#c62828;font-weight:600;">Fermé</span>';
-    if (status === "Ouvert") return '<span style="color:#2e7d32;font-weight:600;">Ouvert</span>';
-    return '<span style="color:#000;">n.d.</span>';
-  }
 
   function normalizeStatus(s){
   const v = (s || "").trim().toLowerCase();
