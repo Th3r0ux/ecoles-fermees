@@ -396,14 +396,6 @@ function setLastUpdateFromRows(rows){
     searchEl.dataset.bound = "1";
   }
 
-  // ✅ Charger Firestore
- function normalizeStatus(s){
-  const v = (s || "").trim().toLowerCase();
-  if (v === "ouvert") return "Ouvert";
-  if (v === "fermé" || v === "ferme") return "Fermé";
-  return "ND";
-}
-
 function startRealtimeSchools(){
   const loadingEl = document.getElementById("loading");
   if (loadingEl) loadingEl.style.display = "block";
