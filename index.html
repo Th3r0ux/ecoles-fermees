@@ -33,7 +33,7 @@ body{
 }
 
 .nd {
-    background-color: #f0f0f0;10:34 2026-02-27
+    background-color: #f0f0f0;
 }
 
 #schools {
@@ -141,375 +141,63 @@ body{
   </thead>
   <tbody></tbody>
 </table>
-<script>
-const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSbpkb1SYuK-BMOQSXlbxcqkvWo6imOXjVCwptnPWXHOst2QZ4XCn3QTVti7XyfztGnxUGD50BVoOl3/pub?gid=314921254&single=true&output=csv";
-const CACHE_KEY = "ecoles_csv_cache_v1";
-const CACHE_TTL_MS = 60 * 1000; // 1 minute (tu peux mettre 5 min)
-  
-let allRows = [];
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-function formatCours(status) {
-  if (status === "Fermé") {
-    return '<span style="color:#c62828;font-weight:600;">Suspendus</span>';
-  }
-  if (status === "Ouvert") {
-    return '<span style="color:#2e7d32;font-weight:600;">Classes ouvertes</span>';
-  }
-  return '<span style="color:#000;">n.d.</span>';
+const firebaseConfig = {
+  apiKey: "AIzaSyA6RX7tzUI7aOKNwpzr3dUf8XyPI_JqM8g",
+  authDomain: "ecoles-fermees-interface.firebaseapp.com",
+  projectId: "ecoles-fermees-interface",
+  storageBucket: "ecoles-fermees-interface.firebasestorage.app",
+  messagingSenderId: "462706468888",
+  appId: "1:462706468888:web:e33ba594ebfeb36871fb6d"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+function norm(s){
+  if (!s) return "n.d.";
+  const v = String(s).trim();
+  if (v === "ND" || v.toLowerCase() === "nd") return "n.d.";
+  return v;
 }
 
-function formatGarde(status) {
-  if (status === "Fermé") {
-    return '<span style="color:#c62828;font-weight:600;">Fermé</span>';
-  }
-  if (status === "Ouvert") {
-    return '<span style="color:#2e7d32;font-weight:600;">Ouvert</span>';
-  }
-  return '<span style="color:#000;">n.d.</span>';
-}
+async function loadFromFirestore(){
+  const loading = document.getElementById("loading");
+  if (loading) loading.style.display = "block";
 
-function render(filterText = "") {
-  const tbody = document.querySelector("#schools tbody");
-  tbody.innerHTML = "";
+  const q = query(
+    collection(db, "ecoles"),
+    orderBy("region"),
+    orderBy("css"),
+    orderBy("name")
+  );
 
-  const query = filterText.trim().toLowerCase();
-  const autoExpand = query.length >= 5;
+  const snap = await getDocs(q);
 
-function cssId(regionId, css) {
-  return regionId + "-css-" + (css || "Autre").replace(/[^a-z0-9]+/gi, "-").toLowerCase();
-}
-
-  // 1) Filtrer
-  const filtered = allRows.filter(r => {
-    if (!query) return true;
-    return (
-      r.name.toLowerCase().includes(query) ||
-      r.css.toLowerCase().includes(query) ||
-      r.region.toLowerCase().includes(query)
-    );
+  // IMPORTANT : on remplit la variable globale utilisée par render()
+  window.allRows = snap.docs.map(d => {
+    const x = d.data();
+    return {
+      name: x.name || "",
+      css: x.css || "",
+      region: x.region || "",
+      statutCours: norm(x.statut_cours),
+      statutGarde: norm(x.statut_garde),
+    };
   });
 
-  // 2) Regrouper par région
-  const groups = {};
-  filtered.forEach(r => {
-    const region = r.region || "Autre";
-    if (!groups[region]) groups[region] = [];
-    groups[region].push(r);
-  });
+  window.render(); // appelle ta fonction existante
 
-  function priorityRank(r) {
-    if (r.statutCours === "Fermé") return 0;
-    if (r.statutGarde === "Fermé") return 1;
-    if (r.statutCours === "n.d." || r.statutGarde === "n.d.") return 3;
-    return 2;
-  }
+  if (loading) loading.style.display = "none";
+}
 
-  // 3) Rendre les régions (alphabétique)
-  Object.keys(groups).sort((a,b)=>a.localeCompare(b,"fr")).forEach(region => {
-    const regionId = "region-" + region.replace(/[^a-z0-9]+/gi, "-").toLowerCase();
-
-    // Trier à l'intérieur de la région (priorités + alpha)
-   groups[region].sort((a, b) => {
-  const pa = priorityRank(a);
-  const pb = priorityRank(b);
-  if (pa !== pb) return pa - pb;
-
-  const ca = (a.css || "").localeCompare((b.css || ""), "fr");
-  if (ca !== 0) return ca;
-
-  return (a.name || "").localeCompare((b.name || ""), "fr");
+loadFromFirestore().catch(err => {
+  console.error(err);
+  const loading = document.getElementById("loading");
+  if (loading) loading.textContent = "Erreur de chargement Firestore.";
 });
-
-const cssGroups = {};
-groups[region].forEach(r => {
-  const css = r.css || "Autre";
-  if (!cssGroups[css]) cssGroups[css] = [];
-  cssGroups[css].push(r);
-});
-
-
-    // Compter écoles fermées (cours)
-    const closedCount = groups[region].filter(r => r.statutCours === "Fermé").length;
-    const closedLabel = `${closedCount} ${closedCount > 1 ? "écoles fermées" : "école fermée"}`;
-
-    // Header région
-    const headerTr = document.createElement("tr");
-    headerTr.className = "region-row";
-    headerTr.style.cursor = "pointer";
-    headerTr.innerHTML = `
-      <td colspan="3">
-        <span id="${regionId}-icon" style="display:inline-block;width:18px;">${autoExpand ? "▼" : "▶"}</span>
-        ${region}
-        <span style="font-weight:400;color:#666;">(${closedLabel})</span>
-      </td>
-    `;
-    tbody.appendChild(headerTr);
-
-    // --- LAZY LOAD ---
-    // Si autoExpand est actif (>=5), on rend tout de suite les lignes
-    if (autoExpand) {
-
- Object.keys(cssGroups)
-  .sort((a,b)=>a.localeCompare(b,"fr"))
-  .forEach(cssName => {
-
-    const cssRegionId = cssId(regionId, cssName);
-
-    // Header CSS (cliquable)
-    const cssHeader = document.createElement("tr");
-    cssHeader.className = "css-row";
-    cssHeader.style.cursor = "pointer";
-    cssHeader.setAttribute("data-region", regionId);
-    cssHeader.setAttribute("data-css", cssRegionId);
-    const cssClosedCount = cssGroups[cssName].filter(r => r.statutCours === "Fermé").length;
-const cssClosedLabel = `${cssClosedCount} ${cssClosedCount > 1 ? "écoles fermées" : "école fermée"}`;
-    cssHeader.innerHTML = `
-  <td colspan="3" style="padding-left:26px;font-weight:700;">
-    <span id="${cssRegionId}-icon" style="display:inline-block;width:18px;">▶</span>
-    ${cssName}
-    <span style="font-weight:400;color:#666;">(${cssClosedLabel})</span>
-  </td>
-`;
-    tbody.appendChild(cssHeader);
-
-    // Écoles (avec data-css)
-    cssGroups[cssName].forEach(r => {
-      const row = document.createElement("tr");
-      row.setAttribute("data-region", regionId);
-      row.setAttribute("data-css", cssRegionId);
-      row.style.display = "table-row";
-      row.innerHTML = `
-        <td style="padding-left:34px;">
-          <strong>${r.name}</strong>
-        </td>
-        <td>${formatCours(r.statutCours)}</td>
-        <td>${formatGarde(r.statutGarde)}</td>
-      `;
-      tbody.appendChild(row);
-    });
-
-    // Toggle CSS
-    cssHeader.addEventListener("click", (e) => {
-      e.stopPropagation(); // IMPORTANT: sinon ça déclenche aussi le toggle de région
-      const rows = Array.from(tbody.querySelectorAll(`tr[data-css="${cssRegionId}"]`));
-      // on exclut le header CSS lui-même
-      const schoolRows = rows.filter(tr => !tr.classList.contains("css-row"));
-      const anyVisible = schoolRows.some(tr => tr.style.display !== "none");
-      schoolRows.forEach(tr => tr.style.display = anyVisible ? "none" : "table-row");
-      document.getElementById(`${cssRegionId}-icon`).textContent = anyVisible ? "▶" : "▼";
-    });
-
-  });
-
-return;
-}
-
-    // Sinon (<5), on ne crée AUCUNE ligne au chargement.
-    // On les crée au clic, puis toggle.
-    
-headerTr.addEventListener("click", () => {
-
-  // 1) Si pas encore créé : créer d'abord les CSS headers + écoles (écoles cachées)
-  let regionRows = Array.from(tbody.querySelectorAll(`tr[data-region="${regionId}"]`));
-
-  if (regionRows.length === 0) {
-
-    Object.keys(cssGroups)
-      .sort((a,b)=>a.localeCompare(b,"fr"))
-      .reverse() // pour insertion afterend dans le bon ordre visuel
-      .forEach(cssName => {
-
-        const cssRegionId = cssId(regionId, cssName);
-        const schools = cssGroups[cssName];
-
-        // Écoles (cachées par défaut)
-        for (let i = schools.length - 1; i >= 0; i--) {
-          const r = schools[i];
-
-          const row = document.createElement("tr");
-          row.setAttribute("data-region", regionId);
-          row.setAttribute("data-css", cssRegionId);
-          row.style.display = "none";
-          row.innerHTML = `
-            <td style="padding-left:34px;">
-              <strong>${r.name}</strong>
-            </td>
-            <td>${formatCours(r.statutCours)}</td>
-            <td>${formatGarde(r.statutGarde)}</td>
-          `;
-          headerTr.insertAdjacentElement("afterend", row);
-        }
-
-        // Header CSS (caché au départ, affiché quand la région s’ouvre)
-        const cssHeader = document.createElement("tr");
-        cssHeader.className = "css-row";
-        cssHeader.style.cursor = "pointer";
-        cssHeader.setAttribute("data-region", regionId);
-        cssHeader.setAttribute("data-css", cssRegionId);
-        cssHeader.style.display = "none";
-        const cssClosedCount = cssGroups[cssName].filter(r => r.statutCours === "Fermé").length;
-const cssClosedLabel = `${cssClosedCount} ${cssClosedCount > 1 ? "écoles fermées" : "école fermée"}`;
-        cssHeader.innerHTML = `
-  <td colspan="3" style="padding-left:26px;font-weight:700;">
-    <span id="${cssRegionId}-icon" style="display:inline-block;width:18px;">▶</span>
-    ${cssName}
-    <span style="font-weight:400;color:#666;">(${cssClosedLabel})</span>
-  </td>
-`;
-        headerTr.insertAdjacentElement("afterend", cssHeader);
-
-        // Toggle CSS (montre/cache seulement ses écoles)
-        cssHeader.addEventListener("click", (e) => {
-          e.stopPropagation(); // ne pas déclencher la région
-
-          const schoolRows = Array.from(
-            tbody.querySelectorAll(`tr[data-css="${cssRegionId}"]`)
-          ).filter(tr => !tr.classList.contains("css-row"));
-
-          const anyVisible = schoolRows.some(tr => tr.style.display !== "none");
-          schoolRows.forEach(tr => tr.style.display = anyVisible ? "none" : "table-row");
-
-          const icon = document.getElementById(`${cssRegionId}-icon`);
-          if (icon) icon.textContent = anyVisible ? "▶" : "▼";
-        });
-
-      });
-
-    regionRows = Array.from(tbody.querySelectorAll(`tr[data-region="${regionId}"]`));
-  }
-
-  // 2) Toggle région : affiche/cache seulement les CSS headers
-  const cssHeaders = regionRows.filter(tr => tr.classList.contains("css-row"));
-  const regionIsOpen = cssHeaders.some(tr => tr.style.display !== "none");
-
-  if (regionIsOpen) {
-    // fermer région => cacher CSS headers + écoles
-    regionRows.forEach(tr => tr.style.display = "none");
-    document.getElementById(`${regionId}-icon`).textContent = "▶";
-  } else {
-    // ouvrir région => montrer CSS headers, laisser écoles cachées
-    cssHeaders.forEach(tr => tr.style.display = "table-row");
-
-    // reset icônes CSS à ▶ et cacher écoles (au cas où)
-    regionRows.forEach(tr => {
-      if (!tr.classList.contains("css-row")) tr.style.display = "none";
-    });
-
-    cssHeaders.forEach(h => {
-      const cssRegionId = h.getAttribute("data-css");
-      const icon = document.getElementById(`${cssRegionId}-icon`);
-      if (icon) icon.textContent = "▶";
-    });
-
-    document.getElementById(`${regionId}-icon`).textContent = "▼";
-  }
-});
-}); // <-- ferme le forEach(region => { ... })
-
-}  // <-- ferme la fonction render()
-
-function formatLastUpdate(dateObj){
-  const time = dateObj.toLocaleTimeString("fr-CA", { hour: "2-digit", minute: "2-digit" });
-  const date = dateObj.toLocaleDateString("fr-CA", { day: "numeric", month: "long", year: "numeric" });
-  return `Dernière mise à jour: ${time} | ${date}`;
-}
-
-document.getElementById("lastUpdate").textContent = formatLastUpdate(new Date());
-
-function parseCSV(text) {
-  const rows = [];
-  let row = [];
-  let cur = "";
-  let inQuotes = false;
-
-  for (let i = 0; i < text.length; i++) {
-    const c = text[i];
-    const next = text[i + 1];
-
-    if (c === '"' ) {
-      // "" à l'intérieur d'un champ quoted => un vrai "
-      if (inQuotes && next === '"') {
-        cur += '"';
-        i++;
-      } else {
-        inQuotes = !inQuotes;
-      }
-    } else if (c === "," && !inQuotes) {
-      row.push(cur);
-      cur = "";
-    } else if ((c === "\n" || c === "\r") && !inQuotes) {
-      if (c === "\r" && next === "\n") i++; // CRLF
-      row.push(cur);
-      rows.push(row);
-      row = [];
-      cur = "";
-    } else {
-      cur += c;
-    }
-  }
-
-  // dernière cellule
-  if (cur.length > 0 || row.length > 0) {
-    row.push(cur);
-    rows.push(row);
-  }
-
-  return rows;
-}
-
-function loadFromCSVText(data){
-  const parsed = parseCSV(data);
-  const header = parsed[0].map(h => h.trim());
-  const idx = (name) => header.indexOf(name);
-
-  const iName = idx("Nom d'établissement");
-  const iCSS = idx("Centre de service scolaire");
-  const iRegion = idx("Région");
-  const iStatutCours = idx("statut_cours");
-  const iStatutGarde = idx("statut_garde");
-
-  allRows = parsed.slice(1)
-    .filter(cols => cols.length && (cols[iName] || "").trim() !== "")
-    .map(cols => ({
-      name: (cols[iName] || "").trim(),
-      css: (cols[iCSS] || "").trim(),
-      region: (cols[iRegion] || "").trim(),
-      statutCours: (cols[iStatutCours] || "").trim(),
-      statutGarde: (cols[iStatutGarde] || "").trim(),
-    }));
-
-  render();
-  const loadingEl = document.getElementById("loading");
-if (loadingEl) loadingEl.style.display = "none";
-  
-  const searchEl = document.getElementById("search");
-if (searchEl && !searchEl.dataset.bound){
-  searchEl.addEventListener("input", (e) => render(e.target.value));
-  searchEl.dataset.bound = "1";
-}
-}
-
-// 1) Tenter cache d'abord
-try{
-  const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || "null");
-  if (cached && cached.text && cached.time && (Date.now() - cached.time) < CACHE_TTL_MS){
-    loadFromCSVText(cached.text); // rendu instantané
-  }
-}catch(e){ /* ignore */ }
-
-// 2) Fetch réseau ensuite (mise à jour)
-fetch(csvUrl, { cache: "no-store" })
-  .then(r => r.text())
-  .then(text => {
-    try{
-      localStorage.setItem(CACHE_KEY, JSON.stringify({ text, time: Date.now() }));
-    }catch(e){ /* ignore */ }
-    // si on avait déjà rendu via cache, on rerender avec data fraîche
-    loadFromCSVText(text);
-  })
-  .catch(err => {
-    const loading = document.getElementById("loading");
-    if (loading) loading.textContent = "Erreur de chargement des données.";
-  });
 </script></body>
 </html>
