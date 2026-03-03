@@ -121,10 +121,14 @@ body{
   style="width:100%;max-width:500px;padding:10px;font-size:15px;margin:15px 0;"
 >
 <div id="lastUpdate" style="margin:10px 0 15px 0;font-size:14px;color:#444;"></div>
-<div style="margin-top:4px; solid #ddd;font-size:14px;color:#555;">
+<div style="margin-top:4px;1px solid #ddd;font-size:14px;color:#555;">
   <strong>n.d.</strong> = L'information n'est pas encore disponible. 
   Vérifiez auprès de votre centre de services scolaire.
 <br></br>
+</div>
+
+<div id="loading" style="margin:10px 0;color:#666;">
+  Chargement des données…
 </div>
 
 <table id="schools" style="width:100%;border-collapse:collapse;margin-top:20px;">
@@ -475,6 +479,9 @@ function loadFromCSVText(data){
     }));
 
   render();
+  const loadingEl = document.getElementById("loading");
+if (loadingEl) loadingEl.style.display = "none";
+  
   const searchEl = document.getElementById("search");
 if (searchEl && !searchEl.dataset.bound){
   searchEl.addEventListener("input", (e) => render(e.target.value));
@@ -504,5 +511,5 @@ fetch(csvUrl, { cache: "no-store" })
     const loading = document.getElementById("loading");
     if (loading) loading.textContent = "Erreur de chargement des données.";
   });
-</script></div></body>
+</script></body>
 </html>
