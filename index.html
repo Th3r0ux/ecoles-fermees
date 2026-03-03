@@ -145,10 +145,10 @@ body{
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
   import {
-    getFirestore,
-    collection,
-    getDocs
-  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+  getFirestore,
+  collection,
+  onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
   // ✅ 1) Mets ICI ta config Firebase (Projet settings > General > Your apps > Web app)
   const firebaseConfig = {
@@ -166,6 +166,30 @@ const db = getFirestore(app);
 
   let allRows = [];
 
+  function formatLastUpdate(dateObj){
+  const time = dateObj.toLocaleTimeString("fr-CA", { hour: "2-digit", minute: "2-digit" });
+  const date = dateObj.toLocaleDateString("fr-CA", { day: "numeric", month: "long", year: "numeric" });
+  return `Dernière mise à jour: ${time} | ${date}`;
+}
+
+function setLastUpdateFromRows(rows){
+  const el = document.getElementById("lastUpdate");
+  if (!el) return;
+
+  let maxMs = 0;
+  for (const r of rows){
+    const u = r.updatedAt;
+    // Firestore Timestamp -> toMillis()
+    if (u && typeof u.toMillis === "function") maxMs = Math.max(maxMs, u.toMillis());
+    // ou si jamais c’est déjà un nombre/date
+    else if (typeof u === "number") maxMs = Math.max(maxMs, u);
+    else if (u instanceof Date) maxMs = Math.max(maxMs, u.getTime());
+  }
+
+  // fallback si rien
+  el.textContent = formatLastUpdate(maxMs ? new Date(maxMs) : new Date());
+}
+  
   function formatCours(status) {
     if (status === "Fermé") return '<span style="color:#c62828;font-weight:600;">Suspendus</span>';
     if (status === "Ouvert") return '<span style="color:#2e7d32;font-weight:600;">Classes ouvertes</span>';
@@ -384,36 +408,45 @@ const db = getFirestore(app);
   }
 
   // ✅ Charger Firestore
-  async function loadSchools(){
-    const loadingEl = document.getElementById("loading");
-    if (loadingEl) loadingEl.style.display = "block";
+ function normalizeStatus(s){
+  const v = (s || "").trim().toLowerCase();
+  if (v === "ouvert") return "Ouvert";
+  if (v === "fermé" || v === "ferme") return "Fermé";
+  return "ND";
+}
 
-    const snap = await getDocs(collection(db, "schools"));
+function startRealtimeSchools(){
+  const loadingEl = document.getElementById("loading");
+  if (loadingEl) loadingEl.style.display = "block";
 
-allRows = snap.docs.map(d => {
-  const x = d.data() || {};
-  return {
-    name: (x.name || "").trim(),
-    css: (x.css || "").trim(),
-    region: (x.region || "").trim(),
-    statutCours: normalizeStatus(x.statut_cours ?? x.statutCours),
-    statutGarde: normalizeStatus(x.statut_garde ?? x.statutGarde),
-  };
-});
+  const colRef = collection(db, "schools");
 
-render(""); // première render, autoExpand intact
+  onSnapshot(colRef, (snap) => {
 
-    document.getElementById("lastUpdate").textContent =
-  `Dernière mise à jour: ${new Date().toLocaleTimeString("fr-CA",{hour:"2-digit",minute:"2-digit"})} | ` +
-  `${new Date().toLocaleDateString("fr-CA",{day:"numeric",month:"long",year:"numeric"})}`;
-    
+    allRows = snap.docs.map(d => {
+      const x = d.data() || {};
+      return {
+        name: (x.name || "").trim(),
+        css: (x.css || "").trim(),
+        region: (x.region || "").trim(),
+        statutCours: normalizeStatus(x.statut_cours ?? x.statutCours),
+        statutGarde: normalizeStatus(x.statut_garde ?? x.statutGarde),
+        updatedAt: x.updatedAt || null
+      };
+    });
+
+    const currentQuery = (document.getElementById("search")?.value || "");
+    render(currentQuery);
+
+    setLastUpdateFromRows(allRows);
+
     if (loadingEl) loadingEl.style.display = "none";
-  }
-
-  loadSchools().catch(err => {
-    const loadingEl = document.getElementById("loading");
+  }, (err) => {
     if (loadingEl) loadingEl.textContent = "Erreur de chargement des données.";
     console.error(err);
   });
+}
+
+startRealtimeSchools();
 </script></body>
 </html>
