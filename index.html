@@ -381,20 +381,19 @@ const db = getFirestore(app);
     if (loadingEl) loadingEl.style.display = "block";
 
     const snap = await getDocs(collection(db, "schools"));
-    console.log("Firestore docs:", snap.size);
-    allRows = snap.docs.map(d => {
+
+allRows = snap.docs.map(d => {
   const x = d.data() || {};
   return {
     name: (x.name || "").trim(),
     css: (x.css || "").trim(),
     region: (x.region || "").trim(),
-    statutCours: (x.statut_cours || "").trim(),
-    statutGarde: (x.statut_garde || "").trim(),
-    updatedAt: x.updatedAt || null
+    statutCours: (x.statut_cours || x.statutCours || "ND").trim(),
+    statutGarde: (x.statut_garde || x.statutGarde || "ND").trim(),
   };
 });
 
-    render(); // première render, autoExpand intact
+render(""); // première render, autoExpand intact
 
     if (loadingEl) loadingEl.style.display = "none";
   }
