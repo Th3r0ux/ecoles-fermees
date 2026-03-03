@@ -160,8 +160,8 @@ body{
     measurementId: "G-1KCL6RLLN1"
   };
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
   let allRows = [];
 
@@ -381,9 +381,19 @@ body{
     if (loadingEl) loadingEl.style.display = "block";
 
     const snap = await getDocs(collection(db, "schools"));
-    allRows = snap.docs.map(d => d.data());
+    allRows = snap.docs.map(d => {
+  const x = d.data() || {};
+  return {
+    name: (x.name || "").trim(),
+    css: (x.css || "").trim(),
+    region: (x.region || "").trim(),
+    statutCours: (x.statut_cours || "").trim(),
+    statutGarde: (x.statut_garde || "").trim(),
+    updatedAt: x.updatedAt || null
+  };
+});
 
-    render(""); // première render, autoExpand intact
+    render(); // première render, autoExpand intact
 
     if (loadingEl) loadingEl.style.display = "none";
   }
