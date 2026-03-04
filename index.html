@@ -445,27 +445,39 @@ async function loadFromSupabaseAll() {
   const loading = document.getElementById("loading");
   if (loading) loading.style.display = "block";
 
-  const url =
-  `${SUPABASE_URL}/rest/v1/public_snapshot` +
-  `?select=name,css,region,statut_cours,statut_garde` +
-  `&order=region.asc,css.asc,name.asc` +
-  `&limit=5000`;
+  const base =
+    `${SUPABASE_URL}/rest/v1/public_snapshot` +
+    `?select=name,css,region,statut_cours,statut_garde` +
+    `&order=region.asc&order=css.asc&order=name.asc`;
 
-  const res = await fetch(url, {
-    headers: {
-      apikey: SUPABASE_KEY,
-      Authorization: `Bearer ${SUPABASE_KEY}`,
-    },
-  });
+  const pageSize = 1000;
+  let from = 0;
+  let all = [];
 
-  if (!res.ok) {
-    const txt = await res.text();
-    throw new Error(`Supabase error ${res.status}: ${txt}`);
+  while (true) {
+    const res = await fetch(base, {
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+        Range: `${from}-${from + pageSize - 1}`,   // 👈 pagination
+      },
+    });
+
+    if (!res.ok) {
+      const txt = await res.text();
+      throw new Error(`Supabase error ${res.status}: ${txt}`);
+    }
+
+    const rows = await res.json();
+    all = all.concat(rows);
+
+    // si on a reçu moins qu'une page complète, c'est fini
+    if (rows.length < pageSize) break;
+
+    from += pageSize;
   }
 
-  const rows = await res.json();
-
-  allRows = rows.map(x => ({
+  allRows = all.map(x => ({
     name: x.name || "",
     css: x.css || "",
     region: x.region || "",
@@ -473,7 +485,7 @@ async function loadFromSupabaseAll() {
     statutGarde: norm(x.statut_garde),
   }));
 
-  render(); // rendu initial
+  render();
 
   if (loading) loading.style.display = "none";
 }
