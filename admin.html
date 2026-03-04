@@ -59,6 +59,27 @@
     });
 
     refreshUI();
+    async function testReadSchools() {
+  msg.textContent = "";
+
+  const { data, error } = await supabase
+    .from("schools")
+    .select("id,name,region")
+    .order("region", { ascending: true })
+    .order("name", { ascending: true })
+    .limit(10);
+
+  if (error) {
+    console.error(error);
+    msg.textContent = "Erreur lecture schools: " + error.message;
+    return;
+  }
+
+  console.log("SCHOOLS (10):", data);
+  msg.textContent = "✅ Lecture OK (voir console pour 10 écoles).";
+}
+
+await testReadSchools();
   </script>
 </body>
 </html>
