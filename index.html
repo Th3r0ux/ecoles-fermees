@@ -240,11 +240,40 @@ window.render = function render(filterText = "") {
     tbody.appendChild(headerTr);
 
     headerTr.addEventListener("click", () => {
-  const regionRows = Array.from(tbody.querySelectorAll(`tr[data-region="${regionId}"]`));
-  const anyVisible = regionRows.some(tr => tr.style.display !== "none");
-  regionRows.forEach(tr => tr.style.display = anyVisible ? "none" : "table-row");
-  const icon = document.getElementById(`${regionId}-icon`);
-  if (icon) icon.textContent = anyVisible ? "▶" : "▼";
+  // Toutes les lignes jusqu’à la prochaine région
+  let tr = headerTr.nextElementSibling;
+  const regionLines = [];
+  while (tr && !tr.classList.contains("region-row")) {
+    regionLines.push(tr);
+    tr = tr.nextElementSibling;
+  }
+
+  // Est-ce que la région est ouverte? (un css-row visible)
+  const cssHeaders = regionLines.filter(x => x.classList.contains("css-row"));
+  const isOpen = cssHeaders.some(x => x.style.display !== "none");
+
+  if (isOpen) {
+    // Fermer : cacher CSS + écoles
+    regionLines.forEach(x => x.style.display = "none");
+    const icon = document.getElementById(`${regionId}-icon`);
+    if (icon) icon.textContent = "▶";
+  } else {
+    // Ouvrir : montrer seulement les CSS headers, garder écoles cachées
+    cssHeaders.forEach(x => x.style.display = "table-row");
+    regionLines.forEach(x => {
+      if (!x.classList.contains("css-row")) x.style.display = "none";
+    });
+
+    // Reset icônes CSS à ▶ (optionnel mais propre)
+    cssHeaders.forEach(h => {
+      const cssRegionId = h.getAttribute("data-css");
+      const icon = document.getElementById(`${cssRegionId}-icon`);
+      if (icon) icon.textContent = "▶";
+    });
+
+    const icon = document.getElementById(`${regionId}-icon`);
+    if (icon) icon.textContent = "▼";
+  }
 });
 
     // --- LAZY LOAD ---
