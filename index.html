@@ -425,7 +425,14 @@ if (searchEl && !searchEl.dataset.bound){
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+import { 
+  getFirestore, 
+  collection, 
+  getDocs, 
+  query, 
+  orderBy,
+  where
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyA6RX7tzUI7aOKNwpzr3dUf8XyPI_JqM8g",
@@ -447,12 +454,13 @@ function norm(s){
 }
 
 async function loadFromFirestore(regionId) {
+
   const loading = document.getElementById("loading");
   if (loading) loading.style.display = "block";
 
   const q = query(
     collection(db, "ecoles"),
-    where("region", "==", regionId),     // 🔥 clé : on filtre
+    where("region", "==", regionId),
     orderBy("css"),
     orderBy("name")
   );
@@ -471,10 +479,7 @@ async function loadFromFirestore(regionId) {
     };
   });
 
-  if (loading) loading.style.display = "none";
-}
-
-  render(); // rendu initial
+  render();
 
   if (loading) loading.style.display = "none";
 }
