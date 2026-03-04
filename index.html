@@ -428,9 +428,16 @@ const SUPABASE_URL = "https://djcexcxyxtfazejhstcn.supabase.co";
 const SUPABASE_KEY = "sb_publishable_TChgyvE4kQSVxpoPUUWZlA_5RYkPzM3";
 
 function norm(s){
-  if (!s) return "n.d.";
+  if (s === null || s === undefined) return "n.d.";
   const v = String(s).trim();
-  if (v === "ND" || v.toLowerCase() === "nd") return "n.d.";
+
+  const u = v.toUpperCase();
+
+  if (u === "ND" || u === "N.D." || u === "N.D" || u === "N/A") return "n.d.";
+  if (u === "OUVERT") return "Ouvert";
+  if (u === "FERME" || u === "FERMÉ") return "Fermé";
+
+  // si c'est déjà "Ouvert"/"Fermé"/"n.d."
   return v;
 }
 
@@ -439,9 +446,10 @@ async function loadFromSupabaseAll() {
   if (loading) loading.style.display = "block";
 
   const url =
-    `${SUPABASE_URL}/rest/v1/public_snapshot` +
-    `?select=name,css,region,statut_cours,statut_garde` +
-    `&order=region.asc&order=css.asc&order=name.asc`;
+  `${SUPABASE_URL}/rest/v1/public_snapshot` +
+  `?select=name,css,region,statut_cours,statut_garde` +
+  `&order=region.asc,css.asc,name.asc` +
+  `&limit=5000`;
 
   const res = await fetch(url, {
     headers: {
