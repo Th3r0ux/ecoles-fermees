@@ -252,12 +252,9 @@ window.render = function render(filterText = "") {
     regionRows.forEach(tr => tr.style.display = "none");
     const icon = document.getElementById(`${regionId}-icon`);
     if (icon) icon.textContent = "▶";
-  } else {
-    // Ouvrir région => montrer seulement les CSS headers, garder écoles cachées
-    cssHeaders.forEach(tr => tr.style.display = "table-row");
-    regionRows.forEach(tr => {
-      if (!tr.classList.contains("css-row")) tr.style.display = "none";
-    });
+ } else {
+    // Ouvrir région => montrer CSS + écoles (en autoExpand, tout est déjà rendu)
+    regionRows.forEach(tr => tr.style.display = "table-row");
     const icon = document.getElementById(`${regionId}-icon`);
     if (icon) icon.textContent = "▼";
   }
@@ -306,78 +303,22 @@ window.render = function render(filterText = "") {
             tbody.appendChild(row);
           });
 
+          cssHeader.addEventListener("click", (e) => {
+  e.stopPropagation();
+
+  const rows = Array.from(tbody.querySelectorAll(`tr[data-css="${cssRegionId}"]`));
+  const schoolRows = rows.filter(tr => !tr.classList.contains("css-row"));
+  const anyVisible = schoolRows.some(tr => tr.style.display !== "none");
+
+  schoolRows.forEach(tr => tr.style.display = anyVisible ? "none" : "table-row");
+
+  const icon = document.getElementById(`${cssRegionId}-icon`);
+  if (icon) icon.textContent = anyVisible ? "▶" : "▼";
+});
+
         });
 
     }
-
-    if (!autoExpand) {
-    // Sinon (<5) : créer au clic
-    headerTr.addEventListener("click", () => {
-      let regionRows = Array.from(tbody.querySelectorAll(`tr[data-region="${regionId}"]`));
-
-      if (regionRows.length === 0) {
-        Object.keys(cssGroups)
-          .sort((a,b)=>a.localeCompare(b,"fr"))
-          .reverse()
-          .forEach(cssName => {
-
-            const cssRegionId = cssId(regionId, cssName);
-            const schools = cssGroups[cssName];
-
-            for (let i = schools.length - 1; i >= 0; i--) {
-              const r = schools[i];
-
-              const row = document.createElement("tr");
-              row.setAttribute("data-region", regionId);
-              row.setAttribute("data-css", cssRegionId);
-              row.style.display = "none";
-              row.innerHTML = `
-                <td style="padding-left:34px;">
-                  <strong>${r.name}</strong>
-                </td>
-                <td>${formatCours(r.statutCours)}</td>
-                <td>${formatGarde(r.statutGarde)}</td>
-              `;
-              headerTr.insertAdjacentElement("afterend", row);
-            }
-
-            const cssHeader = document.createElement("tr");
-            cssHeader.className = "css-row";
-            cssHeader.style.cursor = "pointer";
-            cssHeader.setAttribute("data-region", regionId);
-            cssHeader.setAttribute("data-css", cssRegionId);
-            cssHeader.style.display = "none";
-
-            const cssClosedCount = cssGroups[cssName].filter(r => r.statutCours === "Fermé").length;
-            const cssClosedLabel = `${cssClosedCount} ${cssClosedCount > 1 ? "écoles fermées" : "école fermée"}`;
-
-            cssHeader.innerHTML = `
-              <td colspan="3" style="padding-left:26px;font-weight:700;">
-                <span id="${cssRegionId}-icon" style="display:inline-block;width:18px;">▶</span>
-                ${cssName}
-                <span style="font-weight:400;color:#666;">(${cssClosedLabel})</span>
-              </td>
-            `;
-            headerTr.insertAdjacentElement("afterend", cssHeader);
-
-            cssHeader.addEventListener("click", (e) => {
-              e.stopPropagation();
-
-              const schoolRows = Array.from(
-                tbody.querySelectorAll(`tr[data-css="${cssRegionId}"]`)
-              ).filter(tr => !tr.classList.contains("css-row"));
-
-              const anyVisible = schoolRows.some(tr => tr.style.display !== "none");
-              schoolRows.forEach(tr => tr.style.display = anyVisible ? "none" : "table-row");
-
-              const icon = document.getElementById(`${cssRegionId}-icon`);
-              if (icon) icon.textContent = anyVisible ? "▶" : "▼";
-            });
-
-          });
-
-        regionRows = Array.from(tbody.querySelectorAll(`tr[data-region="${regionId}"]`));
-      }
 
       return;
     });
