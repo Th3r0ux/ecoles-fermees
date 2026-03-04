@@ -124,7 +124,7 @@ await testReadSchoolsAndStatus();
   const { error: e2 } = await supabase
     .from("school_status")
     .update({
-      statut_cours: "Ouvert",
+      statut_cours: "ND",
       updated_at: new Date().toISOString(),
       updated_by: (await supabase.auth.getUser()).data.user.id
     })
