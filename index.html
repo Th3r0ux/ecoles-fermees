@@ -425,14 +425,7 @@ if (searchEl && !searchEl.dataset.bound){
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-import { 
-  getFirestore, 
-  collection, 
-  getDocs, 
-  query, 
-  orderBy,
-  where
-} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyA6RX7tzUI7aOKNwpzr3dUf8XyPI_JqM8g",
@@ -453,24 +446,23 @@ function norm(s){
   return v;
 }
 
-async function loadFromFirestore(regionId) {
-
+async function loadFromFirestore(){
   const loading = document.getElementById("loading");
   if (loading) loading.style.display = "block";
 
   const q = query(
     collection(db, "ecoles"),
-    where("region", "==", regionId),
+    orderBy("region"),
     orderBy("css"),
     orderBy("name")
   );
 
   const snap = await getDocs(q);
 
+  // IMPORTANT: on remplit LA variable allRows (pas window.allRows)
   allRows = snap.docs.map(d => {
     const x = d.data();
     return {
-      id: d.id,
       name: x.name || "",
       css: x.css || "",
       region: x.region || "",
@@ -479,12 +471,12 @@ async function loadFromFirestore(regionId) {
     };
   });
 
-  render();
+  render(); // rendu initial
 
   if (loading) loading.style.display = "none";
 }
 
-loadFromFirestore("Montréal").catch(err => {
+loadFromFirestore().catch(err => {
   console.error(err);
   const loading = document.getElementById("loading");
   if (loading) loading.textContent = "Erreur de chargement Firestore.";
