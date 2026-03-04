@@ -424,20 +424,8 @@ if (searchEl && !searchEl.dataset.bound){
 </script>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyA6RX7tzUI7aOKNwpzr3dUf8XyPI_JqM8g",
-  authDomain: "ecoles-fermees-interface.firebaseapp.com",
-  projectId: "ecoles-fermees-interface",
-  storageBucket: "ecoles-fermees-interface.firebasestorage.app",
-  messagingSenderId: "462706468888",
-  appId: "1:462706468888:web:e33ba594ebfeb36871fb6d"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const SUPABASE_URL = "https://djcexcxyxtfazejhstcn.supabase.co";
+const SUPABASE_KEY = "sb_publishable_TChgyvE4kQSVxpoPUUWZlA_5RYkPzM3";
 
 function norm(s){
   if (!s) return "n.d.";
@@ -446,40 +434,46 @@ function norm(s){
   return v;
 }
 
-async function loadFromFirestore(){
+async function loadFromSupabaseAll() {
   const loading = document.getElementById("loading");
   if (loading) loading.style.display = "block";
 
-  const q = query(
-    collection(db, "ecoles"),
-    orderBy("region"),
-    orderBy("css"),
-    orderBy("name")
-  );
+  const url =
+    `${SUPABASE_URL}/rest/v1/public_snapshot` +
+    `?select=name,css,region,statut_cours,statut_garde` +
+    `&order=region.asc&order=css.asc&order=name.asc`;
 
-  const snap = await getDocs(q);
-
-  // IMPORTANT: on remplit LA variable allRows (pas window.allRows)
-  allRows = snap.docs.map(d => {
-    const x = d.data();
-    return {
-      name: x.name || "",
-      css: x.css || "",
-      region: x.region || "",
-      statutCours: norm(x.statut_cours),
-      statutGarde: norm(x.statut_garde),
-    };
+  const res = await fetch(url, {
+    headers: {
+      apikey: SUPABASE_KEY,
+      Authorization: `Bearer ${SUPABASE_KEY}`,
+    },
   });
+
+  if (!res.ok) {
+    const txt = await res.text();
+    throw new Error(`Supabase error ${res.status}: ${txt}`);
+  }
+
+  const rows = await res.json();
+
+  allRows = rows.map(x => ({
+    name: x.name || "",
+    css: x.css || "",
+    region: x.region || "",
+    statutCours: norm(x.statut_cours),
+    statutGarde: norm(x.statut_garde),
+  }));
 
   render(); // rendu initial
 
   if (loading) loading.style.display = "none";
 }
 
-loadFromFirestore().catch(err => {
+loadFromSupabaseAll().catch(err => {
   console.error(err);
   const loading = document.getElementById("loading");
-  if (loading) loading.textContent = "Erreur de chargement Firestore.";
+  if (loading) loading.textContent = "Erreur de chargement Supabase.";
 });
 </script>
 </body>
