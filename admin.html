@@ -21,6 +21,13 @@
     <button id="logoutBtn" style="padding:10px 14px;">Se déconnecter</button>
   </div>
 
+  <input
+  id="q"
+  type="text"
+  placeholder="Rechercher une école ou une région…"
+  style="width:100%;max-width:520px;padding:10px;font-size:15px;margin:12px 0;"
+>
+
   <div id="list" style="margin-top:16px;"></div>
 
   <script type="module">
@@ -114,7 +121,19 @@ async function loadAllWithButtons() {
   const list = document.getElementById("list");
   list.innerHTML = "";
 
-  for (const s of schools) {
+  const input = document.getElementById("q");
+
+function renderList(filterText = "") {
+  const q = filterText.trim().toLowerCase();
+  list.innerHTML = "";
+
+  const filtered = schools.filter(s =>
+    !q ||
+    (s.name || "").toLowerCase().includes(q) ||
+    (s.region || "").toLowerCase().includes(q)
+  );
+
+  for (const s of filtered) {
     const st = statusById.get(s.id);
     const cours = st?.statut_cours ?? "ND";
 
@@ -136,6 +155,16 @@ async function loadAllWithButtons() {
 
     list.appendChild(row);
   }
+
+  msg.textContent = `✅ ${filtered.length} / ${schools.length} écoles`;
+}
+
+// rendu initial + binding
+renderList("");
+if (input && !input.dataset.bound) {
+  input.addEventListener("input", (e) => renderList(e.target.value));
+  input.dataset.bound = "1";
+}
 
   // handler unique
   list.addEventListener("click", async (e) => {
