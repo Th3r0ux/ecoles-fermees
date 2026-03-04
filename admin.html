@@ -105,6 +105,47 @@
 }
 
 await testReadSchoolsAndStatus();
+    async function testUpdateOne() {
+  msg.textContent = "";
+
+  // 1) prendre 1 école
+  const { data: schools, error: e1 } = await supabase
+    .from("schools")
+    .select("id,name,region")
+    .order("region", { ascending: true })
+    .order("name", { ascending: true })
+    .limit(1);
+
+  if (e1) return (msg.textContent = "Erreur schools: " + e1.message);
+
+  const school = schools[0];
+
+  // 2) update statut_cours
+  const { error: e2 } = await supabase
+    .from("school_status")
+    .update({
+      statut_cours: "Ouvert",
+      updated_at: new Date().toISOString(),
+      updated_by: (await supabase.auth.getUser()).data.user.id
+    })
+    .eq("school_id", school.id);
+
+  if (e2) return (msg.textContent = "Erreur update: " + e2.message);
+
+  // 3) relire
+  const { data: st, error: e3 } = await supabase
+    .from("school_status")
+    .select("school_id,statut_cours,statut_garde,updated_at")
+    .eq("school_id", school.id)
+    .single();
+
+  if (e3) return (msg.textContent = "Erreur relecture: " + e3.message);
+
+  console.log("UPDATED:", school, st);
+  msg.textContent = `✅ Update OK: ${school.name} → cours=${st.statut_cours}`;
+}
+
+await testUpdateOne();
   </script>
 </body>
 </html>
