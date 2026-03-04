@@ -21,6 +21,8 @@
     <button id="logoutBtn" style="padding:10px 14px;">Se déconnecter</button>
   </div>
 
+  <div id="list" style="margin-top:16px;"></div>
+
   <script type="module">
     import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
@@ -59,10 +61,11 @@
     });
 
     refreshUI();
-    async function testReadSchoolsAndStatus() {
+
+    
+    async function loadTop10WithButtons() {
   msg.textContent = "";
 
-  // 1) 10 écoles
   const { data: schools, error: e1 } = await supabase
     .from("schools")
     .select("id,name,region")
@@ -71,12 +74,10 @@
     .limit(10);
 
   if (e1) {
-    console.error(e1);
-    msg.textContent = "Erreur lecture schools: " + e1.message;
+    msg.textContent = "Erreur schools: " + e1.message;
     return;
   }
 
-  // 2) statuts correspondants
   const ids = schools.map(s => s.id);
 
   const { data: statuses, error: e2 } = await supabase
@@ -85,67 +86,86 @@
     .in("school_id", ids);
 
   if (e2) {
-    console.error(e2);
-    msg.textContent = "Erreur lecture school_status: " + e2.message;
+    msg.textContent = "Erreur status: " + e2.message;
     return;
   }
 
   const statusById = new Map(statuses.map(st => [st.school_id, st]));
 
-  // 3) afficher
-  const lines = schools.map(s => {
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+
+  for (const s of schools) {
     const st = statusById.get(s.id);
     const cours = st?.statut_cours ?? "ND";
-    const garde = st?.statut_garde ?? "ND";
-    return `${s.region} — ${s.name} | cours=${cours} | garde=${garde}`;
-  });
 
-  console.log("JOIN (10):", lines);
-  msg.textContent = "✅ Lecture + join OK (voir console).";
+    const row = document.createElement("div");
+    row.style.border = "1px solid #ddd";
+    row.style.borderRadius = "10px";
+    row.style.padding = "10px";
+    row.style.margin = "10px 0";
+
+    row.innerHTML = `
+      <div style="font-weight:700;">${s.name}</div>
+      <div style="color:#666;font-size:13px;margin:3px 0 10px 0;">${s.region}</div>
+      <div style="margin-bottom:8px;">Cours: <strong id="cours-${s.id}">${cours}</strong></div>
+      <button data-id="${s.id}" data-val="ND">ND</button>
+      <button data-id="${s.id}" data-val="Ouvert">Ouvert</button>
+      <button data-id="${s.id}" data-val="Fermé">Fermé</button>
+      <span id="saved-${s.id}" style="margin-left:10px;color:#2e7d32;"></span>
+    `;
+
+    list.appendChild(row);
+  }
+
+  // handler unique
+  list.addEventListener("click", async (e) => {
+    const btn = e.target;
+    if (!(btn instanceof HTMLButtonElement)) return;
+    const schoolId = btn.dataset.id;
+    const val = btn.dataset.val;
+    if (!schoolId || !val) return;
+
+    // clear saved
+    const saved = document.getElementById(`saved-${schoolId}`);
+    if (saved) saved.textContent = "…";
+
+    const { data: userData } = await supabase.auth.getUser();
+    const uid = userData?.user?.id ?? null;
+
+    const { error } = await supabase
+      .from("school_status")
+      .update({
+        statut_cours: val,
+        updated_at: new Date().toISOString(),
+        updated_by: uid
+      })
+      .eq("school_id", schoolId);
+
+    if (error) {
+      console.error(error);
+      if (saved) {
+        saved.style.color = "#b00";
+        saved.textContent = "Erreur";
+      }
+      return;
+    }
+
+    // update UI
+    const coursEl = document.getElementById(`cours-${schoolId}`);
+    if (coursEl) coursEl.textContent = val;
+
+    if (saved) {
+      saved.style.color = "#2e7d32";
+      saved.textContent = "Enregistré ✅";
+    }
+  }, { once: true });
+
+  msg.textContent = "✅ Liste chargée (10 écoles).";
 }
 
-await testReadSchoolsAndStatus();
-    async function testUpdateOne() {
-  msg.textContent = "";
-
-  // 1) prendre 1 école
-  const { data: schools, error: e1 } = await supabase
-    .from("schools")
-    .select("id,name,region")
-    .order("region", { ascending: true })
-    .order("name", { ascending: true })
-    .limit(1);
-
-  if (e1) return (msg.textContent = "Erreur schools: " + e1.message);
-
-  const school = schools[0];
-
-  // 2) update statut_cours
-  const { error: e2 } = await supabase
-    .from("school_status")
-    .update({
-      statut_cours: "ND",
-      updated_at: new Date().toISOString(),
-      updated_by: (await supabase.auth.getUser()).data.user.id
-    })
-    .eq("school_id", school.id);
-
-  if (e2) return (msg.textContent = "Erreur update: " + e2.message);
-
-  // 3) relire
-  const { data: st, error: e3 } = await supabase
-    .from("school_status")
-    .select("school_id,statut_cours,statut_garde,updated_at")
-    .eq("school_id", school.id)
-    .single();
-
-  if (e3) return (msg.textContent = "Erreur relecture: " + e3.message);
-
-  console.log("UPDATED:", school, st);
-  msg.textContent = `✅ Update OK: ${school.name} → cours=${st.statut_cours}`;
-}
-
-await testUpdateOne();
+// après login, on charge la liste
+await loadTop10WithButtons();
   </script>
 </body>
 </html>
