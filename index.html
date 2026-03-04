@@ -290,14 +290,27 @@ window.render = function render(filterText = "") {
             tbody.appendChild(row);
           });
 
-          cssHeader.addEventListener("click", (e) => {
-            e.stopPropagation();
-            const rows = Array.from(tbody.querySelectorAll(`tr[data-css="${cssRegionId}"]`));
-            const schoolRows = rows.filter(tr => !tr.classList.contains("css-row"));
-            const anyVisible = schoolRows.some(tr => tr.style.display !== "none");
-            schoolRows.forEach(tr => tr.style.display = anyVisible ? "none" : "table-row");
-            document.getElementById(`${cssRegionId}-icon`).textContent = anyVisible ? "▶" : "▼";
-          });
+          headerTr.addEventListener("click", () => {
+  // On regarde la 1re ligne après la région
+  let tr = headerTr.nextElementSibling;
+
+  // Déterminer si la région est "ouverte" : si au moins une ligne suivante est visible
+  let isOpen = false;
+  while (tr && !tr.classList.contains("region-row")) {
+    if (tr.style.display !== "none") { isOpen = true; break; }
+    tr = tr.nextElementSibling;
+  }
+
+  // Repartir du début et toggle toutes les lignes jusqu’à la prochaine région
+  tr = headerTr.nextElementSibling;
+  while (tr && !tr.classList.contains("region-row")) {
+    tr.style.display = isOpen ? "none" : "table-row";
+    tr = tr.nextElementSibling;
+  }
+
+  const icon = document.getElementById(`${regionId}-icon`);
+  if (icon) icon.textContent = isOpen ? "▶" : "▼";
+});
 
         });
 
