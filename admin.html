@@ -62,31 +62,50 @@
 
     refreshUI();
 
-    
-    async function loadTop10WithButtons() {
-  msg.textContent = "";
+    async function fetchAllRowsPaged(table, select, orders = []) {
+  const pageSize = 1000;
+  let from = 0;
+  let all = [];
 
-  const { data: schools, error: e1 } = await supabase
-    .from("schools")
-    .select("id,name,region")
-    .order("region", { ascending: true })
-    .order("name", { ascending: true })
-    .limit(5000);
+  while (true) {
+    let q = supabase.from(table).select(select);
 
-  if (e1) {
-    msg.textContent = "Erreur schools: " + e1.message;
-    return;
+    for (const o of orders) {
+      q = q.order(o.col, { ascending: o.asc });
+    }
+
+    const { data, error } = await q.range(from, from + pageSize - 1);
+
+    if (error) throw error;
+
+    all = all.concat(data);
+    if (data.length < pageSize) break;
+    from += pageSize;
   }
 
-  const ids = schools.map(s => s.id);
+  return all;
+}
 
-  const { data: statuses, error: e2 } = await supabase
-    .from("school_status")
-    .select("school_id,statut_cours,statut_garde,updated_at")
-    .in("school_id", ids);
+async function loadAllWithButtons() {
+  msg.textContent = "Chargement…";
 
-  if (e2) {
-    msg.textContent = "Erreur status: " + e2.message;
+  let schools = [];
+  let statuses = [];
+
+  try {
+    schools = await fetchAllRowsPaged(
+      "schools",
+      "id,name,region",
+      [{ col: "region", asc: true }, { col: "name", asc: true }]
+    );
+
+    statuses = await fetchAllRowsPaged(
+      "school_status",
+      "school_id,statut_cours,statut_garde,updated_at"
+    );
+  } catch (err) {
+    console.error(err);
+    msg.textContent = "Erreur chargement: " + (err.message || err);
     return;
   }
 
@@ -122,13 +141,16 @@
   list.addEventListener("click", async (e) => {
     const btn = e.target;
     if (!(btn instanceof HTMLButtonElement)) return;
+
     const schoolId = btn.dataset.id;
     const val = btn.dataset.val;
     if (!schoolId || !val) return;
 
-    // clear saved
     const saved = document.getElementById(`saved-${schoolId}`);
-    if (saved) saved.textContent = "…";
+    if (saved) {
+      saved.style.color = "#666";
+      saved.textContent = "…";
+    }
 
     const { data: userData } = await supabase.auth.getUser();
     const uid = userData?.user?.id ?? null;
@@ -161,11 +183,12 @@
     }
   }, { once: true });
 
-  msg.textContent = "✅ Liste chargée (10 écoles).";
+  msg.textContent = `✅ Chargé: ${schools.length} écoles`;
 }
 
 // après login, on charge la liste
-await loadTop10WithButtons();
+await loadAllWithButtons();
+    
   </script>
 </body>
 </html>
