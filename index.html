@@ -484,7 +484,7 @@ async function loadFromFirestore(regionId) {
   if (loading) loading.style.display = "none";
 }
 
-loadFromFirestore().catch(err => {
+loadFromFirestore("Montréal").catch(err => {
   console.error(err);
   const loading = document.getElementById("loading");
   if (loading) loading.textContent = "Erreur de chargement Firestore.";
