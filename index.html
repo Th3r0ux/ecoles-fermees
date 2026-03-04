@@ -446,23 +446,23 @@ function norm(s){
   return v;
 }
 
-async function loadFromFirestore(){
+async function loadFromFirestore(regionId) {
   const loading = document.getElementById("loading");
   if (loading) loading.style.display = "block";
 
   const q = query(
     collection(db, "ecoles"),
-    orderBy("region"),
+    where("region", "==", regionId),     // 🔥 clé : on filtre
     orderBy("css"),
     orderBy("name")
   );
 
   const snap = await getDocs(q);
 
-  // IMPORTANT: on remplit LA variable allRows (pas window.allRows)
   allRows = snap.docs.map(d => {
     const x = d.data();
     return {
+      id: d.id,
       name: x.name || "",
       css: x.css || "",
       region: x.region || "",
@@ -470,6 +470,9 @@ async function loadFromFirestore(){
       statutGarde: norm(x.statut_garde),
     };
   });
+
+  if (loading) loading.style.display = "none";
+}
 
   render(); // rendu initial
 
