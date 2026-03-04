@@ -239,6 +239,14 @@ window.render = function render(filterText = "") {
     `;
     tbody.appendChild(headerTr);
 
+    headerTr.addEventListener("click", () => {
+  const regionRows = Array.from(tbody.querySelectorAll(`tr[data-region="${regionId}"]`));
+  const anyVisible = regionRows.some(tr => tr.style.display !== "none");
+  regionRows.forEach(tr => tr.style.display = anyVisible ? "none" : "table-row");
+  const icon = document.getElementById(`${regionId}-icon`);
+  if (icon) icon.textContent = anyVisible ? "▶" : "▼";
+});
+
     // --- LAZY LOAD ---
     if (autoExpand) {
 
@@ -253,6 +261,7 @@ window.render = function render(filterText = "") {
           cssHeader.style.cursor = "pointer";
           cssHeader.setAttribute("data-region", regionId);
           cssHeader.setAttribute("data-css", cssRegionId);
+          cssHeader.style.display = "table-row";
 
           const cssClosedCount = cssGroups[cssName].filter(r => r.statutCours === "Fermé").length;
           const cssClosedLabel = `${cssClosedCount} ${cssClosedCount > 1 ? "écoles fermées" : "école fermée"}`;
@@ -292,7 +301,6 @@ window.render = function render(filterText = "") {
 
         });
 
-      return;
     }
 
     // Sinon (<5) : créer au clic
