@@ -121,7 +121,7 @@ body{
   style="width:100%;max-width:500px;padding:10px;font-size:15px;margin:15px 0;"
 >
 <div id="lastUpdate" style="margin:10px 0 15px 0;font-size:14px;color:#444;"></div>
-<div style="margin-top:4px;1px solid #ddd;font-size:14px;color:#555;">
+<div style="margin-top:4px;border:1px solid #ddd;font-size:14px;color:#555;">
   <strong>n.d.</strong> = L'information n'est pas encore disponible. 
   Vérifiez auprès de votre centre de services scolaire.
 <br></br>
@@ -141,9 +141,9 @@ body{
   </thead>
   <tbody></tbody>
 </table>
-
 <script>
-window.allRows = [];
+  
+let allRows = [];
 
 function formatCours(status) {
   if (status === "Fermé") {
@@ -165,24 +165,24 @@ function formatGarde(status) {
   return '<span style="color:#000;">n.d.</span>';
 }
 
-window.render = function render(filterText = "") {
+function render(filterText = "") {
   const tbody = document.querySelector("#schools tbody");
   tbody.innerHTML = "";
 
-  const query = (filterText || "").trim().toLowerCase();
+  const query = filterText.trim().toLowerCase();
   const autoExpand = query.length >= 5;
 
-  function cssId(regionId, css) {
-    return regionId + "-css-" + (css || "Autre").replace(/[^a-z0-9]+/gi, "-").toLowerCase();
-  }
+function cssId(regionId, css) {
+  return regionId + "-css-" + (css || "Autre").replace(/[^a-z0-9]+/gi, "-").toLowerCase();
+}
 
   // 1) Filtrer
-  const filtered = window.allRows.filter(r => {
+  const filtered = allRows.filter(r => {
     if (!query) return true;
     return (
-      (r.name || "").toLowerCase().includes(query) ||
-      (r.css || "").toLowerCase().includes(query) ||
-      (r.region || "").toLowerCase().includes(query)
+      r.name.toLowerCase().includes(query) ||
+      r.css.toLowerCase().includes(query) ||
+      r.region.toLowerCase().includes(query)
     );
   });
 
@@ -206,27 +206,30 @@ window.render = function render(filterText = "") {
     const regionId = "region-" + region.replace(/[^a-z0-9]+/gi, "-").toLowerCase();
 
     // Trier à l'intérieur de la région (priorités + alpha)
-    groups[region].sort((a, b) => {
-      const pa = priorityRank(a);
-      const pb = priorityRank(b);
-      if (pa !== pb) return pa - pb;
+   groups[region].sort((a, b) => {
+  const pa = priorityRank(a);
+  const pb = priorityRank(b);
+  if (pa !== pb) return pa - pb;
 
-      const ca = (a.css || "").localeCompare((b.css || ""), "fr");
-      if (ca !== 0) return ca;
+  const ca = (a.css || "").localeCompare((b.css || ""), "fr");
+  if (ca !== 0) return ca;
 
-      return (a.name || "").localeCompare((b.name || ""), "fr");
-    });
+  return (a.name || "").localeCompare((b.name || ""), "fr");
+});
 
-    const cssGroups = {};
-    groups[region].forEach(r => {
-      const css = r.css || "Autre";
-      if (!cssGroups[css]) cssGroups[css] = [];
-      cssGroups[css].push(r);
-    });
+const cssGroups = {};
+groups[region].forEach(r => {
+  const css = r.css || "Autre";
+  if (!cssGroups[css]) cssGroups[css] = [];
+  cssGroups[css].push(r);
+});
 
+
+    // Compter écoles fermées (cours)
     const closedCount = groups[region].filter(r => r.statutCours === "Fermé").length;
     const closedLabel = `${closedCount} ${closedCount > 1 ? "écoles fermées" : "école fermée"}`;
 
+    // Header région
     const headerTr = document.createElement("tr");
     headerTr.className = "region-row";
     headerTr.style.cursor = "pointer";
@@ -239,97 +242,183 @@ window.render = function render(filterText = "") {
     `;
     tbody.appendChild(headerTr);
 
-    headerTr.addEventListener("click", () => {
-  const regionRows = Array.from(
-    tbody.querySelectorAll(`tr[data-region="${regionId}"]`)
-  );
+headerTr.addEventListener("click", () => {
 
-  const cssHeaders = regionRows.filter(tr => tr.classList.contains("css-row"));
-  const regionIsOpen = cssHeaders.some(tr => tr.style.display !== "none");
+  // 0) Si on est en <5 et que rien n'existe encore, on crée (lazy)
+  let regionRows = Array.from(tbody.querySelectorAll(`tr[data-region="${regionId}"]`));
+
+  if (!autoExpand && regionRows.length === 0) {
+
+    Object.keys(cssGroups)
+      .sort((a,b)=>a.localeCompare(b,"fr"))
+      .reverse()
+      .forEach(cssName => {
+
+        const cssRegionId = cssId(regionId, cssName);
+        const schools = cssGroups[cssName];
+
+        // écoles cachées au départ
+        for (let i = schools.length - 1; i >= 0; i--) {
+          const r = schools[i];
+          const row = document.createElement("tr");
+          row.setAttribute("data-region", regionId);
+          row.setAttribute("data-css", cssRegionId);
+          row.style.display = "none";
+          row.innerHTML = `
+            <td style="padding-left:34px;"><strong>${r.name}</strong></td>
+            <td>${formatCours(r.statutCours)}</td>
+            <td>${formatGarde(r.statutGarde)}</td>
+          `;
+          headerTr.insertAdjacentElement("afterend", row);
+        }
+
+        // header CSS caché au départ
+        const cssHeader = document.createElement("tr");
+        cssHeader.className = "css-row";
+        cssHeader.style.cursor = "pointer";
+        cssHeader.setAttribute("data-region", regionId);
+        cssHeader.setAttribute("data-css", cssRegionId);
+        cssHeader.style.display = "none";
+
+        const cssClosedCount = cssGroups[cssName].filter(r => r.statutCours === "Fermé").length;
+        const cssClosedLabel = `${cssClosedCount} ${cssClosedCount > 1 ? "écoles fermées" : "école fermée"}`;
+
+        cssHeader.innerHTML = `
+          <td colspan="3" style="padding-left:26px;font-weight:700;">
+            <span id="${cssRegionId}-icon" style="display:inline-block;width:18px;">▶</span>
+            ${cssName}
+            <span style="font-weight:400;color:#666;">(${cssClosedLabel})</span>
+          </td>
+        `;
+        headerTr.insertAdjacentElement("afterend", cssHeader);
+
+        // toggle CSS
+        cssHeader.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const schoolRows = Array.from(
+            tbody.querySelectorAll(`tr[data-css="${cssRegionId}"]`)
+          ).filter(tr => !tr.classList.contains("css-row"));
+
+          const anyVisible = schoolRows.some(tr => tr.style.display !== "none");
+          schoolRows.forEach(tr => tr.style.display = anyVisible ? "none" : "table-row");
+
+          const icon = document.getElementById(`${cssRegionId}-icon`);
+          if (icon) icon.textContent = anyVisible ? "▶" : "▼";
+        });
+      });
+
+    // refresh après création
+    regionRows = Array.from(tbody.querySelectorAll(`tr[data-region="${regionId}"]`));
+  }
+
+  // 1) Toggle région
+  const regionIsOpen = regionRows.some(tr => tr.style.display !== "none");
 
   if (regionIsOpen) {
-    // Fermer région => cacher CSS + écoles
     regionRows.forEach(tr => tr.style.display = "none");
     const icon = document.getElementById(`${regionId}-icon`);
     if (icon) icon.textContent = "▶";
- } else {
-    // Ouvrir région => montrer CSS + écoles (en autoExpand, tout est déjà rendu)
-    regionRows.forEach(tr => tr.style.display = "table-row");
-    const icon = document.getElementById(`${regionId}-icon`);
-    if (icon) icon.textContent = "▼";
+    return;
   }
+
+  // ouvrir région
+  const cssHeaders = regionRows.filter(tr => tr.classList.contains("css-row"));
+
+  if (autoExpand) {
+    // en autoExpand: tout visible
+    regionRows.forEach(tr => tr.style.display = "table-row");
+  } else {
+    // en <5: montrer seulement les CSS, garder écoles cachées
+    cssHeaders.forEach(tr => tr.style.display = "table-row");
+    regionRows.forEach(tr => {
+      if (!tr.classList.contains("css-row")) tr.style.display = "none";
+    });
+    // reset icônes CSS
+    cssHeaders.forEach(h => {
+      const id = h.getAttribute("data-css");
+      const ic = document.getElementById(`${id}-icon`);
+      if (ic) ic.textContent = "▶";
+    });
+  }
+
+  const icon = document.getElementById(`${regionId}-icon`);
+  if (icon) icon.textContent = "▼";
 });
 
     // --- LAZY LOAD ---
+    // Si autoExpand est actif (>=5), on rend tout de suite les lignes
     if (autoExpand) {
 
-      Object.keys(cssGroups)
-        .sort((a,b)=>a.localeCompare(b,"fr"))
-        .forEach(cssName => {
+ Object.keys(cssGroups)
+  .sort((a,b)=>a.localeCompare(b,"fr"))
+  .forEach(cssName => {
 
-          const cssRegionId = cssId(regionId, cssName);
+    const cssRegionId = cssId(regionId, cssName);
 
-          const cssHeader = document.createElement("tr");
-          cssHeader.className = "css-row";
-          cssHeader.style.cursor = "pointer";
-          cssHeader.setAttribute("data-region", regionId);
-          cssHeader.setAttribute("data-css", cssRegionId);
-          cssHeader.style.display = "table-row";
+    // Header CSS (cliquable)
+    const cssHeader = document.createElement("tr");
+    cssHeader.className = "css-row";
+    cssHeader.style.cursor = "pointer";
+    cssHeader.setAttribute("data-region", regionId);
+    cssHeader.setAttribute("data-css", cssRegionId);
+    const cssClosedCount = cssGroups[cssName].filter(r => r.statutCours === "Fermé").length;
+const cssClosedLabel = `${cssClosedCount} ${cssClosedCount > 1 ? "écoles fermées" : "école fermée"}`;
+    cssHeader.innerHTML = `
+  <td colspan="3" style="padding-left:26px;font-weight:700;">
+    <span id="${cssRegionId}-icon" style="display:inline-block;width:18px;">▼</span>
+    ${cssName}
+    <span style="font-weight:400;color:#666;">(${cssClosedLabel})</span>
+  </td>
+`;
+    tbody.appendChild(cssHeader);
 
-          const cssClosedCount = cssGroups[cssName].filter(r => r.statutCours === "Fermé").length;
-          const cssClosedLabel = `${cssClosedCount} ${cssClosedCount > 1 ? "écoles fermées" : "école fermée"}`;
-
-          cssHeader.innerHTML = `
-            <td colspan="3" style="padding-left:26px;font-weight:700;">
-              <span id="${cssRegionId}-icon" style="display:inline-block;width:18px;">▶</span>
-              ${cssName}
-              <span style="font-weight:400;color:#666;">(${cssClosedLabel})</span>
-            </td>
-          `;
-          tbody.appendChild(cssHeader);
-
-          cssGroups[cssName].forEach(r => {
-            const row = document.createElement("tr");
-            row.setAttribute("data-region", regionId);
-            row.setAttribute("data-css", cssRegionId);
-            row.style.display = "table-row";
-            row.innerHTML = `
-              <td style="padding-left:34px;">
-                <strong>${r.name}</strong>
-              </td>
-              <td>${formatCours(r.statutCours)}</td>
-              <td>${formatGarde(r.statutGarde)}</td>
-            `;
-            tbody.appendChild(row);
-          });
-
-          cssHeader.addEventListener("click", (e) => {
-  e.stopPropagation();
-
-  const rows = Array.from(tbody.querySelectorAll(`tr[data-css="${cssRegionId}"]`));
-  const schoolRows = rows.filter(tr => !tr.classList.contains("css-row"));
-  const anyVisible = schoolRows.some(tr => tr.style.display !== "none");
-
-  schoolRows.forEach(tr => tr.style.display = anyVisible ? "none" : "table-row");
-
-  const icon = document.getElementById(`${cssRegionId}-icon`);
-  if (icon) icon.textContent = anyVisible ? "▶" : "▼";
-});
-
-        });
-
-    }
-
-      return;
+    // Écoles (avec data-css)
+    cssGroups[cssName].forEach(r => {
+      const row = document.createElement("tr");
+      row.setAttribute("data-region", regionId);
+      row.setAttribute("data-css", cssRegionId);
+      row.style.display = "table-row";
+      row.innerHTML = `
+        <td style="padding-left:34px;">
+          <strong>${r.name}</strong>
+        </td>
+        <td>${formatCours(r.statutCours)}</td>
+        <td>${formatGarde(r.statutGarde)}</td>
+      `;
+      tbody.appendChild(row);
     });
-      }
-  });
-};
 
-// search
+    // Toggle CSS
+    cssHeader.addEventListener("click", (e) => {
+      e.stopPropagation(); // IMPORTANT: sinon ça déclenche aussi le toggle de région
+      const rows = Array.from(tbody.querySelectorAll(`tr[data-css="${cssRegionId}"]`));
+      // on exclut le header CSS lui-même
+      const schoolRows = rows.filter(tr => !tr.classList.contains("css-row"));
+      const anyVisible = schoolRows.some(tr => tr.style.display !== "none");
+      schoolRows.forEach(tr => tr.style.display = anyVisible ? "none" : "table-row");
+      document.getElementById(`${cssRegionId}-icon`).textContent = anyVisible ? "▶" : "▼";
+    });
+
+  });
+
+}
+}); // <-- ferme le forEach(region => { ... })
+
+}  // <-- ferme la fonction render()
+
+</script>
+<script>
+function formatLastUpdate(dateObj){
+  const time = dateObj.toLocaleTimeString("fr-CA", { hour: "2-digit", minute: "2-digit" });
+  const date = dateObj.toLocaleDateString("fr-CA", { day: "numeric", month: "long", year: "numeric" });
+  return `Dernière mise à jour: ${time} | ${date}`;
+}
+document.getElementById("lastUpdate").textContent = formatLastUpdate(new Date());
+
+// Bind search UNE fois
 const searchEl = document.getElementById("search");
 if (searchEl && !searchEl.dataset.bound){
-  searchEl.addEventListener("input", (e) => window.render(e.target.value));
+  searchEl.addEventListener("input", (e) => render(e.target.value));
   searchEl.dataset.bound = "1";
 }
 </script>
@@ -370,8 +459,8 @@ async function loadFromFirestore(){
 
   const snap = await getDocs(q);
 
-  // IMPORTANT : on remplit la variable globale utilisée par render()
-  window.allRows = snap.docs.map(d => {
+  // IMPORTANT: on remplit LA variable allRows (pas window.allRows)
+  allRows = snap.docs.map(d => {
     const x = d.data();
     return {
       name: x.name || "",
@@ -382,7 +471,7 @@ async function loadFromFirestore(){
     };
   });
 
-  window.render(); // appelle ta fonction existante
+  render(); // rendu initial
 
   if (loading) loading.style.display = "none";
 }
@@ -392,5 +481,6 @@ loadFromFirestore().catch(err => {
   const loading = document.getElementById("loading");
   if (loading) loading.textContent = "Erreur de chargement Firestore.";
 });
-</script></body>
+</script>
+</body>
 </html>
