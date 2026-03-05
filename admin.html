@@ -179,13 +179,19 @@
   setTimeout(updateScrollHint, 0);
 }
 
-    document.getElementById("loginBtn").addEventListener("click", async () => {
+    console.log("logoutBtn exists?", !!document.getElementById("logoutBtn"));
+    
+    document.getElementById("logoutBtn").addEventListener("click", async (e) => {
+  console.log("logout click fired");
+  e.preventDefault();
   msg.textContent = "";
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value;
 
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) msg.textContent = error.message;
+  const { error } = await supabase.auth.signOut();
+  if (error) {
+    console.error(error);
+    msg.textContent = "Erreur logout: " + error.message;
+    return;
+  }
 
   await refreshUI();
 });
@@ -384,6 +390,8 @@ refreshBatchBar();
   async function masterSetAll(val){
   const v = normVal(val);
 
+  if (document.activeElement && document.activeElement.tagName === "INPUT") return;
+    
   const confirmMsg =
     `⚠️ Tu vas mettre TOUTES les écoles du Québec à "${v}" (cours + garde).\n\nConfirme en écrivant: OUI`;
   const answer = prompt(confirmMsg);
