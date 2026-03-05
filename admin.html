@@ -47,24 +47,17 @@
   .row-flex{ margin-top:10px; display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
   button{ padding:8px 10px; }
 
-  #scrollHint {
+  #scrollHint{
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 60px;
+  left: 0; right: 0; bottom: 0;
+  height: 64px;
   pointer-events: none;
-  background: linear-gradient(
-    to bottom,
-    rgba(255,255,255,0),
-    rgba(255,255,255,0.95)
-  );
-  transition: opacity 0.2s;
+  z-index: 9999;
+  background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0.96));
+  opacity: 1;
+  transition: opacity .15s;
 }
-
-#scrollHint.hidden {
-  opacity: 0;
-}  
+#scrollHint.hidden{ opacity: 0; }
 </style>
 </head>
 <body>
@@ -152,6 +145,8 @@
 
     const masterBox = document.getElementById("masterBox");
 
+    
+
     async function refreshUI() {
   const { data: { session } } = await supabase.auth.getSession();
 
@@ -180,6 +175,8 @@
     if (q) q.value = "";
     msg.textContent = "";
   }
+
+  setTimeout(updateScrollHint, 0);
 }
 
     document.getElementById("loginBtn").addEventListener("click", async () => {
@@ -209,20 +206,29 @@ const passwordInput = document.getElementById("password");
 
 // ENTER quand connecté = logout
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") {
-    const logoutBtn = document.getElementById("logoutBtn");
-    const okBox = document.getElementById("okBox");
+  if (e.key !== "Enter") return;
 
-    if (okBox.style.display !== "none") {
-      logoutBtn.click();
-    }
+  const tag = (e.target?.tagName || "").toLowerCase();
+  if (["input","textarea","button","select"].includes(tag)) return;
+
+  const okBox = document.getElementById("okBox");
+  if (okBox.style.display !== "none") {
+    document.getElementById("logoutBtn").click();
   }
+});
+
+document.getElementById("logoutBtn").addEventListener("click", async () => {
+  await supabase.auth.signOut();
+  await refreshUI();
 });
     
     refreshUI();
 
 // mettre le curseur automatiquement dans le champ email
-document.getElementById("email").focus();
+(async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) document.getElementById("email").focus();
+})();
     
     async function fetchAllRowsPaged(table, select, orders = []) {
       const pageSize = 1000;
@@ -247,10 +253,11 @@ document.getElementById("email").focus();
       return all;
     }
 
+    let schools = [];
+    
     async function loadAllWithButtons() {
   msg.textContent = "Chargement…";
 
-  let schools = [];
   try {
     schools = await fetchAllRowsPaged(
       "public_snapshot",
@@ -386,16 +393,23 @@ refreshBatchBar();
   };
 
   // ⚠️ update sur toutes les lignes
+  const allIds = schools.map(s => s.id);
+
+const chunkSize = 500;
+for (let i = 0; i < allIds.length; i += chunkSize) {
+  const chunk = allIds.slice(i, i + chunkSize);
+
   const { error } = await supabase
     .from("school_status")
     .update(payload)
-    .neq("school_id", ""); // condition "toujours vraie" pour forcer update global
+    .in("school_id", chunk);
 
   if (error) {
     console.error(error);
     msg.textContent = "Erreur master: " + error.message;
     return;
   }
+}
 
   // Update cache local + UI (si affiché)
   for (const s of schools) {
@@ -773,9 +787,10 @@ function formatGarde(status) {
         const { data: userData } = await supabase.auth.getUser();
         const uid = userData?.user?.id ?? null;
 
-        const payload = { updated_at: new Date().toISOString(), updated_by: uid };
-        if (kind === "cours") payload.statut_cours = val;
-        if (kind === "garde") payload.statut_garde = val;
+        const v = normVal(val);
+const payload = { updated_at: new Date().toISOString(), updated_by: uid };
+if (kind === "cours") payload.statut_cours = v;
+if (kind === "garde") payload.statut_garde = v;
 
         const { error } = await supabase
           .from("school_status")
@@ -1029,19 +1044,30 @@ document.getElementById("batchClear").addEventListener("click", () => {
       msg.textContent = "";
 }
 
-    function updateScrollHint() {
+    function updateScrollHint(){
   const hint = document.getElementById("scrollHint");
   if (!hint) return;
 
-  const nearBottom =
-    window.innerHeight + window.scrollY >= document.body.offsetHeight - 10;
+  const doc = document.documentElement;
 
+  // Hauteur totale réelle scrollable
+  const scrollHeight = doc.scrollHeight;
+  const viewport = window.innerHeight;
+
+  // 1) Si la page ne scroll même pas, on cache le gradient
+  if (scrollHeight <= viewport + 2){
+    hint.classList.add("hidden");
+    return;
+  }
+
+  // 2) Si on est proche du bas, on cache le gradient
+  const nearBottom = (window.scrollY + viewport) >= (scrollHeight - 12);
   hint.classList.toggle("hidden", nearBottom);
 }
 
-window.addEventListener("scroll", updateScrollHint);
+window.addEventListener("scroll", updateScrollHint, { passive: true });
 window.addEventListener("resize", updateScrollHint);
-window.addEventListener("load", updateScrollHint);
+setTimeout(updateScrollHint, 0);
     
   </script>
   <div id="scrollHint"></div>
