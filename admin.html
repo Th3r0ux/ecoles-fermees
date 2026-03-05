@@ -17,6 +17,36 @@
         sans-serif;
     }
   </style>
+  <style>
+  .region-row{
+    padding: 14px 10px;
+    font-weight: 800;
+    border-top: 2px solid #ddd;
+    background: #fafafa;
+    cursor: pointer;
+    border-radius: 10px;
+    margin-top: 12px;
+  }
+  .css-row{
+    padding: 10px 10px;
+    font-weight: 700;
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 10px;
+    margin: 8px 0 0 0;
+    cursor: pointer;
+  }
+  .school-row{
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 10px;
+    margin: 10px 0;
+    background: #fff;
+  }
+  .muted{ color:#666; font-size:13px; }
+  .row-flex{ margin-top:10px; display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  button{ padding:8px 10px; }
+</style>
 </head>
 <body>
   <h1>Admin</h1>
@@ -106,141 +136,391 @@
     }
 
     async function loadAllWithButtons() {
-      msg.textContent = "Chargement…";
+  msg.textContent = "Chargement…";
 
-      let schools = [];
-      try {
-        schools = await fetchAllRowsPaged(
-          "public_snapshot",
-          "id,name,region,css,statut_cours,statut_garde",
-          [{ col: "region", asc: true }, { col: "css", asc: true }, { col: "name", asc: true }]
-        );
-      } catch (err) {
-        console.error(err);
-        msg.textContent = "Erreur chargement: " + (err.message || err);
+  let schools = [];
+  try {
+    schools = await fetchAllRowsPaged(
+      "public_snapshot",
+      "id,name,region,css,statut_cours,statut_garde",
+      [{ col: "region", asc: true }, { col: "css", asc: true }, { col: "name", asc: true }]
+    );
+  } catch (err) {
+    console.error(err);
+    msg.textContent = "Erreur chargement: " + (err.message || err);
+    return;
+  }
+
+  const list = document.getElementById("list");
+  const input = document.getElementById("q");
+
+  // Helpers IDs (comme index)
+  function slug(s){
+    return String(s || "Autre").replace(/[^a-z0-9]+/gi, "-").toLowerCase();
+  }
+  function regionId(region){ return "region-" + slug(region); }
+  function cssId(rid, css){ return rid + "-css-" + slug(css || "Autre"); }
+
+  function normVal(v){
+    if (v === null || v === undefined) return "ND";
+    const t = String(v).trim();
+    const u = t.toUpperCase();
+    if (u === "ND" || u === "N.D." || u === "N.D" || u === "N/A") return "ND";
+    if (u === "OUVERT") return "Ouvert";
+    if (u === "FERME" || u === "FERMÉ") return "Fermé";
+    return t;
+  }
+
+  function priorityRank(s) {
+    const c = normVal(s.statut_cours);
+    const g = normVal(s.statut_garde);
+    if (c === "Fermé") return 0;
+    if (g === "Fermé") return 1;
+    if (c === "ND" || g === "ND") return 3;
+    return 2;
+  }
+
+  function groupByRegionAndCss(arr){
+    const groups = {};
+    for (const s of arr){
+      const r = s.region || "Autre";
+      const c = s.css || "Autre";
+      if (!groups[r]) groups[r] = {};
+      if (!groups[r][c]) groups[r][c] = [];
+      groups[r][c].push(s);
+    }
+    return groups;
+  }
+
+  // Render principal (avec autoExpand + lazy)
+  function renderAdmin(filterText = "") {
+    const query = filterText.trim().toLowerCase();
+    const autoExpand = query.length >= 5;
+
+    // filtrage (même logique)
+    const filtered = schools.filter(s => {
+      if (!query) return true;
+      return (
+        (s.name || "").toLowerCase().includes(query) ||
+        (s.region || "").toLowerCase().includes(query) ||
+        (s.css || "").toLowerCase().includes(query)
+      );
+    });
+
+    // tri interne (priorité + css + name)
+    filtered.sort((a,b) => {
+      const pa = priorityRank(a);
+      const pb = priorityRank(b);
+      if (pa !== pb) return pa - pb;
+      const ca = (a.css || "").localeCompare((b.css || ""), "fr");
+      if (ca !== 0) return ca;
+      return (a.name || "").localeCompare((b.name || ""), "fr");
+    });
+
+    const groups = groupByRegionAndCss(filtered);
+
+    list.innerHTML = "";
+
+    // régions alpha
+    Object.keys(groups).sort((a,b)=>a.localeCompare(b,"fr")).forEach(region => {
+      const rid = regionId(region);
+
+      // header région
+      const regionBlock = document.createElement("div");
+      regionBlock.className = "region-row";
+      regionBlock.setAttribute("data-kind", "region");
+      regionBlock.setAttribute("data-region", rid);
+
+      // petit compteur (cours fermés) comme index
+      const regionAllSchools = Object.values(groups[region]).flat();
+      const closedCount = regionAllSchools.filter(x => normVal(x.statut_cours) === "Fermé").length;
+      const closedLabel = `${closedCount} ${closedCount > 1 ? "écoles fermées" : "école fermée"}`;
+
+      regionBlock.innerHTML = `
+        <span id="${rid}-icon" style="display:inline-block;width:18px;">${autoExpand ? "▼" : "▶"}</span>
+        ${region}
+        <span style="font-weight:400;color:#666;">(${closedLabel})</span>
+      `;
+      list.appendChild(regionBlock);
+
+      // conteneur pour css + écoles (pour pouvoir cacher/montrer tout)
+      const regionContainer = document.createElement("div");
+      regionContainer.setAttribute("data-region-container", rid);
+      regionContainer.style.marginLeft = "10px";
+      list.appendChild(regionContainer);
+
+      const cssNames = Object.keys(groups[region]).sort((a,b)=>a.localeCompare(b,"fr"));
+
+      // AUTOEXPAND: on construit tout immédiatement
+      if (autoExpand) {
+        for (const cssName of cssNames) {
+          const cid = cssId(rid, cssName);
+          const cssHeader = document.createElement("div");
+          cssHeader.className = "css-row";
+          cssHeader.setAttribute("data-kind", "css");
+          cssHeader.setAttribute("data-region", rid);
+          cssHeader.setAttribute("data-css", cid);
+
+          const cssClosedCount = groups[region][cssName].filter(x => normVal(x.statut_cours) === "Fermé").length;
+          const cssClosedLabel = `${cssClosedCount} ${cssClosedCount > 1 ? "écoles fermées" : "école fermée"}`;
+
+          cssHeader.innerHTML = `
+            <span id="${cid}-icon" style="display:inline-block;width:18px;">▼</span>
+            ${cssName}
+            <span style="font-weight:400;color:#666;">(${cssClosedLabel})</span>
+          `;
+          regionContainer.appendChild(cssHeader);
+
+          // écoles visibles
+          for (const s of groups[region][cssName]) {
+            regionContainer.appendChild(makeSchoolRow(s, rid, cid));
+          }
+        }
+        // region est ouverte
+        regionContainer.style.display = "block";
+      } else {
+        // LAZY: rien n’est créé ici. (on crée au clic sur région)
+        regionContainer.style.display = "none";
+      }
+    });
+
+    msg.textContent = `✅ ${filtered.length} / ${schools.length} écoles`;
+  }
+
+  // Fabrique une "carte école" (avec boutons)
+  function makeSchoolRow(s, rid, cid){
+    const cours = normVal(s.statut_cours);
+    const garde = normVal(s.statut_garde);
+
+    const row = document.createElement("div");
+    row.className = "school-row";
+    row.setAttribute("data-kind", "school");
+    row.setAttribute("data-region", rid);
+    row.setAttribute("data-css", cid);
+    row.setAttribute("data-school", String(s.id));
+
+    row.innerHTML = `
+      <div style="font-weight:800;font-size:16px;">${s.name || ""}</div>
+      <div class="muted">${s.css || ""} — ${s.region || ""}</div>
+
+      <div style="margin-top:10px;">
+        <div>Cours: <strong id="cours-${s.id}">${cours}</strong></div>
+        <div>Service de garde: <strong id="garde-${s.id}">${garde}</strong></div>
+      </div>
+
+      <div class="row-flex">
+        <span style="font-weight:700;margin-right:6px;">Cours:</span>
+        <button data-action="set" data-kind="cours" data-id="${s.id}" data-val="ND">ND</button>
+        <button data-action="set" data-kind="cours" data-id="${s.id}" data-val="Ouvert">Ouvert</button>
+        <button data-action="set" data-kind="cours" data-id="${s.id}" data-val="Fermé">Fermé</button>
+      </div>
+
+      <div class="row-flex" style="margin-top:8px;">
+        <span style="font-weight:700;margin-right:6px;">Garde:</span>
+        <button data-action="set" data-kind="garde" data-id="${s.id}" data-val="ND">ND</button>
+        <button data-action="set" data-kind="garde" data-id="${s.id}" data-val="Ouvert">Ouvert</button>
+        <button data-action="set" data-kind="garde" data-id="${s.id}" data-val="Fermé">Fermé</button>
+        <span id="saved-${s.id}" style="margin-left:10px;color:#2e7d32;"></span>
+      </div>
+    `;
+    return row;
+  }
+
+  // 1) rendu initial
+  renderAdmin("");
+
+  // 2) bind search une fois
+  if (input && !input.dataset.bound) {
+    input.addEventListener("input", (e) => renderAdmin(e.target.value));
+    input.dataset.bound = "1";
+  }
+
+  // 3) handler unique: toggle région / toggle css / update status
+  if (!list.dataset.bound) {
+    list.addEventListener("click", async (e) => {
+      const t = e.target;
+
+      // A) UPDATE (boutons)
+      if (t instanceof HTMLButtonElement && t.dataset.action === "set") {
+        const schoolId = t.dataset.id;
+        const val = t.dataset.val;
+        const kind = t.dataset.kind; // cours|garde
+        if (!schoolId || !val || !kind) return;
+
+        const saved = document.getElementById(`saved-${schoolId}`);
+        if (saved) { saved.style.color = "#666"; saved.textContent = "…"; }
+
+        const { data: userData } = await supabase.auth.getUser();
+        const uid = userData?.user?.id ?? null;
+
+        const payload = { updated_at: new Date().toISOString(), updated_by: uid };
+        if (kind === "cours") payload.statut_cours = val;
+        if (kind === "garde") payload.statut_garde = val;
+
+        const { error } = await supabase
+          .from("school_status")
+          .update(payload)
+          .eq("school_id", schoolId);
+
+        if (error) {
+          console.error(error);
+          if (saved) { saved.style.color = "#b00"; saved.textContent = "Erreur"; }
+          return;
+        }
+
+        // update UI
+        const targetId = (kind === "cours") ? `cours-${schoolId}` : `garde-${schoolId}`;
+        const el = document.getElementById(targetId);
+        if (el) el.textContent = val;
+
+        // update cache local
+        const item = schools.find(x => String(x.id) === String(schoolId));
+        if (item) {
+          if (kind === "cours") item.statut_cours = val;
+          if (kind === "garde") item.statut_garde = val;
+        }
+
+        if (saved) { saved.style.color = "#2e7d32"; saved.textContent = "Enregistré ✅"; }
         return;
       }
 
-      const list = document.getElementById("list");
-      const input = document.getElementById("q");
+      // B) TOGGLE (région / css) — on cherche le bloc le plus proche
+      const clickable = t.closest?.('[data-kind="region"],[data-kind="css"]');
+      if (!clickable) return;
 
-      function renderList(filterText = "") {
-        const q = filterText.trim().toLowerCase();
-        list.innerHTML = "";
+      const kind = clickable.getAttribute("data-kind");
 
-        const filtered = schools.filter(s =>
-          !q ||
-          (s.name || "").toLowerCase().includes(q) ||
-          (s.region || "").toLowerCase().includes(q) ||
-          (s.css || "").toLowerCase().includes(q)
-        );
+      // Query courante pour savoir si autoExpand
+      const currentQuery = (input?.value || "").trim();
+      const autoExpand = currentQuery.length >= 5;
 
-        for (const s of filtered) {
-          const cours = s.statut_cours ?? "ND";
-          const garde = s.statut_garde ?? "ND";
+      if (kind === "region") {
+        const rid = clickable.getAttribute("data-region");
+        const regionContainer = list.querySelector(`[data-region-container="${rid}"]`);
+        if (!rid || !regionContainer) return;
 
-          const row = document.createElement("div");
-          row.style.border = "1px solid #ddd";
-          row.style.borderRadius = "10px";
-          row.style.padding = "10px";
-          row.style.margin = "10px 0";
+        // LAZY: si <5 et conteneur vide, on crée CSS + écoles (écoles cachées)
+        if (!autoExpand && regionContainer.childElementCount === 0) {
+          // reconstruire la vue filtrée (même logique que renderAdmin) mais juste pour cette région
+          const q = currentQuery.toLowerCase();
+          const filtered = schools.filter(s => {
+            if (!q) return true;
+            return (
+              (s.name || "").toLowerCase().includes(q) ||
+              (s.region || "").toLowerCase().includes(q) ||
+              (s.css || "").toLowerCase().includes(q)
+            );
+          });
+          filtered.sort((a,b) => {
+            const pa = priorityRank(a), pb = priorityRank(b);
+            if (pa !== pb) return pa - pb;
+            const ca = (a.css || "").localeCompare((b.css || ""), "fr");
+            if (ca !== 0) return ca;
+            return (a.name || "").localeCompare((b.name || ""), "fr");
+          });
 
-          row.innerHTML = `
-            <div style="font-weight:400;font-size:16px;">${s.name}</div>
-            <div style="color:#666;font-size:13px;margin-top:2px;">${s.css} — ${s.region}</div>
+          // grouper juste cette région
+          const byRegionCss = {};
+          for (const s of filtered) {
+            const rr = s.region || "Autre";
+            if (regionId(rr) !== rid) continue;
+            const cc = s.css || "Autre";
+            if (!byRegionCss[cc]) byRegionCss[cc] = [];
+            byRegionCss[cc].push(s);
+          }
 
-            <div style="margin-top:10px;">
-              <div>Cours: <strong id="cours-${s.id}">${cours}</strong></div>
-              <div>Service de garde: <strong id="garde-${s.id}">${garde}</strong></div>
-            </div>
+          Object.keys(byRegionCss).sort((a,b)=>a.localeCompare(b,"fr")).forEach(cssName => {
+            const cid = cssId(rid, cssName);
 
-            <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
-              <span style="font-weight:200;margin-right:6px;">Cours:</span>
-              <button data-kind="cours" data-id="${s.id}" data-val="ND">ND</button>
-              <button data-kind="cours" data-id="${s.id}" data-val="Ouvert">Ouvert</button>
-              <button data-kind="cours" data-id="${s.id}" data-val="Fermé">Fermé</button>
-            </div>
+            const cssHeader = document.createElement("div");
+            cssHeader.className = "css-row";
+            cssHeader.setAttribute("data-kind", "css");
+            cssHeader.setAttribute("data-region", rid);
+            cssHeader.setAttribute("data-css", cid);
 
-            <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
-              <span style="font-weight:200;margin-right:6px;">Garde:</span>
-              <button data-kind="garde" data-id="${s.id}" data-val="ND">ND</button>
-              <button data-kind="garde" data-id="${s.id}" data-val="Ouvert">Ouvert</button>
-              <button data-kind="garde" data-id="${s.id}" data-val="Fermé">Fermé</button>
-              <span id="saved-${s.id}" style="margin-left:10px;color:#2e7d32;"></span>
-            </div>
-          `;
+            const cssClosedCount = byRegionCss[cssName].filter(x => normVal(x.statut_cours) === "Fermé").length;
+            const cssClosedLabel = `${cssClosedCount} ${cssClosedCount > 1 ? "écoles fermées" : "école fermée"}`;
 
-          list.appendChild(row);
+            cssHeader.innerHTML = `
+              <span id="${cid}-icon" style="display:inline-block;width:18px;">▶</span>
+              ${cssName}
+              <span style="font-weight:400;color:#666;">(${cssClosedLabel})</span>
+            `;
+            regionContainer.appendChild(cssHeader);
+
+            // écoles: créées mais cachées
+            for (const s of byRegionCss[cssName]) {
+              const card = makeSchoolRow(s, rid, cid);
+              card.style.display = "none";
+              regionContainer.appendChild(card);
+            }
+          });
         }
 
-        msg.textContent = `✅ ${filtered.length} / ${schools.length} écoles`;
+        // toggle region
+        const isOpen = regionContainer.style.display !== "none";
+        regionContainer.style.display = isOpen ? "none" : "block";
+        const icon = document.getElementById(`${rid}-icon`);
+        if (icon) icon.textContent = isOpen ? "▶" : "▼";
+
+        // en mode <5: ouvrir région = montrer seulement CSS, garder écoles cachées
+        if (!autoExpand && !isOpen) {
+          const cssHeaders = regionContainer.querySelectorAll('[data-kind="css"][data-region="'+rid+'"]');
+          cssHeaders.forEach(h => h.style.display = "block");
+
+          const schoolsCards = regionContainer.querySelectorAll('[data-kind="school"][data-region="'+rid+'"]');
+          schoolsCards.forEach(c => c.style.display = "none");
+
+          // reset icônes CSS
+          cssHeaders.forEach(h => {
+            const cid = h.getAttribute("data-css");
+            const ic = document.getElementById(`${cid}-icon`);
+            if (ic) ic.textContent = "▶";
+          });
+        }
+
+        // en autoExpand (>=5): tout visible
+        if (autoExpand && !isOpen) {
+          const cards = regionContainer.querySelectorAll('[data-kind="school"][data-region="'+rid+'"]');
+          cards.forEach(c => c.style.display = "block");
+          const cssHeaders = regionContainer.querySelectorAll('[data-kind="css"][data-region="'+rid+'"]');
+          cssHeaders.forEach(h => {
+            const cid = h.getAttribute("data-css");
+            const ic = document.getElementById(`${cid}-icon`);
+            if (ic) ic.textContent = "▼";
+          });
+        }
+
+        return;
       }
 
-      renderList("");
-      if (input && !input.dataset.bound) {
-        input.addEventListener("input", (e) => renderList(e.target.value));
-        input.dataset.bound = "1";
+      if (kind === "css") {
+        // empêche que ça clique "à travers" vers région si tu cliques sur un span inside
+        e.stopPropagation();
+
+        const rid = clickable.getAttribute("data-region");
+        const cid = clickable.getAttribute("data-css");
+        if (!rid || !cid) return;
+
+        // toggle écoles de ce CSS
+        const regionContainer = list.querySelector(`[data-region-container="${rid}"]`);
+        if (!regionContainer) return;
+
+        const cards = Array.from(
+          regionContainer.querySelectorAll(`[data-kind="school"][data-css="${cid}"]`)
+        );
+
+        const anyVisible = cards.some(c => c.style.display !== "none");
+        cards.forEach(c => c.style.display = anyVisible ? "none" : "block");
+
+        const icon = document.getElementById(`${cid}-icon`);
+        if (icon) icon.textContent = anyVisible ? "▶" : "▼";
       }
+    });
 
-      if (!list.dataset.bound) {
-        list.addEventListener("click", async (e) => {
-          const btn = e.target;
-          if (!(btn instanceof HTMLButtonElement)) return;
-
-          const schoolId = btn.dataset.id;
-          const val = btn.dataset.val;
-          const kind = btn.dataset.kind;
-          if (!schoolId || !val || !kind) return;
-
-          const saved = document.getElementById(`saved-${schoolId}`);
-          if (saved) {
-            saved.style.color = "#666";
-            saved.textContent = "…";
-          }
-
-          const { data: userData } = await supabase.auth.getUser();
-          const uid = userData?.user?.id ?? null;
-
-          const payload = {
-            updated_at: new Date().toISOString(),
-            updated_by: uid
-          };
-          if (kind === "cours") payload.statut_cours = val;
-          if (kind === "garde") payload.statut_garde = val;
-
-          const { error } = await supabase
-            .from("school_status")
-            .update(payload)
-            .eq("school_id", schoolId);
-
-          if (error) {
-            console.error(error);
-            if (saved) {
-              saved.style.color = "#b00";
-              saved.textContent = "Erreur";
-            }
-            return;
-          }
-
-          const targetId = (kind === "cours") ? `cours-${schoolId}` : `garde-${schoolId}`;
-          const el = document.getElementById(targetId);
-          if (el) el.textContent = val;
-
-          const item = schools.find(x => x.id === schoolId);
-          if (item) {
-            if (kind === "cours") item.statut_cours = val;
-            if (kind === "garde") item.statut_garde = val;
-          }
-
-          if (saved) {
-            saved.style.color = "#2e7d32";
-            saved.textContent = "Enregistré ✅";
-          }
-        });
-        list.dataset.bound = "1";
-      }
-    }
-
+    list.dataset.bound = "1";
+  }
+}
     await loadAllWithButtons();
   </script>
 </body>
