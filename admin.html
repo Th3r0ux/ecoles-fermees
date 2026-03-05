@@ -224,7 +224,7 @@ function refreshBatchBar(){
   batchCount.textContent = String(n);
   batchBar.style.display = (n > 0) ? "block" : "none";
 }
-      async function batchSetSelected(val){
+      async function batchSetSelected(mode, val){
   const ids = Array.from(selected);
   if (ids.length === 0) return;
 
@@ -236,11 +236,20 @@ function refreshBatchBar(){
   const v = normVal(val);
 
   const payload = {
-    statut_cours: v,
-    statut_garde: v,
     updated_at: new Date().toISOString(),
     updated_by: uid
   };
+
+  if (mode === "both") {
+    payload.statut_cours = v;
+    payload.statut_garde = v;
+  } else if (mode === "cours") {
+    payload.statut_cours = v;
+  } else if (mode === "garde") {
+    payload.statut_garde = v;
+  } else {
+    return;
+  }
 
   const { error } = await supabase
     .from("school_status")
@@ -255,15 +264,19 @@ function refreshBatchBar(){
 
   // UI + cache
   for (const id of ids) {
-    const elCours = document.getElementById(`cours-${id}`);
-    const elGarde = document.getElementById(`garde-${id}`);
-    if (elCours) elCours.innerHTML = formatCours(v);
-    if (elGarde) elGarde.innerHTML = formatGarde(v);
+    if (mode === "both" || mode === "cours") {
+      const elCours = document.getElementById(`cours-${id}`);
+      if (elCours) elCours.innerHTML = formatCours(v);
+    }
+    if (mode === "both" || mode === "garde") {
+      const elGarde = document.getElementById(`garde-${id}`);
+      if (elGarde) elGarde.innerHTML = formatGarde(v);
+    }
 
     const item = schools.find(x => String(x.id) === String(id));
     if (item) {
-      item.statut_cours = v;
-      item.statut_garde = v;
+      if (mode === "both" || mode === "cours") item.statut_cours = v;
+      if (mode === "both" || mode === "garde") item.statut_garde = v;
     }
 
     const savedEl = document.getElementById(`saved-${id}`);
@@ -273,7 +286,7 @@ function refreshBatchBar(){
       setTimeout(() => { savedEl.textContent = ""; }, 1200);
     }
   }
-        
+
   selected.clear();
   document.querySelectorAll('input[type="checkbox"][data-action="select"]').forEach(cb => cb.checked = false);
   refreshBatchBar();
