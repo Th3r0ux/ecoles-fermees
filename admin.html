@@ -179,17 +179,13 @@
   setTimeout(updateScrollHint, 0);
 }
 
-    
-    document.getElementById("logoutBtn").addEventListener("click", async (e) => {
-  e.preventDefault();
+    document.getElementById("loginBtn").addEventListener("click", async () => {
   msg.textContent = "";
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
 
-  const { error } = await supabase.auth.signOut();
-  if (error) {
-    console.error(error);
-    msg.textContent = "Erreur logout: " + error.message;
-    return;
-  }
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) msg.textContent = error.message;
 
   await refreshUI();
 });
@@ -221,17 +217,8 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
-document.getElementById("logoutBtn").addEventListener("click", async (e) => {
-  e.preventDefault();
-  msg.textContent = "";
-
-  const { error } = await supabase.auth.signOut();
-  if (error) {
-    console.error(error);
-    msg.textContent = "Erreur logout: " + error.message;
-    return;
-  }
-
+document.getElementById("logoutBtn").addEventListener("click", async () => {
+  await supabase.auth.signOut();
   await refreshUI();
 });
     
@@ -388,8 +375,6 @@ refreshBatchBar();
   async function masterSetAll(val){
   const v = normVal(val);
 
-  if (document.activeElement && document.activeElement.tagName === "INPUT") return;
-    
   const confirmMsg =
     `⚠️ Tu vas mettre TOUTES les écoles du Québec à "${v}" (cours + garde).\n\nConfirme en écrivant: OUI`;
   const answer = prompt(confirmMsg);
