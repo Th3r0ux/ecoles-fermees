@@ -65,12 +65,27 @@
   </div>
 
 <div id="adminUI" style="display:none;">
+
+  <!-- ✅ Barre batch (cachée par défaut) -->
+  <div id="batchBar" style="display:none;margin:12px 0;padding:10px;border:1px solid #ddd;border-radius:10px;background:#fafafa;">
+    <strong><span id="batchCount">0</span> écoles sélectionnées</strong>
+    <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
+      <button id="batchND" type="button">Tout à ND</button>
+      <button id="batchOpen" type="button">Tout Ouvert</button>
+      <button id="batchClose" type="button">Tout Fermé</button>
+      <button id="batchClear" type="button" style="margin-left:auto;">Désélectionner</button>
+    </div>
+  </div>
+
+  <!-- recherche -->
   <input
     id="q"
     type="text"
     placeholder="Rechercher une école ou une région…"
     style="width:100%;max-width:520px;padding:10px;font-size:15px;margin:12px 0;"
   >
+
+  <!-- liste -->
   <div id="list" style="margin-top:16px;"></div>
 </div>
 
@@ -198,6 +213,75 @@ document.getElementById("email").focus();
 
   const list = document.getElementById("list");
   const input = document.getElementById("q");
+
+      const selected = new Set();
+
+const batchBar = document.getElementById("batchBar");
+const batchCount = document.getElementById("batchCount");
+
+function refreshBatchBar(){
+  const n = selected.size;
+  batchCount.textContent = String(n);
+  batchBar.style.display = (n > 0) ? "block" : "none";
+}
+      async function batchSetSelected(val){
+  const ids = Array.from(selected);
+  if (ids.length === 0) return;
+
+  msg.textContent = "Enregistrement…";
+
+  const { data: userData } = await supabase.auth.getUser();
+  const uid = userData?.user?.id ?? null;
+
+  const v = normVal(val);
+
+  const payload = {
+    statut_cours: v,
+    statut_garde: v,
+    updated_at: new Date().toISOString(),
+    updated_by: uid
+  };
+
+  const { error } = await supabase
+    .from("school_status")
+    .update(payload)
+    .in("school_id", ids);
+
+  if (error) {
+    console.error(error);
+    msg.textContent = "Erreur batch: " + error.message;
+    return;
+  }
+
+  // UI + cache
+  for (const id of ids) {
+    const elCours = document.getElementById(`cours-${id}`);
+    const elGarde = document.getElementById(`garde-${id}`);
+    if (elCours) elCours.innerHTML = formatCours(v);
+    if (elGarde) elGarde.innerHTML = formatGarde(v);
+
+    const item = schools.find(x => String(x.id) === String(id));
+    if (item) {
+      item.statut_cours = v;
+      item.statut_garde = v;
+    }
+
+    const savedEl = document.getElementById(`saved-${id}`);
+    if (savedEl) {
+      savedEl.style.color = "#2e7d32";
+      savedEl.textContent = "Enregistré ✅";
+      setTimeout(() => { savedEl.textContent = ""; }, 1200);
+    }
+  }
+        
+  selected.clear();
+  document.querySelectorAll('input[type="checkbox"][data-action="select"]').forEach(cb => cb.checked = false);
+  refreshBatchBar();
+  msg.textContent = "";
+}
+
+// état initial
+refreshBatchBar();
 
   // Helpers IDs (comme index)
   function slug(s){
@@ -363,9 +447,12 @@ function formatGarde(status) {
     row.setAttribute("data-school", String(s.id));
 
     row.innerHTML = `
-      <div style="font-weight:800;font-size:16px;">${s.name || ""}</div>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <input type="checkbox" data-action="select" data-id="${s.id}">
+    <div style="font-weight:800;font-size:16px;">${s.name || ""}</div>
+  </div>
 
-      <div style="margin-top:10px;">
+  <div style="margin-top:10px;">
 <div>Cours: <strong id="cours-${s.id}">${formatCours(cours)}</strong></div>
 <div>Service de garde: <strong id="garde-${s.id}">${formatGarde(garde)}</strong></div>
       </div>
@@ -401,6 +488,7 @@ function formatGarde(status) {
   if (!list.dataset.bound) {
     list.addEventListener("click", async (e) => {
       const t = e.target;
+      if (t instanceof HTMLInputElement && t.type === "checkbox") return;
 
       // A) UPDATE (boutons)
       if (t instanceof HTMLButtonElement && t.dataset.action === "set") {
@@ -441,8 +529,9 @@ function formatGarde(status) {
         // update cache local
         const item = schools.find(x => String(x.id) === String(schoolId));
         if (item) {
-          if (kind === "cours") item.statut_cours = val;
-          if (kind === "garde") item.statut_garde = val;
+const v = normVal(val);
+if (kind === "cours") item.statut_cours = v;
+if (kind === "garde") item.statut_garde = v;
         }
 
         if (saved) { saved.style.color = "#2e7d32"; saved.textContent = "Enregistré ✅"; }
@@ -584,7 +673,37 @@ function formatGarde(status) {
     });
 
     list.dataset.bound = "1";
+
+    if (!list.dataset.boundSelect) {
+  list.addEventListener("change", (e) => {
+    const t = e.target;
+    if (!(t instanceof HTMLInputElement)) return;
+    if (t.type !== "checkbox") return;
+    if (t.dataset.action !== "select") return;
+
+    const id = t.dataset.id;
+    if (!id) return;
+
+    if (t.checked) selected.add(id);
+    else selected.delete(id);
+
+    refreshBatchBar();
+  });
+
+  list.dataset.boundSelect = "1";
+}
   }
+
+      document.getElementById("batchND").addEventListener("click", () => batchSetSelected("ND"));
+document.getElementById("batchOpen").addEventListener("click", () => batchSetSelected("Ouvert"));
+document.getElementById("batchClose").addEventListener("click", () => batchSetSelected("Fermé"));
+
+document.getElementById("batchClear").addEventListener("click", () => {
+  selected.clear();
+  document.querySelectorAll('input[type="checkbox"][data-action="select"]').forEach(cb => cb.checked = false);
+  refreshBatchBar();
+});
+      
       msg.textContent = "";
 }
     
