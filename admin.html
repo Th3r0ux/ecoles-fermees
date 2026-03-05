@@ -137,6 +137,8 @@
     const SUPABASE_KEY = "sb_publishable_TChgyvE4kQSVxpoPUUWZlA_5RYkPzM3";
     const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
+
+
     const msg = document.getElementById("msg");
     const loginBox = document.getElementById("loginBox");
     const okBox = document.getElementById("okBox");
@@ -179,6 +181,11 @@
   setTimeout(updateScrollHint, 0);
 }
 
+    // ✅ UI toujours synchronisée avec l'état Supabase
+supabase.auth.onAuthStateChange((_event, _session) => {
+  refreshUI();
+});
+
     document.getElementById("loginBtn").addEventListener("click", async () => {
   msg.textContent = "";
   const email = document.getElementById("email").value.trim();
@@ -217,8 +224,23 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
-document.getElementById("logoutBtn").addEventListener("click", async () => {
-  await supabase.auth.signOut();
+document.getElementById("logoutBtn").addEventListener("click", async (e) => {
+  e.preventDefault();
+
+  msg.textContent = "";
+  const btn = e.currentTarget;
+  btn.disabled = true;
+
+  const { error } = await supabase.auth.signOut();
+  btn.disabled = false;
+
+  if (error) {
+    console.error(error);
+    msg.textContent = "Erreur déconnexion: " + error.message;
+    return;
+  }
+
+  // refreshUI sera aussi appelé par onAuthStateChange, mais on laisse ça:
   await refreshUI();
 });
     
