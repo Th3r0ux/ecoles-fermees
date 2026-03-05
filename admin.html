@@ -135,7 +135,16 @@
 
     const SUPABASE_URL = "https://djcexcxyxtfazejhstcn.supabase.co";
     const SUPABASE_KEY = "sb_publishable_TChgyvE4kQSVxpoPUUWZlA_5RYkPzM3";
-    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+    
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth: {
+    persistSession: true,
+    storage: window.localStorage,
+    autoRefreshToken: true,
+    detectSessionInUrl: true
+  }
+});
+
 
 
 
@@ -227,20 +236,32 @@ document.addEventListener("keydown", (e) => {
 document.getElementById("logoutBtn").addEventListener("click", async (e) => {
   e.preventDefault();
 
-  msg.textContent = "";
+  msg.textContent = "Déconnexion…";
   const btn = e.currentTarget;
   btn.disabled = true;
 
-  const { error } = await supabase.auth.signOut();
+  // Déconnexion locale (robuste)
+  const { error } = await supabase.auth.signOut({ scope: "local" });
+
+  // Filet de sécurité : purge du token
+  try {
+    const projectRef = new URL(SUPABASE_URL).hostname.split(".")[0];
+    const keysToRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.includes(`sb-${projectRef}`) && k.includes("auth-token")) keysToRemove.push(k);
+    }
+    keysToRemove.forEach(k => localStorage.removeItem(k));
+  } catch {}
+
   btn.disabled = false;
 
   if (error) {
     console.error(error);
     msg.textContent = "Erreur déconnexion: " + error.message;
-    return;
   }
 
-  // refreshUI sera aussi appelé par onAuthStateChange, mais on laisse ça:
+  // Laisse onAuthStateChange + refreshUI faire le reste
   await refreshUI();
 });
     
