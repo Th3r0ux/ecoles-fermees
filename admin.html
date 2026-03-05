@@ -4,6 +4,19 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Admin — Écoles fermées</title>
+
+  <style>
+    body{
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        "Helvetica Neue",
+        Arial,
+        sans-serif;
+    }
+  </style>
 </head>
 <body>
   <h1>Admin</h1>
@@ -22,11 +35,11 @@
   </div>
 
   <input
-  id="q"
-  type="text"
-  placeholder="Rechercher une école ou une région…"
-  style="width:100%;max-width:520px;padding:10px;font-size:15px;margin:12px 0;"
->
+    id="q"
+    type="text"
+    placeholder="Rechercher une école ou une région…"
+    style="width:100%;max-width:520px;padding:10px;font-size:15px;margin:12px 0;"
+  >
 
   <div id="list" style="margin-top:16px;"></div>
 
@@ -70,171 +83,165 @@
     refreshUI();
 
     async function fetchAllRowsPaged(table, select, orders = []) {
-  const pageSize = 1000;
-  let from = 0;
-  let all = [];
+      const pageSize = 1000;
+      let from = 0;
+      let all = [];
 
-  while (true) {
-    let q = supabase.from(table).select(select);
+      while (true) {
+        let q = supabase.from(table).select(select);
 
-    for (const o of orders) {
-      q = q.order(o.col, { ascending: o.asc });
-    }
+        for (const o of orders) {
+          q = q.order(o.col, { ascending: o.asc });
+        }
 
-    const { data, error } = await q.range(from, from + pageSize - 1);
+        const { data, error } = await q.range(from, from + pageSize - 1);
+        if (error) throw error;
 
-    if (error) throw error;
-
-    all = all.concat(data);
-    if (data.length < pageSize) break;
-    from += pageSize;
-  }
-
-  return all;
-}
-
-async function loadAllWithButtons() {
-  msg.textContent = "Chargement…";
-
-  let schools = [];
-  try {
-    schools = await fetchAllRowsPaged(
-      "public_snapshot",
-      "id,name,region,css,statut_cours,statut_garde",
-      [{ col: "region", asc: true }, { col: "css", asc: true }, { col: "name", asc: true }]
-    );
-  } catch (err) {
-    console.error(err);
-    msg.textContent = "Erreur chargement: " + (err.message || err);
-    return;
-  }
-
-  const list = document.getElementById("list");
-  const input = document.getElementById("q");
-
-  function renderList(filterText = "") {
-    const q = filterText.trim().toLowerCase();
-    list.innerHTML = "";
-
-    const filtered = schools.filter(s =>
-      !q ||
-      (s.name || "").toLowerCase().includes(q) ||
-      (s.region || "").toLowerCase().includes(q) ||
-      (s.css || "").toLowerCase().includes(q)
-    );
-
-    for (const s of filtered) {
-      const cours = s.statut_cours ?? "ND";
-      const garde = s.statut_garde ?? "ND";
-
-      const row = document.createElement("div");
-      row.style.border = "1px solid #ddd";
-      row.style.borderRadius = "10px";
-      row.style.padding = "10px";
-      row.style.margin = "10px 0";
-
-      row.innerHTML = `
-        <div style="font-weight:800;font-size:16px;">${s.name}</div>
-        <div style="color:#666;font-size:13px;margin-top:2px;">${s.css} — ${s.region}</div>
-
-        <div style="margin-top:10px;">
-          <div>Cours: <strong id="cours-${s.id}">${cours}</strong></div>
-          <div>Service de garde: <strong id="garde-${s.id}">${garde}</strong></div>
-        </div>
-
-        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
-          <span style="font-weight:700;margin-right:6px;">Cours:</span>
-          <button data-kind="cours" data-id="${s.id}" data-val="ND">ND</button>
-          <button data-kind="cours" data-id="${s.id}" data-val="Ouvert">Ouvert</button>
-          <button data-kind="cours" data-id="${s.id}" data-val="Fermé">Fermé</button>
-        </div>
-
-        <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
-          <span style="font-weight:700;margin-right:6px;">Garde:</span>
-          <button data-kind="garde" data-id="${s.id}" data-val="ND">ND</button>
-          <button data-kind="garde" data-id="${s.id}" data-val="Ouvert">Ouvert</button>
-          <button data-kind="garde" data-id="${s.id}" data-val="Fermé">Fermé</button>
-          <span id="saved-${s.id}" style="margin-left:10px;color:#2e7d32;"></span>
-        </div>
-      `;
-
-      list.appendChild(row);
-    }
-
-    msg.textContent = `✅ ${filtered.length} / ${schools.length} écoles`;
-  }
-
-  renderList("");
-  if (input && !input.dataset.bound) {
-    input.addEventListener("input", (e) => renderList(e.target.value));
-    input.dataset.bound = "1";
-  }
-
-  // handler (un seul, et il gère cours/garde)
-  if (!list.dataset.bound) {
-    list.addEventListener("click", async (e) => {
-      const btn = e.target;
-      if (!(btn instanceof HTMLButtonElement)) return;
-
-      const schoolId = btn.dataset.id;
-      const val = btn.dataset.val;
-      const kind = btn.dataset.kind; // "cours" | "garde"
-      if (!schoolId || !val || !kind) return;
-
-      const saved = document.getElementById(`saved-${schoolId}`);
-      if (saved) {
-        saved.style.color = "#666";
-        saved.textContent = "…";
+        all = all.concat(data);
+        if (data.length < pageSize) break;
+        from += pageSize;
       }
 
-      const { data: userData } = await supabase.auth.getUser();
-      const uid = userData?.user?.id ?? null;
+      return all;
+    }
 
-      const payload = {
-        updated_at: new Date().toISOString(),
-        updated_by: uid
-      };
-      if (kind === "cours") payload.statut_cours = val;
-      if (kind === "garde") payload.statut_garde = val;
+    async function loadAllWithButtons() {
+      msg.textContent = "Chargement…";
 
-      const { error } = await supabase
-        .from("school_status")
-        .update(payload)
-        .eq("school_id", schoolId);
-
-      if (error) {
-        console.error(error);
-        if (saved) {
-          saved.style.color = "#b00";
-          saved.textContent = "Erreur";
-        }
+      let schools = [];
+      try {
+        schools = await fetchAllRowsPaged(
+          "public_snapshot",
+          "id,name,region,css,statut_cours,statut_garde",
+          [{ col: "region", asc: true }, { col: "css", asc: true }, { col: "name", asc: true }]
+        );
+      } catch (err) {
+        console.error(err);
+        msg.textContent = "Erreur chargement: " + (err.message || err);
         return;
       }
 
-      // update UI
-      const targetId = (kind === "cours") ? `cours-${schoolId}` : `garde-${schoolId}`;
-      const el = document.getElementById(targetId);
-      if (el) el.textContent = val;
+      const list = document.getElementById("list");
+      const input = document.getElementById("q");
 
-      // update local cache (pour que la recherche/rerender reste cohérent)
-      const item = schools.find(x => x.id === schoolId);
-      if (item) {
-        if (kind === "cours") item.statut_cours = val;
-        if (kind === "garde") item.statut_garde = val;
+      function renderList(filterText = "") {
+        const q = filterText.trim().toLowerCase();
+        list.innerHTML = "";
+
+        const filtered = schools.filter(s =>
+          !q ||
+          (s.name || "").toLowerCase().includes(q) ||
+          (s.region || "").toLowerCase().includes(q) ||
+          (s.css || "").toLowerCase().includes(q)
+        );
+
+        for (const s of filtered) {
+          const cours = s.statut_cours ?? "ND";
+          const garde = s.statut_garde ?? "ND";
+
+          const row = document.createElement("div");
+          row.style.border = "1px solid #ddd";
+          row.style.borderRadius = "10px";
+          row.style.padding = "10px";
+          row.style.margin = "10px 0";
+
+          row.innerHTML = `
+            <div style="font-weight:800;font-size:16px;">${s.name}</div>
+            <div style="color:#666;font-size:13px;margin-top:2px;">${s.css} — ${s.region}</div>
+
+            <div style="margin-top:10px;">
+              <div>Cours: <strong id="cours-${s.id}">${cours}</strong></div>
+              <div>Service de garde: <strong id="garde-${s.id}">${garde}</strong></div>
+            </div>
+
+            <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+              <span style="font-weight:700;margin-right:6px;">Cours:</span>
+              <button data-kind="cours" data-id="${s.id}" data-val="ND">ND</button>
+              <button data-kind="cours" data-id="${s.id}" data-val="Ouvert">Ouvert</button>
+              <button data-kind="cours" data-id="${s.id}" data-val="Fermé">Fermé</button>
+            </div>
+
+            <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
+              <span style="font-weight:700;margin-right:6px;">Garde:</span>
+              <button data-kind="garde" data-id="${s.id}" data-val="ND">ND</button>
+              <button data-kind="garde" data-id="${s.id}" data-val="Ouvert">Ouvert</button>
+              <button data-kind="garde" data-id="${s.id}" data-val="Fermé">Fermé</button>
+              <span id="saved-${s.id}" style="margin-left:10px;color:#2e7d32;"></span>
+            </div>
+          `;
+
+          list.appendChild(row);
+        }
+
+        msg.textContent = `✅ ${filtered.length} / ${schools.length} écoles`;
       }
 
-      if (saved) {
-        saved.style.color = "#2e7d32";
-        saved.textContent = "Enregistré ✅";
+      renderList("");
+      if (input && !input.dataset.bound) {
+        input.addEventListener("input", (e) => renderList(e.target.value));
+        input.dataset.bound = "1";
       }
-    });
-    list.dataset.bound = "1";
-  }
-}
 
-// après login, on charge la liste
-await loadAllWithButtons();
-    
+      if (!list.dataset.bound) {
+        list.addEventListener("click", async (e) => {
+          const btn = e.target;
+          if (!(btn instanceof HTMLButtonElement)) return;
+
+          const schoolId = btn.dataset.id;
+          const val = btn.dataset.val;
+          const kind = btn.dataset.kind;
+          if (!schoolId || !val || !kind) return;
+
+          const saved = document.getElementById(`saved-${schoolId}`);
+          if (saved) {
+            saved.style.color = "#666";
+            saved.textContent = "…";
+          }
+
+          const { data: userData } = await supabase.auth.getUser();
+          const uid = userData?.user?.id ?? null;
+
+          const payload = {
+            updated_at: new Date().toISOString(),
+            updated_by: uid
+          };
+          if (kind === "cours") payload.statut_cours = val;
+          if (kind === "garde") payload.statut_garde = val;
+
+          const { error } = await supabase
+            .from("school_status")
+            .update(payload)
+            .eq("school_id", schoolId);
+
+          if (error) {
+            console.error(error);
+            if (saved) {
+              saved.style.color = "#b00";
+              saved.textContent = "Erreur";
+            }
+            return;
+          }
+
+          const targetId = (kind === "cours") ? `cours-${schoolId}` : `garde-${schoolId}`;
+          const el = document.getElementById(targetId);
+          if (el) el.textContent = val;
+
+          const item = schools.find(x => x.id === schoolId);
+          if (item) {
+            if (kind === "cours") item.statut_cours = val;
+            if (kind === "garde") item.statut_garde = val;
+          }
+
+          if (saved) {
+            saved.style.color = "#2e7d32";
+            saved.textContent = "Enregistré ✅";
+          }
+        });
+        list.dataset.bound = "1";
+      }
+    }
+
+    await loadAllWithButtons();
   </script>
 </body>
 </html>
