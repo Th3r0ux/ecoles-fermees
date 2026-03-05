@@ -85,15 +85,23 @@
     const okBox = document.getElementById("okBox");
 
     async function refreshUI() {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        loginBox.style.display = "none";
-        okBox.style.display = "block";
-      } else {
-        loginBox.style.display = "block";
-        okBox.style.display = "none";
-      }
-    }
+  const { data: { session } } = await supabase.auth.getSession();
+
+  if (session) {
+    loginBox.style.display = "none";
+    okBox.style.display = "block";
+
+    // charger la liste seulement si connecté
+    await loadAllWithButtons();
+
+  } else {
+    loginBox.style.display = "block";
+    okBox.style.display = "none";
+
+    // cacher complètement l'admin
+    document.getElementById("list").innerHTML = "";
+  }
+}
 
     document.getElementById("loginBtn").addEventListener("click", async () => {
       msg.textContent = "";
@@ -519,7 +527,6 @@
     list.dataset.bound = "1";
   }
 }
-    await loadAllWithButtons();
   </script>
 </body>
 </html>
