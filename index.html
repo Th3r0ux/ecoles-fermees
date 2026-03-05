@@ -496,22 +496,6 @@ loadFromSupabaseAll().catch(err => {
   if (loading) loading.textContent = "Erreur de chargement Supabase.";
 });
 </script>
-  <script>
-function sendHeight() {
-  const height = document.documentElement.scrollHeight;
-  parent.postMessage({ type: "ecolesHeight", height }, "*");
-}
 
-window.addEventListener("load", sendHeight);
-window.addEventListener("resize", sendHeight);
-
-// si ton tableau change dynamiquement
-const observer = new MutationObserver(sendHeight);
-observer.observe(document.body, {
-  childList: true,
-  subtree: true,
-  attributes: true
-});
-</script>
 </body>
 </html>
