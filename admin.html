@@ -198,6 +198,9 @@ console.log("supabase exposed", !!window.supabase);
     const q = document.getElementById("q");
     if (q) q.value = "";
     msg.textContent = "";
+    // ✅ vider les champs de connexion au logout
+  document.getElementById("email").value = "";
+  document.getElementById("password").value = "";
   }
 
   setTimeout(updateScrollHint, 0);
