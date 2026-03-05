@@ -179,10 +179,8 @@
   setTimeout(updateScrollHint, 0);
 }
 
-    console.log("logoutBtn exists?", !!document.getElementById("logoutBtn"));
     
     document.getElementById("logoutBtn").addEventListener("click", async (e) => {
-  console.log("logout click fired");
   e.preventDefault();
   msg.textContent = "";
 
