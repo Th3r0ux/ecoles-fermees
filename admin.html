@@ -46,6 +46,25 @@
   .muted{ color:#666; font-size:13px; }
   .row-flex{ margin-top:10px; display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
   button{ padding:8px 10px; }
+
+  #scrollHint {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(255,255,255,0),
+    rgba(255,255,255,0.95)
+  );
+  transition: opacity 0.2s;
+}
+
+#scrollHint.hidden {
+  opacity: 0;
+}  
 </style>
 </head>
 <body>
@@ -1009,7 +1028,22 @@ document.getElementById("batchClear").addEventListener("click", () => {
       
       msg.textContent = "";
 }
+
+    function updateScrollHint() {
+  const hint = document.getElementById("scrollHint");
+  if (!hint) return;
+
+  const nearBottom =
+    window.innerHeight + window.scrollY >= document.body.offsetHeight - 10;
+
+  hint.classList.toggle("hidden", nearBottom);
+}
+
+window.addEventListener("scroll", updateScrollHint);
+window.addEventListener("resize", updateScrollHint);
+window.addEventListener("load", updateScrollHint);
     
   </script>
+  <div id="scrollHint"></div>
 </body>
 </html>
