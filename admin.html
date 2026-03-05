@@ -64,14 +64,15 @@
     <button id="logoutBtn" style="padding:10px 14px;">Se déconnecter</button>
   </div>
 
+<div id="adminUI" style="display:none;">
   <input
     id="q"
     type="text"
     placeholder="Rechercher une école ou une région…"
     style="width:100%;max-width:520px;padding:10px;font-size:15px;margin:12px 0;"
   >
-
   <div id="list" style="margin-top:16px;"></div>
+</div>
 
   <script type="module">
     import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
@@ -84,22 +85,33 @@
     const loginBox = document.getElementById("loginBox");
     const okBox = document.getElementById("okBox");
 
+    const adminUI = document.getElementById("adminUI");
+
     async function refreshUI() {
   const { data: { session } } = await supabase.auth.getSession();
 
   if (session) {
     loginBox.style.display = "none";
     okBox.style.display = "block";
+    adminUI.style.display = "block";
 
-    // charger la liste seulement si connecté
-    await loadAllWithButtons();
+    // Charge UNE seule fois
+    if (!adminUI.dataset.loaded) {
+      await loadAllWithButtons();
+      adminUI.dataset.loaded = "1";
+    }
 
   } else {
     loginBox.style.display = "block";
     okBox.style.display = "none";
+    adminUI.style.display = "none";
 
-    // cacher complètement l'admin
+    // reset (optionnel mais clean)
+    adminUI.dataset.loaded = "";
     document.getElementById("list").innerHTML = "";
+    const q = document.getElementById("q");
+    if (q) q.value = "";
+    msg.textContent = "";
   }
 }
 
