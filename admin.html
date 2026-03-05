@@ -233,35 +233,28 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
-document.getElementById("logoutBtn").addEventListener("click", async (e) => {
-  e.preventDefault();
+document.addEventListener("click", async (e) => {
+  const btn = e.target?.closest?.("#logoutBtn");
+  if (!btn) return;
 
+  e.preventDefault();
+  e.stopPropagation();
+
+  console.log("LOGOUT CLICK ✅");
   msg.textContent = "Déconnexion…";
-  const btn = e.currentTarget;
   btn.disabled = true;
 
-  // Déconnexion locale (robuste)
   const { error } = await supabase.auth.signOut({ scope: "local" });
-
-  // Filet de sécurité : purge du token
-  try {
-    const projectRef = new URL(SUPABASE_URL).hostname.split(".")[0];
-    const keysToRemove = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      const k = localStorage.key(i);
-      if (k && k.includes(`sb-${projectRef}`) && k.includes("auth-token")) keysToRemove.push(k);
-    }
-    keysToRemove.forEach(k => localStorage.removeItem(k));
-  } catch {}
 
   btn.disabled = false;
 
   if (error) {
-    console.error(error);
+    console.error("Erreur signOut:", error);
     msg.textContent = "Erreur déconnexion: " + error.message;
+    return;
   }
 
-  // Laisse onAuthStateChange + refreshUI faire le reste
+  msg.textContent = "Déconnecté ✅";
   await refreshUI();
 });
     
