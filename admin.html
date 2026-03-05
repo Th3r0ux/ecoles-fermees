@@ -217,8 +217,17 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
-document.getElementById("logoutBtn").addEventListener("click", async () => {
-  await supabase.auth.signOut();
+document.getElementById("logoutBtn").addEventListener("click", async (e) => {
+  e.preventDefault();
+  msg.textContent = "";
+
+  const { error } = await supabase.auth.signOut();
+  if (error) {
+    console.error(error);
+    msg.textContent = "Erreur logout: " + error.message;
+    return;
+  }
+
   await refreshUI();
 });
     
