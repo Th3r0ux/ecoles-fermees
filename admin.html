@@ -444,10 +444,21 @@ function formatGarde(status) {
           const cssClosedLabel = `${cssClosedCount} ${cssClosedCount > 1 ? "écoles fermées" : "école fermée"}`;
 
           cssHeader.innerHTML = `
-            <span id="${cid}-icon" style="display:inline-block;width:18px;">▼</span>
-            ${cssName}
-            <span style="font-weight:400;color:#666;">(${cssClosedLabel})</span>
-          `;
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+    <div>
+      <span id="${cid}-icon" style="display:inline-block;width:18px;">▼</span>
+      ${cssName}
+      <span style="font-weight:400;color:#666;">(${cssClosedLabel})</span>
+    </div>
+
+    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+      <button type="button" data-action="css-batch" data-css="${cid}" data-val="ND">ND</button>
+      <button type="button" data-action="css-batch" data-css="${cid}" data-val="Ouvert">Ouvert</button>
+      <button type="button" data-action="css-batch" data-css="${cid}" data-val="Fermé">Fermé</button>
+    </div>
+  </div>
+`;
+          
           regionContainer.appendChild(cssHeader);
 
           // écoles visibles
@@ -626,10 +637,21 @@ if (kind === "garde") item.statut_garde = v;
             const cssClosedLabel = `${cssClosedCount} ${cssClosedCount > 1 ? "écoles fermées" : "école fermée"}`;
 
             cssHeader.innerHTML = `
-              <span id="${cid}-icon" style="display:inline-block;width:18px;">▶</span>
-              ${cssName}
-              <span style="font-weight:400;color:#666;">(${cssClosedLabel})</span>
-            `;
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+    <div>
+      <span id="${cid}-icon" style="display:inline-block;width:18px;">▶</span>
+      ${cssName}
+      <span style="font-weight:400;color:#666;">(${cssClosedLabel})</span>
+    </div>
+
+    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+      <button type="button" data-action="css-batch" data-css="${cid}" data-val="ND">ND</button>
+      <button type="button" data-action="css-batch" data-css="${cid}" data-val="Ouvert">Ouvert</button>
+      <button type="button" data-action="css-batch" data-css="${cid}" data-val="Fermé">Fermé</button>
+    </div>
+  </div>
+`;
+            
             regionContainer.appendChild(cssHeader);
 
             // écoles: créées mais cachées
