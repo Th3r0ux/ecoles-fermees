@@ -225,6 +225,8 @@ function scheduleAutoLogout() {
       adminUI.dataset.loaded = "1";
     }
 
+    scheduleAutoLogout();
+    
   } else {
     loginBox.style.display = "block";
     okBox.style.display = "none";
@@ -240,6 +242,8 @@ function scheduleAutoLogout() {
     // ✅ vider les champs de connexion au logout
   document.getElementById("email").value = "";
   document.getElementById("password").value = "";
+    clearAutoLogoutTimer();
+localStorage.removeItem(AUTO_LOGOUT_KEY);
   }
 
   setTimeout(updateScrollHint, 0);
