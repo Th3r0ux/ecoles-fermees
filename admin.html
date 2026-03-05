@@ -64,6 +64,20 @@
     <button id="logoutBtn" style="padding:10px 14px;">Se déconnecter</button>
   </div>
 
+<div id="masterBox" style="display:none;margin:14px 0;padding:12px;border:1px solid #ddd;border-radius:10px;background:#fafafa;">
+  <div style="font-weight:800;margin-bottom:8px;">Reset Québec (toutes les écoles)</div>
+
+  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+    <span style="font-weight:600;color:#444;">Toutes les écoles du Québec :</span>
+
+    <button type="button" id="masterND">Tout à ND</button>
+    <button type="button" id="masterOpen">Tout Ouvert</button>
+    <button type="button" id="masterClose">Tout Fermé</button>
+
+    <span id="masterSaved" style="margin-left:10px;color:#2e7d32;"></span>
+  </div>
+</div>
+  
 <div id="adminUI" style="display:none;">
 
   <!-- ✅ Barre batch (cachée par défaut) -->
@@ -119,6 +133,8 @@
 
     const adminUI = document.getElementById("adminUI");
 
+    const masterBox = document.getElementById("masterBox");
+
     async function refreshUI() {
   const { data: { session } } = await supabase.auth.getSession();
 
@@ -126,6 +142,7 @@
     loginBox.style.display = "none";
     okBox.style.display = "block";
     adminUI.style.display = "block";
+    masterBox.style.display = "block";
 
     // Charge UNE seule fois
     if (!adminUI.dataset.loaded) {
@@ -137,6 +154,7 @@
     loginBox.style.display = "block";
     okBox.style.display = "none";
     adminUI.style.display = "none";
+    masterBox.style.display = "none";
 
     // reset (optionnel mais clean)
     adminUI.dataset.loaded = "";
@@ -329,6 +347,61 @@ refreshBatchBar();
     if (u === "FERME" || u === "FERMÉ") return "Fermé";
     return t;
   }
+
+  async function masterSetAll(val){
+  const v = normVal(val);
+
+  const confirmMsg =
+    `⚠️ Tu vas mettre TOUTES les écoles du Québec à "${v}" (cours + garde).\n\nConfirme en écrivant: OUI`;
+  const answer = prompt(confirmMsg);
+  if (answer !== "OUI") return;
+
+  msg.textContent = "Enregistrement (tout le Québec)…";
+
+  const { data: userData } = await supabase.auth.getUser();
+  const uid = userData?.user?.id ?? null;
+
+  const payload = {
+    statut_cours: v,
+    statut_garde: v,
+    updated_at: new Date().toISOString(),
+    updated_by: uid
+  };
+
+  // ⚠️ update sur toutes les lignes
+  const { error } = await supabase
+    .from("school_status")
+    .update(payload)
+    .neq("school_id", ""); // condition "toujours vraie" pour forcer update global
+
+  if (error) {
+    console.error(error);
+    msg.textContent = "Erreur master: " + error.message;
+    return;
+  }
+
+  // Update cache local + UI (si affiché)
+  for (const s of schools) {
+    s.statut_cours = v;
+    s.statut_garde = v;
+  }
+
+  document.querySelectorAll('[id^="cours-"]').forEach(el => el.innerHTML = formatCours(v));
+  document.querySelectorAll('[id^="garde-"]').forEach(el => el.innerHTML = formatGarde(v));
+
+  // Met à jour tous les compteurs visibles
+  document.querySelectorAll('[data-kind="region"]').forEach(rh => {
+    updateClosedLabelsForRegion(rh.getAttribute("data-region"));
+  });
+
+  const saved = document.getElementById("masterSaved");
+  if (saved) {
+    saved.textContent = "Enregistré ✅";
+    setTimeout(()=> saved.textContent = "", 1200);
+  }
+
+  msg.textContent = "";
+}
 
   function formatCours(status) {
   if (status === "Fermé") {
@@ -915,6 +988,11 @@ document.getElementById("batchGardeClose").addEventListener("click", () => batch
 document.getElementById("batchBothND").addEventListener("click", () => batchSetSelected("both", "ND"));
 document.getElementById("batchBothOpen").addEventListener("click", () => batchSetSelected("both", "Ouvert"));
 document.getElementById("batchBothClose").addEventListener("click", () => batchSetSelected("both", "Fermé"));
+
+// MasterBox
+document.getElementById("masterND").addEventListener("click", () => masterSetAll("ND"));
+document.getElementById("masterOpen").addEventListener("click", () => masterSetAll("Ouvert"));
+document.getElementById("masterClose").addEventListener("click", () => masterSetAll("Fermé"));
 
 // Clear
 document.getElementById("batchClear").addEventListener("click", () => {
