@@ -216,6 +216,26 @@ document.getElementById("email").focus();
     return t;
   }
 
+  function formatCours(status) {
+  if (status === "Fermé") {
+    return '<span style="color:#c62828;font-weight:600;">Fermé</span>';
+  }
+  if (status === "Ouvert") {
+    return '<span style="color:#2e7d32;font-weight:600;">Ouvert</span>';
+  }
+  return status;
+}
+
+function formatGarde(status) {
+  if (status === "Fermé") {
+    return '<span style="color:#c62828;font-weight:600;">Fermé</span>';
+  }
+  if (status === "Ouvert") {
+    return '<span style="color:#2e7d32;font-weight:600;">Ouvert</span>';
+  }
+  return status;
+}    
+
   function priorityRank(s) {
     const c = normVal(s.statut_cours);
     const g = normVal(s.statut_garde);
@@ -346,8 +366,8 @@ document.getElementById("email").focus();
       <div style="font-weight:800;font-size:16px;">${s.name || ""}</div>
 
       <div style="margin-top:10px;">
-        <div>Cours: <strong id="cours-${s.id}">${cours}</strong></div>
-        <div>Service de garde: <strong id="garde-${s.id}">${garde}</strong></div>
+<div>Cours: <strong id="cours-${s.id}">${formatCours(cours)}</strong></div>
+<div>Service de garde: <strong id="garde-${s.id}">${formatGarde(garde)}</strong></div>
       </div>
 
       <div class="row-flex">
@@ -413,7 +433,10 @@ document.getElementById("email").focus();
         // update UI
         const targetId = (kind === "cours") ? `cours-${schoolId}` : `garde-${schoolId}`;
         const el = document.getElementById(targetId);
-        if (el) el.textContent = val;
+        if (el) {
+  const v = normVal(val);
+  el.innerHTML = (kind === "cours") ? formatCours(v) : formatGarde(v);
+}
 
         // update cache local
         const item = schools.find(x => String(x.id) === String(schoolId));
