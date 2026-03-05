@@ -116,22 +116,47 @@
 }
 
     document.getElementById("loginBtn").addEventListener("click", async () => {
-      msg.textContent = "";
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value;
+  msg.textContent = "";
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
 
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) msg.textContent = error.message;
-      await refreshUI();
-    });
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) msg.textContent = error.message;
 
-    document.getElementById("logoutBtn").addEventListener("click", async () => {
-      await supabase.auth.signOut();
-      await refreshUI();
-    });
+  await refreshUI();
+});
 
+
+// ENTER dans email ou password = login
+const emailInput = document.getElementById("email");
+const passwordInput = document.getElementById("password");
+
+[emailInput, passwordInput].forEach(input => {
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      document.getElementById("loginBtn").click();
+    }
+  });
+});
+
+
+// ENTER quand connecté = logout
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    const logoutBtn = document.getElementById("logoutBtn");
+    const okBox = document.getElementById("okBox");
+
+    if (okBox.style.display !== "none") {
+      logoutBtn.click();
+    }
+  }
+});
+    
     refreshUI();
 
+// mettre le curseur automatiquement dans le champ email
+document.getElementById("email").focus();
+    
     async function fetchAllRowsPaged(table, select, orders = []) {
       const pageSize = 1000;
       let from = 0;
