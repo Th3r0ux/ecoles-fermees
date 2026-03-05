@@ -533,6 +533,77 @@ function formatGarde(status) {
       const t = e.target;
       if (t instanceof HTMLInputElement && t.type === "checkbox") return;
 
+      if (t instanceof HTMLButtonElement && t.dataset.action === "css-batch") {
+  e.stopPropagation(); // évite de toggle le CSS / région en même temps
+
+  const cid = t.dataset.css;          // ex: region-xxx-css-yyy
+  const val = t.dataset.val;          // ND | Ouvert | Fermé
+  if (!cid || !val) return;
+
+  const v = normVal(val);
+
+  // trouve les cartes écoles qui appartiennent à ce CSS
+  const regionContainer = t.closest('[data-region-container]') || list;
+  const cards = Array.from(regionContainer.querySelectorAll(`[data-kind="school"][data-css="${cid}"]`));
+
+  // IMPORTANT: en mode lazy, si le CSS n'a pas encore été "créé", il n'y aura aucune carte -> on informe
+  if (cards.length === 0) {
+    msg.textContent = "Ouvre ce centre de services scolaire (CSS) pour charger ses écoles, puis réessaie.";
+    return;
+  }
+
+  // ids à modifier
+  const ids = cards.map(c => c.getAttribute("data-school")).filter(Boolean);
+  if (ids.length === 0) return;
+
+  msg.textContent = "Enregistrement…";
+
+  const { data: userData } = await supabase.auth.getUser();
+  const uid = userData?.user?.id ?? null;
+
+  const payload = {
+    statut_cours: v,
+    statut_garde: v,
+    updated_at: new Date().toISOString(),
+    updated_by: uid
+  };
+
+  const { error } = await supabase
+    .from("school_status")
+    .update(payload)
+    .in("school_id", ids);
+
+  if (error) {
+    console.error(error);
+    msg.textContent = "Erreur batch CSS: " + error.message;
+    return;
+  }
+
+  // UI + cache pour toutes les écoles du CSS
+  for (const id of ids) {
+    const elCours = document.getElementById(`cours-${id}`);
+    const elGarde = document.getElementById(`garde-${id}`);
+    if (elCours) elCours.innerHTML = formatCours(v);
+    if (elGarde) elGarde.innerHTML = formatGarde(v);
+
+    const item = schools.find(x => String(x.id) === String(id));
+    if (item) {
+      item.statut_cours = v;
+      item.statut_garde = v;
+    }
+
+    const savedEl = document.getElementById(`saved-${id}`);
+    if (savedEl) {
+      savedEl.style.color = "#2e7d32";
+      savedEl.textContent = "Enregistré ✅";
+      setTimeout(() => { savedEl.textContent = ""; }, 900);
+    }
+  }
+
+  msg.textContent = "";
+  return;
+}
+
       // A) UPDATE (boutons)
       if (t instanceof HTMLButtonElement && t.dataset.action === "set") {
         const schoolId = t.dataset.id;
