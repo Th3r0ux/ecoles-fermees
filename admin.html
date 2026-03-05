@@ -137,15 +137,11 @@
     const SUPABASE_KEY = "sb_publishable_TChgyvE4kQSVxpoPUUWZlA_5RYkPzM3";
     
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
-  auth: {
-    persistSession: true,
-    storage: window.localStorage,
-    autoRefreshToken: true,
-    detectSessionInUrl: true
-  }
+  auth: { persistSession: true, storage: window.localStorage, autoRefreshToken: true, detectSessionInUrl: true }
 });
 
-    window.supabase = supabase; // DEBUG
+window.supabase = supabase;
+console.log("supabase exposed", !!window.supabase);
 
 
 
