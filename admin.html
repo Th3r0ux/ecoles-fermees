@@ -68,14 +68,31 @@
 
   <!-- ✅ Barre batch (cachée par défaut) -->
   <div id="batchBar" style="display:none;margin:12px 0;padding:10px;border:1px solid #ddd;border-radius:10px;background:#fafafa;">
-    <strong><span id="batchCount">0</span> écoles sélectionnées</strong>
-    <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
-      <button id="batchND" type="button">Tout à ND</button>
-      <button id="batchOpen" type="button">Tout Ouvert</button>
-      <button id="batchClose" type="button">Tout Fermé</button>
-      <button id="batchClear" type="button" style="margin-left:auto;">Désélectionner</button>
-    </div>
+  <strong><span id="batchCount">0</span> écoles sélectionnées</strong>
+
+  <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+    <span style="font-weight:700;min-width:70px;">Cours :</span>
+    <button id="batchCoursND" type="button">ND</button>
+    <button id="batchCoursOpen" type="button">Ouvert</button>
+    <button id="batchCoursClose" type="button">Fermé</button>
   </div>
+
+  <div style="margin-top:8px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+    <span style="font-weight:700;min-width:70px;">Garde :</span>
+    <button id="batchGardeND" type="button">ND</button>
+    <button id="batchGardeOpen" type="button">Ouvert</button>
+    <button id="batchGardeClose" type="button">Fermé</button>
+  </div>
+
+  <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+    <span style="font-weight:700;min-width:70px;">Tout :</span>
+    <button id="batchBothND" type="button">ND</button>
+    <button id="batchBothOpen" type="button">Ouvert</button>
+    <button id="batchBothClose" type="button">Fermé</button>
+
+    <button id="batchClear" type="button" style="margin-left:auto;">Désélectionner</button>
+  </div>
+</div>
 
   <!-- recherche -->
   <input
@@ -707,10 +724,22 @@ if (kind === "garde") item.statut_garde = v;
 }
   }
 
-      document.getElementById("batchND").addEventListener("click", () => batchSetSelected("ND"));
-document.getElementById("batchOpen").addEventListener("click", () => batchSetSelected("Ouvert"));
-document.getElementById("batchClose").addEventListener("click", () => batchSetSelected("Fermé"));
+      // Cours
+document.getElementById("batchCoursND").addEventListener("click", () => batchSetSelected("cours", "ND"));
+document.getElementById("batchCoursOpen").addEventListener("click", () => batchSetSelected("cours", "Ouvert"));
+document.getElementById("batchCoursClose").addEventListener("click", () => batchSetSelected("cours", "Fermé"));
 
+// Garde
+document.getElementById("batchGardeND").addEventListener("click", () => batchSetSelected("garde", "ND"));
+document.getElementById("batchGardeOpen").addEventListener("click", () => batchSetSelected("garde", "Ouvert"));
+document.getElementById("batchGardeClose").addEventListener("click", () => batchSetSelected("garde", "Fermé"));
+
+// Tout (cours + garde)
+document.getElementById("batchBothND").addEventListener("click", () => batchSetSelected("both", "ND"));
+document.getElementById("batchBothOpen").addEventListener("click", () => batchSetSelected("both", "Ouvert"));
+document.getElementById("batchBothClose").addEventListener("click", () => batchSetSelected("both", "Fermé"));
+
+// Clear
 document.getElementById("batchClear").addEventListener("click", () => {
   selected.clear();
   document.querySelectorAll('input[type="checkbox"][data-action="select"]').forEach(cb => cb.checked = false);
