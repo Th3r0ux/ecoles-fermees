@@ -47,6 +47,21 @@
   .row-flex{ margin-top:10px; display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
   button{ padding:8px 10px; }
 
+ #batchBar{
+  position: sticky;
+  top: 10px;                 /* ajuste selon ton goût */
+  z-index: 2000;
+  background: #fafafa;       /* important pour cacher ce qui passe dessous */
+  box-shadow: 0 6px 14px rgba(0,0,0,.08);
+}
+
+#batchBar{ margin:12px 0; }
+
+/* Bonus mobile (si tu veux éviter l'encoche iPhone) */
+@supports (top: calc(env(safe-area-inset-top) + 10px)) {
+  #batchBar{ top: calc(env(safe-area-inset-top) + 10px); }
+}   
+
   #scrollHint{
   position: fixed;
   left: 0; right: 0; bottom: 0;
@@ -91,7 +106,7 @@
 <div id="adminUI" style="display:none;">
 
   <!-- ✅ Barre batch (cachée par défaut) -->
-  <div id="batchBar" style="display:none;margin:12px 0;padding:10px;border:1px solid #ddd;border-radius:10px;background:#fafafa;">
+  <div id="batchBar" style="display:none;padding:10px;border:1px solid #ddd;border-radius:10px;background:#fafafa;">
   <strong><span id="batchCount">0</span> écoles sélectionnées</strong>
 
   <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
