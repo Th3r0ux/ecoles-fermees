@@ -406,7 +406,14 @@ refreshBatchBar();
     return t;
   }
 
-  async function masterSetAll(val){
+      const lockMaster = (locked) => {
+  ["masterND","masterOpen","masterClose"].forEach(id => {
+    const b = document.getElementById(id);
+    if (b) b.disabled = locked;
+  });
+};
+      
+async function masterSetAll(val){
   const v = normVal(val);
 
   const confirmMsg =
@@ -414,60 +421,65 @@ refreshBatchBar();
   const answer = prompt(confirmMsg);
   if (answer !== "OUI") return;
 
-  msg.textContent = "Enregistrement (tout le Québec)…";
+  lockMaster(true);
 
-  const { data: userData } = await supabase.auth.getUser();
-  const uid = userData?.user?.id ?? null;
+  try {
+    msg.textContent = "Enregistrement (tout le Québec)…";
 
-  const payload = {
-    statut_cours: v,
-    statut_garde: v,
-    updated_at: new Date().toISOString(),
-    updated_by: uid
-  };
+    const { data: userData } = await supabase.auth.getUser();
+    const uid = userData?.user?.id ?? null;
 
-  // ⚠️ update sur toutes les lignes
-  const allIds = schools.map(s => s.id);
+    const payload = {
+      statut_cours: v,
+      statut_garde: v,
+      updated_at: new Date().toISOString(),
+      updated_by: uid
+    };
 
-const chunkSize = 500;
-for (let i = 0; i < allIds.length; i += chunkSize) {
-  const chunk = allIds.slice(i, i + chunkSize);
+    const allIds = schools.map(s => s.id);
 
-  const { error } = await supabase
-    .from("school_status")
-    .update(payload)
-    .in("school_id", chunk);
+    const chunkSize = 500;
+    for (let i = 0; i < allIds.length; i += chunkSize) {
+      const chunk = allIds.slice(i, i + chunkSize);
 
-  if (error) {
-    console.error(error);
-    msg.textContent = "Erreur master: " + error.message;
-    return;
+      const { error } = await supabase
+        .from("school_status")
+        .update(payload)
+        .in("school_id", chunk);
+
+      if (error) {
+        console.error(error);
+        msg.textContent = "Erreur master: " + error.message;
+        return;
+      }
+    }
+
+    // ✅ Update cache local + UI (DANS la fonction)
+    for (const s of schools) {
+      s.statut_cours = v;
+      s.statut_garde = v;
+    }
+
+    document.querySelectorAll('[id^="cours-"]').forEach(el => el.innerHTML = formatCours(v));
+    document.querySelectorAll('[id^="garde-"]').forEach(el => el.innerHTML = formatGarde(v));
+
+    document.querySelectorAll('[data-kind="region"]').forEach(rh => {
+      updateClosedLabelsForRegion(rh.getAttribute("data-region"));
+    });
+
+    const saved = document.getElementById("masterSaved");
+    if (saved) {
+      saved.textContent = "Enregistré ✅";
+      setTimeout(()=> saved.textContent = "", 1200);
+    }
+
+    msg.textContent = "";
+
+  } finally {
+    lockMaster(false);
   }
 }
-
-  // Update cache local + UI (si affiché)
-  for (const s of schools) {
-    s.statut_cours = v;
-    s.statut_garde = v;
-  }
-
-  document.querySelectorAll('[id^="cours-"]').forEach(el => el.innerHTML = formatCours(v));
-  document.querySelectorAll('[id^="garde-"]').forEach(el => el.innerHTML = formatGarde(v));
-
-  // Met à jour tous les compteurs visibles
-  document.querySelectorAll('[data-kind="region"]').forEach(rh => {
-    updateClosedLabelsForRegion(rh.getAttribute("data-region"));
-  });
-
-  const saved = document.getElementById("masterSaved");
-  if (saved) {
-    saved.textContent = "Enregistré ✅";
-    setTimeout(()=> saved.textContent = "", 1200);
-  }
-
-  msg.textContent = "";
-}
-
+      
   function formatCours(status) {
   if (status === "Fermé") {
     return '<span style="color:#c62828;font-weight:600;">Fermé</span>';
@@ -1105,5 +1117,24 @@ setTimeout(updateScrollHint, 0);
     
   </script>
   <div id="scrollHint"></div>
+<div id="confirmModal" style="
+  position:fixed; inset:0; display:none; align-items:center; justify-content:center;
+  background:rgba(0,0,0,.45); z-index:99999; padding:16px;
+">
+  <div style="
+    width:min(520px, 100%); background:#fff; border-radius:14px;
+    padding:16px; box-shadow:0 12px 40px rgba(0,0,0,.25);
+  ">
+    <div id="confirmText" style="white-space:pre-wrap; font-weight:600; margin-bottom:12px;"></div>
+
+    <label class="muted">Tape <strong>OUI</strong> pour confirmer :</label>
+    <input id="confirmInput" type="text" style="width:100%; padding:10px; margin:8px 0 12px;">
+
+    <div style="display:flex; gap:10px; justify-content:flex-end;">
+      <button id="confirmCancel" type="button">Annuler</button>
+      <button id="confirmOk" type="button">Confirmer</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
