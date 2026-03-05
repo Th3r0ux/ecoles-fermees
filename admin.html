@@ -359,6 +359,64 @@ function formatGarde(status) {
     return 2;
   }
 
+  function updateClosedLabelsForRegion(rid) {
+  // 1) Region name
+  const regionHeader = list.querySelector(`[data-kind="region"][data-region="${rid}"]`);
+  if (!regionHeader) return;
+  const regionName = regionHeader.dataset.regionName || "";
+
+  // 2) Recompute region closed count from "schools" cache
+  const regionClosedCount = schools.filter(s =>
+    regionId(s.region || "Autre") === rid && normVal(s.statut_cours) === "Fermé"
+  ).length;
+  const regionClosedLabel = `${regionClosedCount} ${regionClosedCount > 1 ? "écoles fermées" : "école fermée"}`;
+
+  // 3) Update region header HTML while keeping icon + name
+  const iconEl = document.getElementById(`${rid}-icon`);
+  const icon = iconEl ? iconEl.textContent : "▶";
+  regionHeader.innerHTML = `
+    <span id="${rid}-icon" style="display:inline-block;width:18px;">${icon}</span>
+    ${regionName}
+    <span style="font-weight:400;color:#666;">(${regionClosedLabel})</span>
+  `;
+
+  // 4) Update each CSS header under this region
+  const cssHeaders = list.querySelectorAll(`[data-kind="css"][data-region="${rid}"]`);
+  cssHeaders.forEach(h => {
+    const cssName = h.dataset.cssName || "";
+    const cid = h.dataset.cssId || h.getAttribute("data-css");
+
+    const cssClosedCount = schools.filter(s =>
+      regionId(s.region || "Autre") === rid &&
+      (s.css || "Autre") === cssName &&
+      normVal(s.statut_cours) === "Fermé"
+    ).length;
+
+    const cssClosedLabel = `${cssClosedCount} ${cssClosedCount > 1 ? "écoles fermées" : "école fermée"}`;
+
+    const iconEl2 = document.getElementById(`${cid}-icon`);
+    const icon2 = iconEl2 ? iconEl2.textContent : "▶";
+
+    // Important: on réinjecte ton UI "Toutes les écoles :" + boutons
+    h.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+        <div>
+          <span id="${cid}-icon" style="display:inline-block;width:18px;">${icon2}</span>
+          ${cssName}
+          <span style="font-weight:400;color:#666;">(${cssClosedLabel})</span>
+        </div>
+
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+          <span style="font-weight:600;color:#444;margin-right:4px;">Toutes les écoles :</span>
+          <button type="button" data-action="css-batch" data-css="${cid}" data-val="ND">ND</button>
+          <button type="button" data-action="css-batch" data-css="${cid}" data-val="Ouvert">Ouvert</button>
+          <button type="button" data-action="css-batch" data-css="${cid}" data-val="Fermé">Fermé</button>
+        </div>
+      </div>
+    `;
+  });
+}
+
   function groupByRegionAndCss(arr){
     const groups = {};
     for (const s of arr){
@@ -409,6 +467,8 @@ function formatGarde(status) {
       regionBlock.className = "region-row";
       regionBlock.setAttribute("data-kind", "region");
       regionBlock.setAttribute("data-region", rid);
+      regionBlock.dataset.regionName = region;   // le vrai nom
+      regionBlock.dataset.regionId = rid;        // l'id slug
 
       // petit compteur (cours fermés) comme index
       const regionAllSchools = Object.values(groups[region]).flat();
@@ -439,6 +499,9 @@ function formatGarde(status) {
           cssHeader.setAttribute("data-kind", "css");
           cssHeader.setAttribute("data-region", rid);
           cssHeader.setAttribute("data-css", cid);
+          cssHeader.dataset.cssName = cssName;
+          cssHeader.dataset.regionId = rid;
+          cssHeader.dataset.cssId = cid;
 
           const cssClosedCount = groups[region][cssName].filter(x => normVal(x.statut_cours) === "Fermé").length;
           const cssClosedLabel = `${cssClosedCount} ${cssClosedCount > 1 ? "écoles fermées" : "école fermée"}`;
@@ -600,6 +663,9 @@ function formatGarde(status) {
     }
   }
 
+  const rid = cid.split("-css-")[0];
+  updateClosedLabelsForRegion(rid);       
+
   msg.textContent = "";
   return;
 }
@@ -641,12 +707,23 @@ function formatGarde(status) {
 }
 
         // update cache local
-        const item = schools.find(x => String(x.id) === String(schoolId));
-        if (item) {
-const v = normVal(val);
-if (kind === "cours") item.statut_cours = v;
-if (kind === "garde") item.statut_garde = v;
-        }
+        // update cache local
+const item = schools.find(x => String(x.id) === String(schoolId));
+if (item) {
+  const v = normVal(val);
+
+  if (kind === "cours") {
+    item.statut_cours = v;
+
+    // ✅ met à jour les compteurs immédiatement
+    const rid = regionId(item.region || "Autre");
+    updateClosedLabelsForRegion(rid);
+  }
+
+  if (kind === "garde") {
+    item.statut_garde = v;
+  }
+}
 
         if (saved) { saved.style.color = "#2e7d32"; saved.textContent = "Enregistré ✅"; }
         return;
@@ -705,6 +782,9 @@ if (kind === "garde") item.statut_garde = v;
             cssHeader.setAttribute("data-kind", "css");
             cssHeader.setAttribute("data-region", rid);
             cssHeader.setAttribute("data-css", cid);
+            cssHeader.dataset.cssName = cssName;
+            cssHeader.dataset.regionId = rid;
+            cssHeader.dataset.cssId = cid;
 
             const cssClosedCount = byRegionCss[cssName].filter(x => normVal(x.statut_cours) === "Fermé").length;
             const cssClosedLabel = `${cssClosedCount} ${cssClosedCount > 1 ? "écoles fermées" : "école fermée"}`;
