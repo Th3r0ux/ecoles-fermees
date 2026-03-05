@@ -166,10 +166,49 @@ console.log("supabase exposed", !!window.supabase);
     const okBox = document.getElementById("okBox");
 
     const adminUI = document.getElementById("adminUI");
-
     const masterBox = document.getElementById("masterBox");
 
-    
+    const AUTO_LOGOUT_MS = 2 * 60 * 60 * 1000; // 2h
+const AUTO_LOGOUT_KEY = "autoLogoutAt";
+let autoLogoutTimer = null;
+
+function clearAutoLogoutTimer() {
+  if (autoLogoutTimer) {
+    clearTimeout(autoLogoutTimer);
+    autoLogoutTimer = null;
+  }
+}
+
+async function forceLogout() {
+  clearAutoLogoutTimer();
+  localStorage.removeItem(AUTO_LOGOUT_KEY);
+  await supabase.auth.signOut({ scope: "local" });
+  await refreshUI();
+}
+
+function scheduleAutoLogout() {
+  clearAutoLogoutTimer();
+
+  // si pas déjà un deadline, on en crée un
+  let at = Number(localStorage.getItem(AUTO_LOGOUT_KEY));
+  if (!at || Number.isNaN(at)) {
+    at = Date.now() + AUTO_LOGOUT_MS;
+    localStorage.setItem(AUTO_LOGOUT_KEY, String(at));
+  }
+
+  const msLeft = at - Date.now();
+
+  // si déjà dépassé → logout immédiat
+  if (msLeft <= 0) {
+    forceLogout();
+    return;
+  }
+
+  // sinon → timer
+  autoLogoutTimer = setTimeout(() => {
+    forceLogout();
+  }, msLeft);
+}
 
     async function refreshUI() {
   const { data: { session } } = await supabase.auth.getSession();
