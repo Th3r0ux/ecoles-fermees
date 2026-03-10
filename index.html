@@ -496,6 +496,31 @@ loadFromSupabaseAll().catch(err => {
   if (loading) loading.textContent = "Erreur de chargement Supabase.";
 });
 </script>
+<script>
+function sendHeight() {
+  const height = Math.max(
+    document.body.scrollHeight,
+    document.documentElement.scrollHeight
+  );
 
+  parent.postMessage({ iframeHeight: height }, "*");
+}
+
+window.addEventListener("load", sendHeight);
+window.addEventListener("resize", sendHeight);
+
+const observer = new MutationObserver(() => {
+  sendHeight();
+});
+
+observer.observe(document.body, {
+  childList: true,
+  subtree: true,
+  attributes: true
+});
+
+setTimeout(sendHeight, 300);
+setTimeout(sendHeight, 1000);
+</script>
 </body>
 </html>
