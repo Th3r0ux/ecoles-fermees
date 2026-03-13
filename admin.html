@@ -451,22 +451,16 @@ function refreshBatchBar(){
     return;
   }
 
-  const names = ids
+  batchSelectedNames.innerHTML = ids
     .map(id => {
       const item = schools.find(x => String(x.id) === String(id));
-      return item ? item.name : null;
+      if (!item) return "";
+      return `<button type="button" class="batch-tag" data-action="remove-tag" data-id="${id}">${item.name}</button>`;
     })
-    .filter(Boolean);
+    .join("");
+}
 
-  batchSelectedNames.innerHTML = ids
-  .map(id => {
-    const item = schools.find(x => String(x.id) === String(id));
-    if (!item) return "";
-    return `<button type="button" class="batch-tag" data-action="remove-tag" data-id="${id}">${item.name}</button>`;
-  })
-  .join("");
-  
-      async function batchSetSelected(mode, val){
+async function batchSetSelected(mode, val){
   const ids = Array.from(selected);
   if (ids.length === 0) return;
 
@@ -504,7 +498,6 @@ function refreshBatchBar(){
     return;
   }
 
-  // UI + cache
   for (const id of ids) {
     if (mode === "both" || mode === "cours") {
       const elCours = document.getElementById(`cours-${id}`);
