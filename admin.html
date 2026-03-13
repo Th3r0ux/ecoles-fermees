@@ -80,6 +80,10 @@
   background: #ffe8a3;
 }
 
+     #batchBar > div:not(:first-child){
+  padding-left: 28px;
+}
+
 #batchBar::before{
   content: "MODE BATCH";
   font-size: 11px;
@@ -95,10 +99,6 @@
   position: absolute;
   top: -10px;
   left: 12px;
-}
-
-    #batchBar > div:not(:first-child){
-  padding-left: 28px;
 }
 
   #scrollHint{
@@ -145,7 +145,7 @@
 <div id="adminUI" style="display:none;">
 
   <!-- ✅ Barre batch (cachée par défaut) -->
-  <div id="batchBar" style="display:none;padding:10px;border:1px solid #ddd;border-radius:10px;background:#fafafa;">
+  <div id="batchBar" style="display:none;">
  <strong style="font-size:16px;color:#8a5a00;">
 ⚡ Modification rapide — <span id="batchCount">0</span> écoles sélectionnées
 </strong>
