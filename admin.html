@@ -101,6 +101,12 @@
   left: 12px;
 }
 
+#batchSelectedNames{
+  max-width: 900px;
+  white-space: normal;
+  font-style: italic;
+}
+    
   #scrollHint{
   position: fixed;
   left: 0; right: 0; bottom: 0;
@@ -149,6 +155,7 @@
  <strong style="font-size:16px;color:#8a5a00;">
 ⚡ Modification rapide — <span id="batchCount">0</span> écoles sélectionnées
 </strong>
+    <div id="batchSelectedNames" style="margin-top:8px;color:#6b4b00;font-size:14px;line-height:1.4;"></div>
 
   <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
     <span style="font-weight:700;min-width:70px;">Cours :</span>
@@ -413,11 +420,39 @@ document.addEventListener("click", async (e) => {
 
 const batchBar = document.getElementById("batchBar");
 const batchCount = document.getElementById("batchCount");
+const batchSelectedNames = document.getElementById("batchSelectedNames");
 
 function refreshBatchBar(){
-  const n = selected.size;
+  const ids = Array.from(selected);
+  const n = ids.length;
+
   batchCount.textContent = String(n);
   batchBar.style.display = (n > 0) ? "block" : "none";
+
+  if (n === 0) {
+    batchSelectedNames.textContent = "";
+    return;
+  }
+
+  const names = ids
+    .map(id => {
+      const item = schools.find(x => String(x.id) === String(id));
+      return item ? item.name : null;
+    })
+    .filter(Boolean);
+
+  if (names.length <= 3) {
+    batchSelectedNames.textContent = "Établissements : " + names.join(" • ");
+    return;
+  }
+
+  const firstNames = names.slice(0, 3);
+  const remaining = names.length - 3;
+
+  batchSelectedNames.textContent =
+    "Établissements : " +
+    firstNames.join(" • ") +
+    ` • +${remaining} autre${remaining > 1 ? "s" : ""}`;
 }
       async function batchSetSelected(mode, val){
   const ids = Array.from(selected);
