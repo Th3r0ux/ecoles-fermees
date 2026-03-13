@@ -822,25 +822,25 @@ function formatGarde(status) {
       if (t instanceof HTMLInputElement && t.type === "checkbox") return;
 
       if (t instanceof HTMLButtonElement && t.dataset.action === "css-batch") {
-  e.stopPropagation(); // évite de toggle le CSS / région en même temps
+  e.stopPropagation();
 
-  const cid = t.dataset.css;          // ex: region-xxx-css-yyy
-  const val = t.dataset.val;          // ND | Ouvert | Fermé
+  const cid = t.dataset.css;
+  const val = t.dataset.val;
+  const mode = t.dataset.mode || "both"; // cours | garde | both
   if (!cid || !val) return;
 
   const v = normVal(val);
 
-  // trouve les cartes écoles qui appartiennent à ce CSS
   const regionContainer = t.closest('[data-region-container]') || list;
-  const cards = Array.from(regionContainer.querySelectorAll(`[data-kind="school"][data-css="${cid}"]`));
+  const cards = Array.from(
+    regionContainer.querySelectorAll(`[data-kind="school"][data-css="${cid}"]`)
+  );
 
-  // IMPORTANT: en mode lazy, si le CSS n'a pas encore été "créé", il n'y aura aucune carte -> on informe
   if (cards.length === 0) {
     msg.textContent = "Ouvre ce centre de services scolaire (CSS) pour charger ses écoles, puis réessaie.";
     return;
   }
 
-  // ids à modifier
   const ids = cards.map(c => c.getAttribute("data-school")).filter(Boolean);
   if (ids.length === 0) return;
 
@@ -850,11 +850,16 @@ function formatGarde(status) {
   const uid = userData?.user?.id ?? null;
 
   const payload = {
-    statut_cours: v,
-    statut_garde: v,
     updated_at: new Date().toISOString(),
     updated_by: uid
   };
+
+  if (mode === "cours") payload.statut_cours = v;
+  if (mode === "garde") payload.statut_garde = v;
+  if (mode === "both") {
+    payload.statut_cours = v;
+    payload.statut_garde = v;
+  }
 
   const { error } = await supabase
     .from("school_status")
@@ -867,17 +872,20 @@ function formatGarde(status) {
     return;
   }
 
-  // UI + cache pour toutes les écoles du CSS
   for (const id of ids) {
     const elCours = document.getElementById(`cours-${id}`);
     const elGarde = document.getElementById(`garde-${id}`);
-    if (elCours) elCours.innerHTML = formatCours(v);
-    if (elGarde) elGarde.innerHTML = formatGarde(v);
 
     const item = schools.find(x => String(x.id) === String(id));
-    if (item) {
-      item.statut_cours = v;
-      item.statut_garde = v;
+
+    if (mode === "cours" || mode === "both") {
+      if (elCours) elCours.innerHTML = formatCours(v);
+      if (item) item.statut_cours = v;
+    }
+
+    if (mode === "garde" || mode === "both") {
+      if (elGarde) elGarde.innerHTML = formatGarde(v);
+      if (item) item.statut_garde = v;
     }
 
     const savedEl = document.getElementById(`saved-${id}`);
@@ -889,7 +897,7 @@ function formatGarde(status) {
   }
 
   const rid = cid.split("-css-")[0];
-  updateClosedLabelsForRegion(rid);       
+  updateClosedLabelsForRegion(rid);
 
   msg.textContent = "";
   return;
