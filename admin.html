@@ -716,20 +716,35 @@ function formatGarde(status) {
           const cssClosedCount = groups[region][cssName].filter(x => normVal(x.statut_cours) === "Fermé").length;
           const cssClosedLabel = `${cssClosedCount} ${cssClosedCount > 1 ? "écoles fermées" : "école fermée"}`;
 
-          cssHeader.innerHTML = `
-  <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+         cssHeader.innerHTML = `
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;">
     <div>
       <span id="${cid}-icon" style="display:inline-block;width:18px;">▼</span>
       ${cssName}
       <span style="font-weight:400;color:#666;">(${cssClosedLabel})</span>
     </div>
 
-    <div style="display:flex;gap:6px;flex-wrap:wrap;">
-      <span style="font-weight:600;color:#444;margin-right:4px;">Toutes les écoles :</span>
-      
-      <button type="button" data-action="css-batch" data-css="${cid}" data-val="ND">ND</button>
-      <button type="button" data-action="css-batch" data-css="${cid}" data-val="Ouvert">Ouvert</button>
-      <button type="button" data-action="css-batch" data-css="${cid}" data-val="Fermé">Fermé</button>
+    <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+        <span style="font-weight:600;color:#444;margin-right:4px;">Cours :</span>
+        <button type="button" data-action="css-batch" data-mode="cours" data-css="${cid}" data-val="ND">ND</button>
+        <button type="button" data-action="css-batch" data-mode="cours" data-css="${cid}" data-val="Ouvert">Ouvert</button>
+        <button type="button" data-action="css-batch" data-mode="cours" data-css="${cid}" data-val="Fermé">Fermé</button>
+      </div>
+
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+        <span style="font-weight:600;color:#444;margin-right:4px;">Garde :</span>
+        <button type="button" data-action="css-batch" data-mode="garde" data-css="${cid}" data-val="ND">ND</button>
+        <button type="button" data-action="css-batch" data-mode="garde" data-css="${cid}" data-val="Ouvert">Ouvert</button>
+        <button type="button" data-action="css-batch" data-mode="garde" data-css="${cid}" data-val="Fermé">Fermé</button>
+      </div>
+
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+        <span style="font-weight:600;color:#444;margin-right:4px;">Tout :</span>
+        <button type="button" data-action="css-batch" data-mode="both" data-css="${cid}" data-val="ND">ND</button>
+        <button type="button" data-action="css-batch" data-mode="both" data-css="${cid}" data-val="Ouvert">Ouvert</button>
+        <button type="button" data-action="css-batch" data-mode="both" data-css="${cid}" data-val="Fermé">Fermé</button>
+      </div>
     </div>
   </div>
 `;
@@ -1001,19 +1016,34 @@ if (item) {
             const cssClosedLabel = `${cssClosedCount} ${cssClosedCount > 1 ? "écoles fermées" : "école fermée"}`;
 
             cssHeader.innerHTML = `
-  <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;">
     <div>
       <span id="${cid}-icon" style="display:inline-block;width:18px;">▶</span>
       ${cssName}
       <span style="font-weight:400;color:#666;">(${cssClosedLabel})</span>
     </div>
 
-    <div style="display:flex;gap:6px;flex-wrap:wrap;">
-      <span style="font-weight:600;color:#444;margin-right:4px;">Toutes les écoles :</span>
-      
-      <button type="button" data-action="css-batch" data-css="${cid}" data-val="ND">ND</button>
-      <button type="button" data-action="css-batch" data-css="${cid}" data-val="Ouvert">Ouvert</button>
-      <button type="button" data-action="css-batch" data-css="${cid}" data-val="Fermé">Fermé</button>
+    <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+        <span style="font-weight:600;color:#444;margin-right:4px;">Cours :</span>
+        <button type="button" data-action="css-batch" data-mode="cours" data-css="${cid}" data-val="ND">ND</button>
+        <button type="button" data-action="css-batch" data-mode="cours" data-css="${cid}" data-val="Ouvert">Ouvert</button>
+        <button type="button" data-action="css-batch" data-mode="cours" data-css="${cid}" data-val="Fermé">Fermé</button>
+      </div>
+
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+        <span style="font-weight:600;color:#444;margin-right:4px;">Garde :</span>
+        <button type="button" data-action="css-batch" data-mode="garde" data-css="${cid}" data-val="ND">ND</button>
+        <button type="button" data-action="css-batch" data-mode="garde" data-css="${cid}" data-val="Ouvert">Ouvert</button>
+        <button type="button" data-action="css-batch" data-mode="garde" data-css="${cid}" data-val="Fermé">Fermé</button>
+      </div>
+
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+        <span style="font-weight:600;color:#444;margin-right:4px;">Tout :</span>
+        <button type="button" data-action="css-batch" data-mode="both" data-css="${cid}" data-val="ND">ND</button>
+        <button type="button" data-action="css-batch" data-mode="both" data-css="${cid}" data-val="Ouvert">Ouvert</button>
+        <button type="button" data-action="css-batch" data-mode="both" data-css="${cid}" data-val="Fermé">Fermé</button>
+      </div>
     </div>
   </div>
 `;
