@@ -507,11 +507,14 @@ async function batchSetSelected(mode, val){
     return;
   }
 
+const touchedRegions = new Set();
+
   for (const id of ids) {
     if (mode === "both" || mode === "cours") {
       const elCours = document.getElementById(`cours-${id}`);
       if (elCours) elCours.innerHTML = formatCours(v);
     }
+
     if (mode === "both" || mode === "garde") {
       const elGarde = document.getElementById(`garde-${id}`);
       if (elGarde) elGarde.innerHTML = formatGarde(v);
@@ -519,8 +522,14 @@ async function batchSetSelected(mode, val){
 
     const item = schools.find(x => String(x.id) === String(id));
     if (item) {
-      if (mode === "both" || mode === "cours") item.statut_cours = v;
-      if (mode === "both" || mode === "garde") item.statut_garde = v;
+      if (mode === "both" || mode === "cours") {
+        item.statut_cours = v;
+        touchedRegions.add(regionId(item.region || "Autre"));
+      }
+
+      if (mode === "both" || mode === "garde") {
+        item.statut_garde = v;
+      }
     }
 
     const savedEl = document.getElementById(`saved-${id}`);
@@ -531,7 +540,13 @@ async function batchSetSelected(mode, val){
     }
   }
 
+  // Recalcule immédiatement les compteurs si les cours ont changé
+  if (mode === "both" || mode === "cours") {
+    touchedRegions.forEach(rid => updateClosedLabelsForRegion(rid));
+  }
+
   selected.clear();
+  
   document.querySelectorAll('input[type="checkbox"][data-action="select"]').forEach(cb => cb.checked = false);
   refreshBatchBar();
   msg.textContent = "";
