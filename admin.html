@@ -102,9 +102,26 @@
 }
 
 #batchSelectedNames{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
   max-width: 900px;
-  white-space: normal;
-  font-style: italic;
+}
+
+.batch-tag{
+  display: inline-flex;
+  align-items: center;
+  max-width: 320px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #fff3cd;
+  border: 1px solid #f0c36d;
+  color: #7a5200;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
 }
     
   #scrollHint{
@@ -155,7 +172,7 @@
  <strong style="font-size:16px;color:#8a5a00;">
 ⚡ Modification rapide — <span id="batchCount">0</span> écoles sélectionnées
 </strong>
-    <div id="batchSelectedNames" style="margin-top:8px;color:#6b4b00;font-size:14px;line-height:1.4;"></div>
+    <div id="batchSelectedNames" style="margin-top:8px;"></div>
 
   <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
     <span style="font-weight:700;min-width:70px;">Cours :</span>
@@ -430,7 +447,7 @@ function refreshBatchBar(){
   batchBar.style.display = (n > 0) ? "block" : "none";
 
   if (n === 0) {
-    batchSelectedNames.textContent = "";
+    batchSelectedNames.innerHTML = "";
     return;
   }
 
@@ -441,18 +458,9 @@ function refreshBatchBar(){
     })
     .filter(Boolean);
 
-  if (names.length <= 3) {
-    batchSelectedNames.textContent = "Établissements : " + names.join(" • ");
-    return;
-  }
-
-  const firstNames = names.slice(0, 3);
-  const remaining = names.length - 3;
-
-  batchSelectedNames.textContent =
-    "Établissements : " +
-    firstNames.join(" • ") +
-    ` • +${remaining} autre${remaining > 1 ? "s" : ""}`;
+  batchSelectedNames.innerHTML = names
+    .map(name => `<span class="batch-tag">${name}</span>`)
+    .join("");
 }
       async function batchSetSelected(mode, val){
   const ids = Array.from(selected);
