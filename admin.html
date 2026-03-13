@@ -854,12 +854,25 @@ function formatGarde(status) {
     updated_by: uid
   };
 
-  if (mode === "cours") payload.statut_cours = v;
-  if (mode === "garde") payload.statut_garde = v;
-  if (mode === "both") {
+ switch (mode) {
+  case "cours":
+    payload.statut_cours = v;
+    break;
+
+  case "garde":
+    payload.statut_garde = v;
+    break;
+
+  case "both":
     payload.statut_cours = v;
     payload.statut_garde = v;
-  }
+    break;
+
+  default:
+    console.error("Mode CSS inconnu:", mode);
+    msg.textContent = "Erreur: mode invalide.";
+    return;
+}
 
   const { error } = await supabase
     .from("school_status")
@@ -873,28 +886,38 @@ function formatGarde(status) {
   }
 
   for (const id of ids) {
-    const elCours = document.getElementById(`cours-${id}`);
-    const elGarde = document.getElementById(`garde-${id}`);
+  const elCours = document.getElementById(`cours-${id}`);
+  const elGarde = document.getElementById(`garde-${id}`);
+  const item = schools.find(x => String(x.id) === String(id));
 
-    const item = schools.find(x => String(x.id) === String(id));
-
-    if (mode === "cours" || mode === "both") {
+  switch (mode) {
+    case "cours":
       if (elCours) elCours.innerHTML = formatCours(v);
       if (item) item.statut_cours = v;
-    }
+      break;
 
-    if (mode === "garde" || mode === "both") {
+    case "garde":
       if (elGarde) elGarde.innerHTML = formatGarde(v);
       if (item) item.statut_garde = v;
-    }
+      break;
 
-    const savedEl = document.getElementById(`saved-${id}`);
-    if (savedEl) {
-      savedEl.style.color = "#2e7d32";
-      savedEl.textContent = "Enregistré ✅";
-      setTimeout(() => { savedEl.textContent = ""; }, 900);
-    }
+    case "both":
+      if (elCours) elCours.innerHTML = formatCours(v);
+      if (elGarde) elGarde.innerHTML = formatGarde(v);
+      if (item) {
+        item.statut_cours = v;
+        item.statut_garde = v;
+      }
+      break;
   }
+
+  const savedEl = document.getElementById(`saved-${id}`);
+  if (savedEl) {
+    savedEl.style.color = "#2e7d32";
+    savedEl.textContent = "Enregistré ✅";
+    setTimeout(() => { savedEl.textContent = ""; }, 900);
+  }
+}
 
   const rid = cid.split("-css-")[0];
   updateClosedLabelsForRegion(rid);
