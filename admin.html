@@ -1271,54 +1271,61 @@ if (item) {
 }
   }
 
-      // Cours
-document.getElementById("batchCoursND").addEventListener("click", () => batchSetSelected("cours", "ND"));
-document.getElementById("batchCoursOpen").addEventListener("click", () => batchSetSelected("cours", "Ouvert"));
-document.getElementById("batchCoursClose").addEventListener("click", () => batchSetSelected("cours", "Fermé"));
+if (!batchBar.dataset.bound) {
+  // Cours
+  document.getElementById("batchCoursND").addEventListener("click", () => batchSetSelected("cours", "ND"));
+  document.getElementById("batchCoursOpen").addEventListener("click", () => batchSetSelected("cours", "Ouvert"));
+  document.getElementById("batchCoursClose").addEventListener("click", () => batchSetSelected("cours", "Fermé"));
 
-// Garde
-document.getElementById("batchGardeND").addEventListener("click", () => batchSetSelected("garde", "ND"));
-document.getElementById("batchGardeOpen").addEventListener("click", () => batchSetSelected("garde", "Ouvert"));
-document.getElementById("batchGardeClose").addEventListener("click", () => batchSetSelected("garde", "Fermé"));
+  // Garde
+  document.getElementById("batchGardeND").addEventListener("click", () => batchSetSelected("garde", "ND"));
+  document.getElementById("batchGardeOpen").addEventListener("click", () => batchSetSelected("garde", "Ouvert"));
+  document.getElementById("batchGardeClose").addEventListener("click", () => batchSetSelected("garde", "Fermé"));
 
-// Tout (cours + garde)
-document.getElementById("batchBothND").addEventListener("click", () => batchSetSelected("both", "ND"));
-document.getElementById("batchBothOpen").addEventListener("click", () => batchSetSelected("both", "Ouvert"));
-document.getElementById("batchBothClose").addEventListener("click", () => batchSetSelected("both", "Fermé"));
+  // Tout
+  document.getElementById("batchBothND").addEventListener("click", () => batchSetSelected("both", "ND"));
+  document.getElementById("batchBothOpen").addEventListener("click", () => batchSetSelected("both", "Ouvert"));
+  document.getElementById("batchBothClose").addEventListener("click", () => batchSetSelected("both", "Fermé"));
 
-// MasterBox
-document.getElementById("masterND").addEventListener("click", () => masterSetAll("ND"));
-document.getElementById("masterOpen").addEventListener("click", () => masterSetAll("Ouvert"));
-document.getElementById("masterClose").addEventListener("click", () => masterSetAll("Fermé"));
+  // Master
+  document.getElementById("masterND").addEventListener("click", () => masterSetAll("ND"));
+  document.getElementById("masterOpen").addEventListener("click", () => masterSetAll("Ouvert"));
+  document.getElementById("masterClose").addEventListener("click", () => masterSetAll("Fermé"));
 
-// Clear
-document.getElementById("batchClear").addEventListener("click", () => {
-  selected.clear();
-  document.querySelectorAll('input[type="checkbox"][data-action="select"]').forEach(cb => cb.checked = false);
-  refreshBatchBar();
-});
+  // Clear
+  document.getElementById("batchClear").addEventListener("click", () => {
+    selected.clear();
+    document.querySelectorAll('input[type="checkbox"][data-action="select"]').forEach(cb => {
+      cb.checked = false;
+    });
+    refreshBatchBar();
+  });
 
+  // Retrait d’un tag
   batchSelectedNames.addEventListener("click", (e) => {
-  const target = e.target.closest('[data-action="remove-tag"]');
-  if (!target) return;
+    const target = e.target.closest('[data-action="remove-tag"]');
+    if (!target) return;
 
-  e.preventDefault();
-  e.stopPropagation();
+    e.preventDefault();
+    e.stopPropagation();
 
-  const id = target.dataset.id;
-  if (!id) return;
+    const id = target.dataset.id;
+    if (!id) return;
 
-  selected.delete(id);
+    selected.delete(id);
 
-  const checkbox = document.querySelector(
-    `input[type="checkbox"][data-action="select"][data-id="${id}"]`
-  );
-  if (checkbox) {
-    checkbox.checked = false;
-  }
+    const checkbox = document.querySelector(
+      `input[type="checkbox"][data-action="select"][data-id="${id}"]`
+    );
+    if (checkbox) {
+      checkbox.checked = false;
+    }
 
-  refreshBatchBar();
-});
+    refreshBatchBar();
+  });
+
+  batchBar.dataset.bound = "1";
+}
       
       msg.textContent = "";
 }
