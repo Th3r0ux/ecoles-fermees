@@ -68,7 +68,17 @@
 /* Bonus mobile (si tu veux éviter l'encoche iPhone) */
 @supports (top: calc(env(safe-area-inset-top) + 10px)) {
   #batchBar{ top: calc(env(safe-area-inset-top) + 10px); }
-}   
+} 
+
+#batchBar button{
+  background: #fff;
+  border: 2px solid #e0a800;
+  font-weight: 600;
+}
+
+#batchBar button:hover{
+  background: #ffe8a3;
+}
 
   #scrollHint{
   position: fixed;
