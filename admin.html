@@ -122,6 +122,11 @@
   font-weight: 600;
   line-height: 1.2;
   box-shadow: 0 1px 2px rgba(0,0,0,.04);
+  cursor: pointer;
+}
+
+.batch-tag:hover{
+  background: #ffe8a3;
 }
     
   #scrollHint{
@@ -451,14 +456,17 @@ function refreshBatchBar(){
     return;
   }
 
-  batchSelectedNames.innerHTML = ids
-    .map(id => {
-      const item = schools.find(x => String(x.id) === String(id));
-      if (!item) return "";
-      return `<button type="button" class="batch-tag" data-action="remove-tag" data-id="${id}">${item.name}</button>`;
-    })
-    .join("");
-}
+ batchSelectedNames.innerHTML = ids
+  .map(id => {
+    const item = schools.find(x => String(x.id) === String(id));
+    if (!item) return "";
+    return `
+      <button type="button" class="batch-tag" data-action="remove-tag" data-id="${id}">
+        ${item.name} ×
+      </button>
+    `;
+  })
+  .join("");
 
 async function batchSetSelected(mode, val){
   const ids = Array.from(selected);
@@ -1290,16 +1298,23 @@ document.getElementById("batchClear").addEventListener("click", () => {
 });
 
   batchSelectedNames.addEventListener("click", (e) => {
-  const btn = e.target.closest('[data-action="remove-tag"]');
-  if (!btn) return;
+  const target = e.target.closest('[data-action="remove-tag"]');
+  if (!target) return;
 
-  const id = btn.dataset.id;
+  e.preventDefault();
+  e.stopPropagation();
+
+  const id = target.dataset.id;
   if (!id) return;
 
   selected.delete(id);
 
-  const checkbox = document.querySelector(`input[type="checkbox"][data-action="select"][data-id="${id}"]`);
-  if (checkbox) checkbox.checked = false;
+  const checkbox = document.querySelector(
+    `input[type="checkbox"][data-action="select"][data-id="${id}"]`
+  );
+  if (checkbox) {
+    checkbox.checked = false;
+  }
 
   refreshBatchBar();
 });
