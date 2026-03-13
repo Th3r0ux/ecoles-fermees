@@ -458,10 +458,14 @@ function refreshBatchBar(){
     })
     .filter(Boolean);
 
-  batchSelectedNames.innerHTML = names
-    .map(name => `<span class="batch-tag">${name}</span>`)
-    .join("");
-}
+  batchSelectedNames.innerHTML = ids
+  .map(id => {
+    const item = schools.find(x => String(x.id) === String(id));
+    if (!item) return "";
+    return `<button type="button" class="batch-tag" data-action="remove-tag" data-id="${id}">${item.name}</button>`;
+  })
+  .join("");
+  
       async function batchSetSelected(mode, val){
   const ids = Array.from(selected);
   if (ids.length === 0) return;
@@ -1289,6 +1293,21 @@ document.getElementById("masterClose").addEventListener("click", () => masterSet
 document.getElementById("batchClear").addEventListener("click", () => {
   selected.clear();
   document.querySelectorAll('input[type="checkbox"][data-action="select"]').forEach(cb => cb.checked = false);
+  refreshBatchBar();
+});
+
+  batchSelectedNames.addEventListener("click", (e) => {
+  const btn = e.target.closest('[data-action="remove-tag"]');
+  if (!btn) return;
+
+  const id = btn.dataset.id;
+  if (!id) return;
+
+  selected.delete(id);
+
+  const checkbox = document.querySelector(`input[type="checkbox"][data-action="select"][data-id="${id}"]`);
+  if (checkbox) checkbox.checked = false;
+
   refreshBatchBar();
 });
       
