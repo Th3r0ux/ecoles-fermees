@@ -762,12 +762,19 @@ function formatGarde(status) {
 
     // Important: on réinjecte ton UI "Toutes les écoles :" + boutons
     h.innerHTML = `
-  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;">
-    <div>
+  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
   <span id="${cid}-icon" style="display:inline-block;width:18px;">${icon2}</span>
-  ${cssName}
+  <span>${cssName}</span>
   ${cssCheck}
   <span style="font-weight:400;color:#666;">(${cssClosedLabel})</span>
+  <button
+    type="button"
+    data-action="clear-css-check"
+    data-css-name="${cssName.replace(/"/g, '&quot;')}"
+    style="padding:4px 8px;font-size:12px;"
+  >
+    Effacer ✔
+  </button>
 </div>
 
     <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
@@ -992,6 +999,41 @@ function formatGarde(status) {
     list.addEventListener("click", async (e) => {
       const t = e.target;
       if (t instanceof HTMLInputElement && t.type === "checkbox") return;
+
+      if (t instanceof HTMLButtonElement && t.dataset.action === "clear-css-check") {
+  e.stopPropagation();
+
+  const cssName = t.dataset.cssName;
+  if (!cssName) return;
+
+  msg.textContent = "Effacement du crochet…";
+  t.disabled = true;
+
+  const { error } = await supabase.rpc("clear_css_manual_updates", {
+    p_css_name: cssName
+  });
+
+  t.disabled = false;
+
+  if (error) {
+    console.error(error);
+    msg.textContent = "Erreur effacement ✔ : " + error.message;
+    return;
+  }
+
+  for (const item of schools) {
+    if ((item.css || "Autre") === cssName) {
+      item.manual_updated_at = null;
+    }
+  }
+
+  const cssHeader = t.closest('[data-kind="css"]');
+  const rid = cssHeader?.getAttribute("data-region");
+  if (rid) updateClosedLabelsForRegion(rid);
+
+  msg.textContent = "";
+  return;
+}
 
       if (t instanceof HTMLButtonElement && t.dataset.action === "css-batch") {
   e.stopPropagation();
