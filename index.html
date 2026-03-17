@@ -423,30 +423,59 @@ if (searchEl && !searchEl.dataset.bound){
 }
 </script>
 
-<script>
+<script type="module">
+const SUPABASE_URL = "https://djcexcxyxtfazejhstcn.supabase.co";
+const SUPABASE_KEY = "sb_publishable_TChgyvE4kQSVxpoPUUWZlA_5RYkPzM3";
+
 function norm(s){
   if (s === null || s === undefined) return "n.d.";
   const v = String(s).trim();
+
   const u = v.toUpperCase();
 
   if (u === "ND" || u === "N.D." || u === "N.D" || u === "N/A") return "n.d.";
   if (u === "OUVERT") return "Ouvert";
   if (u === "FERME" || u === "FERMÉ") return "Fermé";
 
+  // si c'est déjà "Ouvert"/"Fermé"/"n.d."
   return v;
 }
 
-async function loadFromJson() {
+async function loadFromSupabaseAll() {
   const loading = document.getElementById("loading");
   if (loading) loading.style.display = "block";
 
-  const res = await fetch("./public_snapshot.json", { cache: "no-store" });
+  const base =
+    `${SUPABASE_URL}/rest/v1/public_snapshot` +
+    `?select=name,css,region,statut_cours,statut_garde` +
+    `&order=region.asc&order=css.asc&order=name.asc`;
 
-  if (!res.ok) {
-    throw new Error(`JSON error ${res.status}`);
+  const pageSize = 1000;
+  let from = 0;
+  let all = [];
+
+  while (true) {
+    const res = await fetch(base, {
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+        Range: `${from}-${from + pageSize - 1}`,   // 👈 pagination
+      },
+    });
+
+    if (!res.ok) {
+      const txt = await res.text();
+      throw new Error(`Supabase error ${res.status}: ${txt}`);
+    }
+
+    const rows = await res.json();
+    all = all.concat(rows);
+
+    // si on a reçu moins qu'une page complète, c'est fini
+    if (rows.length < pageSize) break;
+
+    from += pageSize;
   }
-
-  const all = await res.json();
 
   allRows = all.map(x => ({
     name: x.name || "",
@@ -461,13 +490,12 @@ async function loadFromJson() {
   if (loading) loading.style.display = "none";
 }
 
-loadFromJson().catch(err => {
+loadFromSupabaseAll().catch(err => {
   console.error(err);
   const loading = document.getElementById("loading");
-  if (loading) loading.textContent = "Erreur de chargement des données.";
+  if (loading) loading.textContent = "Erreur de chargement Supabase.";
 });
 </script>
-  
 <script>
 function sendHeight() {
   const height = Math.max(
