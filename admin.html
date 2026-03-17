@@ -1203,6 +1203,7 @@ const item = schools.find(x => String(x.id) === String(schoolId));
 if (item) {
   const v = normVal(val);
   item.updated_at = payload.updated_at;
+item.manual_updated_at = payload.manual_updated_at;
 
   if (kind === "cours") {
     item.statut_cours = v;
