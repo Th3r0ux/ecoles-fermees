@@ -128,6 +128,15 @@
 .batch-tag:hover{
   background: #6d83f0;
 }
+
+    .css-checkmark{
+  color: #2e7d32;
+  font-weight: 900;
+  font-size: 28px;
+  line-height: 1;
+  margin-left: 8px;
+  vertical-align: middle;
+}
     
   #scrollHint{
   position: fixed;
@@ -426,7 +435,7 @@ document.addEventListener("click", async (e) => {
   try {
     schools = await fetchAllRowsPaged(
       "public_snapshot",
-      "id,name,region,css,statut_cours,statut_garde",
+      "id,name,region,css,statut_cours,statut_garde,updated_at",
       [{ col: "region", asc: true }, { col: "css", asc: true }, { col: "name", asc: true }]
     );
   } catch (err) {
@@ -521,16 +530,19 @@ const touchedRegions = new Set();
     }
 
     const item = schools.find(x => String(x.id) === String(id));
-    if (item) {
-      if (mode === "both" || mode === "cours") {
-        item.statut_cours = v;
-        touchedRegions.add(regionId(item.region || "Autre"));
-      }
+   if (item) {
+  item.updated_at = payload.updated_at;
 
-      if (mode === "both" || mode === "garde") {
-        item.statut_garde = v;
-      }
-    }
+  if (mode === "both" || mode === "cours") {
+    item.statut_cours = v;
+    touchedRegions.add(regionId(item.region || "Autre"));
+  }
+
+  if (mode === "both" || mode === "garde") {
+    item.statut_garde = v;
+    touchedRegions.add(regionId(item.region || "Autre"));
+  }
+}
 
     const savedEl = document.getElementById(`saved-${id}`);
     if (savedEl) {
@@ -571,6 +583,56 @@ refreshBatchBar();
     if (u === "FERME" || u === "FERMÉ") return "Fermé";
     return t;
   }
+
+      function getWindowBounds() {
+    const now = new Date();
+
+    const start = new Date(now);
+    const end = new Date(now);
+
+    const minutesNow = now.getHours() * 60 + now.getMinutes();
+    const cutoffMorning = 7 * 60 + 45; // 07:45
+    const startEvening = 15 * 60;      // 15:00
+
+    if (minutesNow >= startEvening) {
+      start.setHours(15, 0, 0, 0);
+      end.setDate(end.getDate() + 1);
+      end.setHours(7, 45, 0, 0);
+    } else {
+      start.setDate(start.getDate() - 1);
+      start.setHours(15, 0, 0, 0);
+      end.setHours(7, 45, 0, 0);
+    }
+
+    return { start, end, now };
+  }
+
+  function isUpdatedInWindow(updatedAt) {
+    if (!updatedAt) return false;
+
+    const ts = new Date(updatedAt);
+    if (Number.isNaN(ts.getTime())) return false;
+
+    const { start, end, now } = getWindowBounds();
+    const effectiveEnd = end > now ? now : end;
+
+    return ts >= start && ts <= effectiveEnd;
+  }
+
+  function cssHasWindowUpdate(regionName, cssName) {
+    return schools.some(s =>
+      (s.region || "Autre") === regionName &&
+      (s.css || "Autre") === cssName &&
+      isUpdatedInWindow(s.updated_at)
+    );
+  }
+
+  function cssCheckmarkHTML(regionName, cssName) {
+    return cssHasWindowUpdate(regionName, cssName)
+      ? `<span class="css-checkmark" title="Au moins une modification entre 15 h et 7 h 45">✔</span>`
+      : "";
+  }
+
 
       const lockMaster = (locked) => {
   ["masterND","masterOpen","masterClose"].forEach(id => {
@@ -695,15 +757,17 @@ function formatGarde(status) {
 
     const iconEl2 = document.getElementById(`${cid}-icon`);
     const icon2 = iconEl2 ? iconEl2.textContent : "▶";
+    const cssCheck = cssCheckmarkHTML(regionName, cssName);
 
     // Important: on réinjecte ton UI "Toutes les écoles :" + boutons
     h.innerHTML = `
   <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;">
     <div>
-      <span id="${cid}-icon" style="display:inline-block;width:18px;">${icon2}</span>
-      ${cssName}
-      <span style="font-weight:400;color:#666;">(${cssClosedLabel})</span>
-    </div>
+  <span id="${cid}-icon" style="display:inline-block;width:18px;">${icon2}</span>
+  ${cssName}
+  ${cssCheck}
+  <span style="font-weight:400;color:#666;">(${cssClosedLabel})</span>
+</div>
 
     <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
       <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
@@ -820,14 +884,16 @@ function formatGarde(status) {
 
           const cssClosedCount = groups[region][cssName].filter(x => normVal(x.statut_cours) === "Fermé").length;
           const cssClosedLabel = `${cssClosedCount} ${cssClosedCount > 1 ? "écoles fermées" : "école fermée"}`;
+          const cssCheck = cssCheckmarkHTML(region, cssName);
 
          cssHeader.innerHTML = `
   <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;">
     <div>
-      <span id="${cid}-icon" style="display:inline-block;width:18px;">▼</span>
-      ${cssName}
-      <span style="font-weight:400;color:#666;">(${cssClosedLabel})</span>
-    </div>
+  <span id="${cid}-icon" style="display:inline-block;width:18px;">▼</span>
+  ${cssName}
+  ${cssCheck}
+  <span style="font-weight:400;color:#666;">(${cssClosedLabel})</span>
+</div>
 
     <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
       <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
@@ -998,12 +1064,18 @@ function formatGarde(status) {
   switch (mode) {
     case "cours":
       if (elCours) elCours.innerHTML = formatCours(v);
-      if (item) item.statut_cours = v;
+      if (item) {
+        item.statut_cours = v;
+        item.updated_at = payload.updated_at;
+      }
       break;
 
     case "garde":
       if (elGarde) elGarde.innerHTML = formatGarde(v);
-      if (item) item.statut_garde = v;
+      if (item) {
+        item.statut_garde = v;
+        item.updated_at = payload.updated_at;
+      }
       break;
 
     case "both":
@@ -1012,6 +1084,7 @@ function formatGarde(status) {
       if (item) {
         item.statut_cours = v;
         item.statut_garde = v;
+        item.updated_at = payload.updated_at;
       }
       break;
   }
@@ -1073,6 +1146,7 @@ if (kind === "garde") payload.statut_garde = v;
 const item = schools.find(x => String(x.id) === String(schoolId));
 if (item) {
   const v = normVal(val);
+  item.updated_at = payload.updated_at;
 
   if (kind === "cours") {
     item.statut_cours = v;
@@ -1084,6 +1158,8 @@ if (item) {
 
   if (kind === "garde") {
     item.statut_garde = v;
+    const rid = regionId(item.region || "Autre");
+    updateClosedLabelsForRegion(rid);
   }
 }
 
@@ -1150,14 +1226,19 @@ if (item) {
 
             const cssClosedCount = byRegionCss[cssName].filter(x => normVal(x.statut_cours) === "Fermé").length;
             const cssClosedLabel = `${cssClosedCount} ${cssClosedCount > 1 ? "écoles fermées" : "école fermée"}`;
+            const cssCheck = cssCheckmarkHTML(
+  clickable.dataset.regionName || "Autre",
+  cssName
+);
 
             cssHeader.innerHTML = `
   <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;">
     <div>
-      <span id="${cid}-icon" style="display:inline-block;width:18px;">▶</span>
-      ${cssName}
-      <span style="font-weight:400;color:#666;">(${cssClosedLabel})</span>
-    </div>
+  <span id="${cid}-icon" style="display:inline-block;width:18px;">▶</span>
+  ${cssName}
+  ${cssCheck}
+  <span style="font-weight:400;color:#666;">(${cssClosedLabel})</span>
+</div>
 
     <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
       <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
