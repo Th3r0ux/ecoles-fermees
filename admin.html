@@ -760,14 +760,7 @@ function formatGarde(status) {
     const iconEl2 = document.getElementById(`${cid}-icon`);
     const icon2 = iconEl2 ? iconEl2.textContent : "▶";
     const cssCheck = cssCheckmarkHTML(regionName, cssName);
-
-    // Important: on réinjecte ton UI "Toutes les écoles :" + boutons
-    h.innerHTML = `
-  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-  <span id="${cid}-icon" style="display:inline-block;width:18px;">${icon2}</span>
-  <span>${cssName}</span>
-  ${cssCheck}
-  <span style="font-weight:400;color:#666;">(${cssClosedLabel})</span>
+    const clearBtn = cssCheck ? `
   <button
     type="button"
     data-action="clear-css-check"
@@ -776,6 +769,16 @@ function formatGarde(status) {
   >
     Revérifier ❌
   </button>
+` : "";
+
+    // Important: on réinjecte ton UI "Toutes les écoles :" + boutons
+    h.innerHTML = `
+  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+  <span id="${cid}-icon" style="display:inline-block;width:18px;">${icon2}</span>
+  <span>${cssName}</span>
+  ${cssCheck}
+  <span style="font-weight:400;color:#666;">(${cssClosedLabel})</span>
+  ${clearBtn}
 </div>
 
     <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
@@ -894,14 +897,7 @@ function formatGarde(status) {
           const cssClosedCount = groups[region][cssName].filter(x => normVal(x.statut_cours) === "Fermé").length;
           const cssClosedLabel = `${cssClosedCount} ${cssClosedCount > 1 ? "écoles fermées" : "école fermée"}`;
           const cssCheck = cssCheckmarkHTML(region, cssName);
-
-         cssHeader.innerHTML = `
-  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;">
-    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-  <span id="${cid}-icon" style="display:inline-block;width:18px;">▼</span>
-  <span>${cssName}</span>
-  ${cssCheck}
-  <span style="font-weight:400;color:#666;">(${cssClosedLabel})</span>
+          const clearBtn = cssCheck ? `
   <button
     type="button"
     data-action="clear-css-check"
@@ -910,6 +906,16 @@ function formatGarde(status) {
   >
     Revérifier ❌
   </button>
+` : "";
+
+         cssHeader.innerHTML = `
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+  <span id="${cid}-icon" style="display:inline-block;width:18px;">▼</span>
+  <span>${cssName}</span>
+  ${cssCheck}
+  <span style="font-weight:400;color:#666;">(${cssClosedLabel})</span>
+  ${clearBtn}
 </div>
 
     <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
@@ -1292,6 +1298,17 @@ item.manual_updated_at = payload.manual_updated_at;
   cssName
 );
 
+            const clearBtn = cssCheck ? `
+  <button
+    type="button"
+    data-action="clear-css-check"
+    data-css-name="${cssName.replace(/"/g, '&quot;')}"
+    style="padding:4px 8px;font-size:12px;"
+  >
+    Revérifier ❌
+  </button>
+` : "";
+
             cssHeader.innerHTML = `
   <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;">
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
@@ -1299,14 +1316,7 @@ item.manual_updated_at = payload.manual_updated_at;
       <span>${cssName}</span>
       ${cssCheck}
       <span style="font-weight:400;color:#666;">(${cssClosedLabel})</span>
-      <button
-        type="button"
-        data-action="clear-css-check"
-        data-css-name="${cssName.replace(/"/g, '&quot;')}"
-        style="padding:4px 8px;font-size:12px;"
-      >
-        Revérifier ❌
-      </button>
+      ${clearBtn}
     </div>
 
     <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
