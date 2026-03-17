@@ -1,0 +1,16 @@
+[
+  {
+    "name": "École Alpha",
+    "css": "CSS de Montréal",
+    "region": "Montréal",
+    "statut_cours": "Ouvert",
+    "statut_garde": "Ouvert"
+  },
+  {
+    "name": "École Beta",
+    "css": "CSS de Laval",
+    "region": "Laval",
+    "statut_cours": "Fermé",
+    "statut_garde": "Fermé"
+  }
+]
