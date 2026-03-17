@@ -531,8 +531,9 @@ const touchedRegions = new Set();
     }
 
     const item = schools.find(x => String(x.id) === String(id));
-   if (item) {
+if (item) {
   item.updated_at = payload.updated_at;
+  item.manual_updated_at = payload.manual_updated_at;
 
   if (mode === "both" || mode === "cours") {
     item.statut_cours = v;
