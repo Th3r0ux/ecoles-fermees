@@ -274,7 +274,6 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
 window.supabase = supabase;
 console.log("supabase exposed", !!window.supabase);
 
-    
 async function syncPublicJson() {
   try {
     const { data, error } = await supabase.functions.invoke("sync-public-json-v2", {
@@ -282,10 +281,12 @@ async function syncPublicJson() {
     });
 
     if (error) throw error;
+
     console.log("Sync GitHub OK", data);
+    alert("Sync GitHub OK");
   } catch (err) {
     console.error("Erreur sync GitHub:", err);
-    alert("Les changements ont été enregistrés, mais la publication publique a échoué.");
+    alert("Erreur sync GitHub: " + (err?.message || err));
   }
 }
 
