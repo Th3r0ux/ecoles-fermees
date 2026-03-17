@@ -434,10 +434,10 @@ document.addEventListener("click", async (e) => {
 
   try {
     schools = await fetchAllRowsPaged(
-      "public_snapshot",
-      "id,name,region,css,statut_cours,statut_garde,updated_at",
-      [{ col: "region", asc: true }, { col: "css", asc: true }, { col: "name", asc: true }]
-    );
+  "public_snapshot",
+  "id,name,region,css,statut_cours,statut_garde,updated_at,manual_updated_at",
+  [{ col: "region", asc: true }, { col: "css", asc: true }, { col: "name", asc: true }]
+);
   } catch (err) {
     console.error(err);
     msg.textContent = "Erreur chargement: " + (err.message || err);
@@ -490,9 +490,10 @@ async function batchSetSelected(mode, val){
   const v = normVal(val);
 
   const payload = {
-    updated_at: new Date().toISOString(),
-    updated_by: uid
-  };
+  updated_at: new Date().toISOString(),
+  manual_updated_at: new Date().toISOString(),
+  updated_by: uid
+};
 
   if (mode === "both") {
     payload.statut_cours = v;
@@ -623,7 +624,7 @@ refreshBatchBar();
     return schools.some(s =>
       (s.region || "Autre") === regionName &&
       (s.css || "Autre") === cssName &&
-      isUpdatedInWindow(s.updated_at)
+      isUpdatedInWindow(s.manual_updated_at)
     );
   }
 
@@ -1021,9 +1022,10 @@ function formatGarde(status) {
   const uid = userData?.user?.id ?? null;
 
   const payload = {
-    updated_at: new Date().toISOString(),
-    updated_by: uid
-  };
+  updated_at: new Date().toISOString(),
+  manual_updated_at: new Date().toISOString(),
+  updated_by: uid
+};
 
  switch (mode) {
   case "cours":
@@ -1118,7 +1120,11 @@ function formatGarde(status) {
         const uid = userData?.user?.id ?? null;
 
         const v = normVal(val);
-const payload = { updated_at: new Date().toISOString(), updated_by: uid };
+const payload = {
+  updated_at: new Date().toISOString(),
+  manual_updated_at: new Date().toISOString(),
+  updated_by: uid
+};
 if (kind === "cours") payload.statut_cours = v;
 if (kind === "garde") payload.statut_garde = v;
 
