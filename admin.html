@@ -274,6 +274,20 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
 window.supabase = supabase;
 console.log("supabase exposed", !!window.supabase);
 
+    
+async function syncPublicJson() {
+  try {
+    const { data, error } = await supabase.functions.invoke("sync-public-json-v2", {
+      body: {}
+    });
+
+    if (error) throw error;
+    console.log("Sync GitHub OK", data);
+  } catch (err) {
+    console.error("Erreur sync GitHub:", err);
+    alert("Les changements ont été enregistrés, mais la publication publique a échoué.");
+  }
+}
 
 
 
@@ -649,6 +663,10 @@ if (item) {
 
   selected.clear();
   
+  await syncPublicJson();
+
+  selected.clear();
+  
   document.querySelectorAll('input[type="checkbox"][data-action="select"]').forEach(cb => cb.checked = false);
   refreshBatchBar();
   msg.textContent = "";
@@ -774,8 +792,9 @@ async function masterSetAll(val){
 
     const saved = document.getElementById("masterSaved");
     if (saved) { saved.textContent = "Enregistré ✅"; setTimeout(()=> saved.textContent = "", 1200); }
-
+await syncPublicJson();
     msg.textContent = "";
+    
   } finally {
     lockMaster(false);
   }
@@ -1247,8 +1266,10 @@ function formatGarde(status) {
   }
 }
 
-  const rid = cid.split("-css-")[0];
+ const rid = cid.split("-css-")[0];
   updateClosedLabelsForRegion(rid);
+
+  await syncPublicJson();
 
   msg.textContent = "";
   return;
@@ -1317,6 +1338,8 @@ item.manual_updated_at = payload.manual_updated_at;
     updateClosedLabelsForRegion(rid);
   }
 }
+
+       await syncPublicJson();
 
         if (saved) { saved.style.color = "#2e7d32"; saved.textContent = "Enregistré ✅"; }
         return;
