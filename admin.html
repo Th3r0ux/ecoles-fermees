@@ -1114,32 +1114,35 @@ function formatGarde(status) {
   const item = schools.find(x => String(x.id) === String(id));
 
   switch (mode) {
-    case "cours":
-      if (elCours) elCours.innerHTML = formatCours(v);
-      if (item) {
-        item.statut_cours = v;
-        item.updated_at = payload.updated_at;
-      }
-      break;
+  case "cours":
+    if (elCours) elCours.innerHTML = formatCours(v);
+    if (item) {
+      item.statut_cours = v;
+      item.updated_at = payload.updated_at;
+      item.manual_updated_at = payload.manual_updated_at;
+    }
+    break;
 
-    case "garde":
-      if (elGarde) elGarde.innerHTML = formatGarde(v);
-      if (item) {
-        item.statut_garde = v;
-        item.updated_at = payload.updated_at;
-      }
-      break;
+  case "garde":
+    if (elGarde) elGarde.innerHTML = formatGarde(v);
+    if (item) {
+      item.statut_garde = v;
+      item.updated_at = payload.updated_at;
+      item.manual_updated_at = payload.manual_updated_at;
+    }
+    break;
 
-    case "both":
-      if (elCours) elCours.innerHTML = formatCours(v);
-      if (elGarde) elGarde.innerHTML = formatGarde(v);
-      if (item) {
-        item.statut_cours = v;
-        item.statut_garde = v;
-        item.updated_at = payload.updated_at;
-      }
-      break;
-  }
+  case "both":
+    if (elCours) elCours.innerHTML = formatCours(v);
+    if (elGarde) elGarde.innerHTML = formatGarde(v);
+    if (item) {
+      item.statut_cours = v;
+      item.statut_garde = v;
+      item.updated_at = payload.updated_at;
+      item.manual_updated_at = payload.manual_updated_at;
+    }
+    break;
+}
 
   const savedEl = document.getElementById(`saved-${id}`);
   if (savedEl) {
