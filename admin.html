@@ -224,6 +224,43 @@
   <div id="list" style="margin-top:16px;"></div>
 </div>
 
+// Fenêtre de confirmation avant de poser une action sur tout le Québec
+<div id="confirmModal" style="
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.45);
+  z-index:10000;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+">
+  <div style="
+    width:100%;
+    max-width:520px;
+    background:#fff;
+    border-radius:16px;
+    box-shadow:0 20px 50px rgba(0,0,0,0.25);
+    padding:22px;
+  ">
+    <div style="font-size:20px;font-weight:800;margin-bottom:10px;">
+      Confirmer l’action
+    </div>
+
+    <div id="confirmText" style="font-size:15px;line-height:1.5;color:#333;margin-bottom:18px;">
+      Voulez-vous vraiment continuer?
+    </div>
+
+    <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;">
+      <button type="button" id="confirmCancel">Annuler</button>
+      <button type="button" id="confirmOk" style="background:#b71c1c;color:#fff;border:none;">
+        Confirmer
+      </button>
+    </div>
+  </div>
+</div>
+  
+  
   <script type="module">
     import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
@@ -246,6 +283,57 @@ console.log("supabase exposed", !!window.supabase);
 
     const adminUI = document.getElementById("adminUI");
     const masterBox = document.getElementById("masterBox");
+
+    // fonction de confirmation await
+
+    const confirmModal = document.getElementById("confirmModal");
+const confirmText = document.getElementById("confirmText");
+const confirmOk = document.getElementById("confirmOk");
+const confirmCancel = document.getElementById("confirmCancel");
+
+function askConfirm(message) {
+  return new Promise((resolve) => {
+    confirmText.textContent = message;
+    confirmModal.style.display = "flex";
+
+    const cleanup = () => {
+      confirmModal.style.display = "none";
+      confirmOk.removeEventListener("click", onOk);
+      confirmCancel.removeEventListener("click", onCancel);
+      confirmModal.removeEventListener("click", onBackdrop);
+      document.removeEventListener("keydown", onKey);
+    };
+
+    const onOk = () => {
+      cleanup();
+      resolve(true);
+    };
+
+    const onCancel = () => {
+      cleanup();
+      resolve(false);
+    };
+
+    const onBackdrop = (e) => {
+      if (e.target === confirmModal) {
+        cleanup();
+        resolve(false);
+      }
+    };
+
+    const onKey = (e) => {
+      if (e.key === "Escape") {
+        cleanup();
+        resolve(false);
+      }
+    };
+
+    confirmOk.addEventListener("click", onOk);
+    confirmCancel.addEventListener("click", onCancel);
+    confirmModal.addEventListener("click", onBackdrop);
+    document.addEventListener("keydown", onKey);
+  });
+}
 
     const AUTO_LOGOUT_MS = 2 * 60 * 60 * 1000; // 2h
 const AUTO_LOGOUT_KEY = "autoLogoutAt";
@@ -1463,9 +1551,26 @@ if (!batchBar.dataset.bound) {
   document.getElementById("batchBothClose").addEventListener("click", () => batchSetSelected("both", "Fermé"));
 
   // Master
-  document.getElementById("masterND").addEventListener("click", () => masterSetAll("ND"));
-  document.getElementById("masterOpen").addEventListener("click", () => masterSetAll("Ouvert"));
-  document.getElementById("masterClose").addEventListener("click", () => masterSetAll("Fermé"));
+  document.getElementById("masterND").addEventListener("click", async () => {
+  const ok = await askConfirm(
+    "Cette action va mettre TOUTES les écoles du Québec à ND.\n\nVoulez-vous vraiment continuer ?"
+  );
+  if (ok) masterSetAll("ND");
+});
+
+document.getElementById("masterOpen").addEventListener("click", async () => {
+  const ok = await askConfirm(
+    "Cette action va mettre TOUTES les écoles du Québec à OUVERT.\n\nVoulez-vous vraiment continuer ?"
+  );
+  if (ok) masterSetAll("Ouvert");
+});
+
+document.getElementById("masterClose").addEventListener("click", async () => {
+  const ok = await askConfirm(
+    "Cette action va mettre TOUTES les écoles du Québec à FERMÉ.\n\nVoulez-vous vraiment continuer ?"
+  );
+  if (ok) masterSetAll("Fermé");
+});
 
   // Clear
   document.getElementById("batchClear").addEventListener("click", () => {
