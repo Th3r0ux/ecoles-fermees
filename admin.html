@@ -284,13 +284,13 @@ async function publishSnapshot() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": Bearer ${session.access_token}
+        "Authorization": `Bearer ${session.access_token}`
       }
     });
 
     if (!res.ok) {
       const txt = await res.text();
-      throw new Error(txt || HTTP ${res.status});
+      throw new Error(txt || `HTTP ${res.status}`);
     }
 
     return true;
