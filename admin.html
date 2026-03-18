@@ -300,6 +300,16 @@ async function publishSnapshot() {
   }
 }
 
+    let publishTimer = null;
+
+function schedulePublish() {
+  if (publishTimer) clearTimeout(publishTimer);
+
+  publishTimer = setTimeout(() => {
+    publishSnapshot();
+  }, 2000);
+}
+
     window.publishSnapshot = publishSnapshot;
 
 window.supabase = supabase;
@@ -1353,7 +1363,7 @@ item.manual_updated_at = payload.manual_updated_at;
 }
 
         if (saved) { saved.style.color = "#2e7d32"; saved.textContent = "Enregistré ✅"; }
-        await publishSnapshot();
+        schedulePublish();
         return;
       }
 
