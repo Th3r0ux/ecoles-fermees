@@ -693,7 +693,7 @@ if (item) {
   document.querySelectorAll('input[type="checkbox"][data-action="select"]').forEach(cb => cb.checked = false);
   refreshBatchBar();
   msg.textContent = "";
-  await publishSnapshot();
+  schedulePublish();
 }
 
 // état initial
@@ -818,7 +818,7 @@ async function masterSetAll(val){
     if (saved) { saved.textContent = "Enregistré ✅"; setTimeout(()=> saved.textContent = "", 1200); }
 
     msg.textContent = "";
-    await publishSnapshot();
+    schedulePublish();
   } finally {
     lockMaster(false);
   }
@@ -1294,7 +1294,7 @@ function formatGarde(status) {
   updateClosedLabelsForRegion(rid);
 
   msg.textContent = "";
-  await publishSnapshot();
+  schedulePublish();
   return;
 }
 
