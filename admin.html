@@ -271,6 +271,37 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: { persistSession: true, storage: window.localStorage, autoRefreshToken: true, detectSessionInUrl: true }
 });
 
+async function publishSnapshot() {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session?.access_token) {
+      console.warn("Aucune session active pour publier le snapshot.");
+      return false;
+    }
+
+    const res = await fetch("https://djcexcxyxtfazejhstcn.supabase.co/functions/v1/publish-snapshot", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": Bearer ${session.access_token}
+      }
+    });
+
+    if (!res.ok) {
+      const txt = await res.text();
+      throw new Error(txt || HTTP ${res.status});
+    }
+
+    return true;
+  } catch (err) {
+    console.error("Erreur publishSnapshot:", err);
+    return false;
+  }
+}
+
+    window.publishSnapshot = publishSnapshot;
+
 window.supabase = supabase;
 console.log("supabase exposed", !!window.supabase);
 
