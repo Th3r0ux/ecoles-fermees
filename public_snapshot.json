@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-18T18:35:52.208Z",
+  "generatedAt": "2026-03-18T18:42:47.417Z",
   "rows": [
     {
       "name": "Centre de formation professionnelle Val-d'Or",
@@ -19,7 +19,7 @@
       "name": "Centre La Concorde",
       "css": "Centre de services scolaire de l'Or-et-des-Bois",
       "region": "Abitibi-Témiscamingue",
-      "statut_cours": "Ouvert",
+      "statut_cours": "ND",
       "statut_garde": "Ouvert"
     },
     {
