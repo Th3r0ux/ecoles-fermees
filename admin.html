@@ -305,11 +305,17 @@ async function publishSnapshot() {
 function schedulePublish() {
   if (publishTimer) clearTimeout(publishTimer);
 
-  publishTimer = setTimeout(() => {
-    publishSnapshot();
-  }, 2000);
-}
+  publishTimer = setTimeout(async () => {
+    const ok = await publishSnapshot();
 
+    if (!ok) {
+      msg.textContent = "Erreur de publication du snapshot public.";
+      return;
+    }
+
+    msg.textContent = "";
+  }, 800);
+}
     window.publishSnapshot = publishSnapshot;
 
 window.supabase = supabase;
@@ -1178,6 +1184,7 @@ function formatGarde(status) {
   if (rid) updateClosedLabelsForRegion(rid);
 
   msg.textContent = "";
+  schedulePublish();
   return;
 }
 
