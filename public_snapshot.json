@@ -1,18 +1,18 @@
 {
-  "generatedAt": "2026-03-18T18:31:18.015Z",
+  "generatedAt": "2026-03-18T18:35:52.208Z",
   "rows": [
     {
       "name": "Centre de formation professionnelle Val-d'Or",
       "css": "Centre de services scolaire de l'Or-et-des-Bois",
       "region": "Abitibi-Témiscamingue",
-      "statut_cours": "Ouvert",
+      "statut_cours": "ND",
       "statut_garde": "Ouvert"
     },
     {
       "name": "Centre L'Horizon",
       "css": "Centre de services scolaire de l'Or-et-des-Bois",
       "region": "Abitibi-Témiscamingue",
-      "statut_cours": "Ouvert",
+      "statut_cours": "ND",
       "statut_garde": "Ouvert"
     },
     {
