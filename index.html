@@ -408,13 +408,6 @@ const cssClosedLabel = `${cssClosedCount} ${cssClosedCount > 1 ? "écoles fermé
 
 </script>
 <script>
-function formatLastUpdate(dateObj){
-  const time = dateObj.toLocaleTimeString("fr-CA", { hour: "2-digit", minute: "2-digit" });
-  const date = dateObj.toLocaleDateString("fr-CA", { day: "numeric", month: "long", year: "numeric" });
-  return `Dernière mise à jour: ${time} | ${date}`;
-}
-document.getElementById("lastUpdate").textContent = formatLastUpdate(new Date());
-
 // Bind search UNE fois
 const searchEl = document.getElementById("search");
 if (searchEl && !searchEl.dataset.bound){
@@ -423,79 +416,90 @@ if (searchEl && !searchEl.dataset.bound){
 }
 </script>
 
-<script type="module">
-const SUPABASE_URL = "https://djcexcxyxtfazejhstcn.supabase.co";
-const SUPABASE_KEY = "sb_publishable_TChgyvE4kQSVxpoPUUWZlA_5RYkPzM3";
-
+<script>
 function norm(s){
   if (s === null || s === undefined) return "n.d.";
   const v = String(s).trim();
-
   const u = v.toUpperCase();
 
   if (u === "ND" || u === "N.D." || u === "N.D" || u === "N/A") return "n.d.";
   if (u === "OUVERT") return "Ouvert";
   if (u === "FERME" || u === "FERMÉ") return "Fermé";
 
-  // si c'est déjà "Ouvert"/"Fermé"/"n.d."
   return v;
 }
 
-async function loadFromSupabaseAll() {
+function formatLastUpdate(dateString){
+  if (!dateString) return "";
+  const d = new Date(dateString);
+
+  if (Number.isNaN(d.getTime())) return "";
+
+  const time = d.toLocaleTimeString("fr-CA", {
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+
+  const date = d.toLocaleDateString("fr-CA", {
+    day: "numeric",
+    month: "long",
+    year: "numeric"
+  });
+
+  return `Dernière mise à jour: ${time} | ${date}`;
+}
+
+async function loadSnapshot() {
   const loading = document.getElementById("loading");
-  if (loading) loading.style.display = "block";
+  const lastUpdateEl = document.getElementById("lastUpdate");
 
-  const base =
-    `${SUPABASE_URL}/rest/v1/public_snapshot` +
-    `?select=name,css,region,statut_cours,statut_garde` +
-    `&order=region.asc&order=css.asc&order=name.asc`;
+  try {
+    if (loading) loading.style.display = "block";
 
-  const pageSize = 1000;
-  let from = 0;
-  let all = [];
-
-  while (true) {
-    const res = await fetch(base, {
-      headers: {
-        apikey: SUPABASE_KEY,
-        Authorization: `Bearer ${SUPABASE_KEY}`,
-        Range: `${from}-${from + pageSize - 1}`,   // 👈 pagination
-      },
+    const res = await fetch(`./snapshot.json?v=${Date.now()}`, {
+      cache: "no-store"
     });
 
     if (!res.ok) {
-      const txt = await res.text();
-      throw new Error(`Supabase error ${res.status}: ${txt}`);
+      throw new Error(`HTTP ${res.status}`);
     }
 
-    const rows = await res.json();
-    all = all.concat(rows);
+    const snapshot = await res.json();
 
-    // si on a reçu moins qu'une page complète, c'est fini
-    if (rows.length < pageSize) break;
+    const rows = Array.isArray(snapshot)
+      ? snapshot
+      : Array.isArray(snapshot.rows)
+        ? snapshot.rows
+        : [];
 
-    from += pageSize;
+    allRows = rows.map(x => ({
+      name: x.name || "",
+      css: x.css || "",
+      region: x.region || "",
+      statutCours: norm(x.statut_cours ?? x.statutCours),
+      statutGarde: norm(x.statut_garde ?? x.statutGarde),
+    }));
+
+    render();
+
+    if (lastUpdateEl) {
+      lastUpdateEl.textContent =
+        formatLastUpdate(snapshot.generatedAt || snapshot.lastUpdate || snapshot.updated_at)
+        || "Dernière mise à jour indisponible.";
+    }
+
+    if (loading) loading.style.display = "none";
+  } catch (err) {
+    console.error(err);
+    if (loading) {
+      loading.textContent = "Erreur de chargement des données.";
+    }
   }
-
-  allRows = all.map(x => ({
-    name: x.name || "",
-    css: x.css || "",
-    region: x.region || "",
-    statutCours: norm(x.statut_cours),
-    statutGarde: norm(x.statut_garde),
-  }));
-
-  render();
-
-  if (loading) loading.style.display = "none";
 }
 
-loadFromSupabaseAll().catch(err => {
-  console.error(err);
-  const loading = document.getElementById("loading");
-  if (loading) loading.textContent = "Erreur de chargement Supabase.";
-});
+loadSnapshot();
 </script>
+  
 <script>
 function sendHeight() {
   const height = Math.max(
