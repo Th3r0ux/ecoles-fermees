@@ -683,6 +683,7 @@ if (item) {
   document.querySelectorAll('input[type="checkbox"][data-action="select"]').forEach(cb => cb.checked = false);
   refreshBatchBar();
   msg.textContent = "";
+  await publishSnapshot();
 }
 
 // état initial
@@ -807,6 +808,7 @@ async function masterSetAll(val){
     if (saved) { saved.textContent = "Enregistré ✅"; setTimeout(()=> saved.textContent = "", 1200); }
 
     msg.textContent = "";
+    await publishSnapshot();
   } finally {
     lockMaster(false);
   }
@@ -1282,6 +1284,7 @@ function formatGarde(status) {
   updateClosedLabelsForRegion(rid);
 
   msg.textContent = "";
+  await publishSnapshot();
   return;
 }
 
@@ -1350,6 +1353,7 @@ item.manual_updated_at = payload.manual_updated_at;
 }
 
         if (saved) { saved.style.color = "#2e7d32"; saved.textContent = "Enregistré ✅"; }
+        await publishSnapshot();
         return;
       }
 
