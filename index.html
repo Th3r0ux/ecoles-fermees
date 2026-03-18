@@ -456,7 +456,7 @@ async function loadSnapshot() {
   try {
     if (loading) loading.style.display = "block";
 
-    const res = await fetch(`./snapshot.json?v=${Date.now()}`, {
+    const res = await fetch(`./public_snapshot.json?v=${Date.now()}`, {
       cache: "no-store"
     });
 
