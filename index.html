@@ -272,9 +272,16 @@ h1{
   <tbody></tbody>
 </table>
 <script>
-
-let activeFilter = "all";  // 👈 AJOUTE ICI
+  
+let activeFilter = "all";
 let allRows = [];
+
+const uiState = {
+  search: "",
+  openRegions: new Set(),
+  openCss: new Set(),
+  isInteracting: false
+};
 
 function formatCours(status) {
   if (status === "Fermé") {
@@ -296,7 +303,53 @@ function formatGarde(status) {
   return '<span class="badge badge-gray">n.d.</span>';
 }
 
-function render(filterText = "") {
+function captureUiState() {
+  uiState.openRegions = new Set();
+  uiState.openCss = new Set();
+
+  document.querySelectorAll(".region-row").forEach(row => {
+    const icon = row.querySelector('span[id$="-icon"]');
+    if (!icon) return;
+
+    const regionId = icon.id.replace("-icon", "");
+    if (icon.textContent.trim() === "▼") {
+      uiState.openRegions.add(regionId);
+    }
+  });
+
+  document.querySelectorAll(".css-row").forEach(row => {
+    const icon = row.querySelector('span[id$="-icon"]');
+    if (!icon) return;
+
+    const cssRegionId = icon.id.replace("-icon", "");
+    if (icon.textContent.trim() === "▼") {
+      uiState.openCss.add(cssRegionId);
+    }
+  });
+}
+
+function restoreUiState() {
+  uiState.openRegions.forEach(regionId => {
+    const icon = document.getElementById(`${regionId}-icon`);
+    if (!icon) return;
+    if (icon.textContent.trim() === "▼") return;
+
+    const regionHeader = icon.closest(".region-row");
+    if (regionHeader) regionHeader.click();
+  });
+
+  uiState.openCss.forEach(cssRegionId => {
+    const icon = document.getElementById(`${cssRegionId}-icon`);
+    if (!icon) return;
+    if (icon.textContent.trim() === "▼") return;
+
+    const cssHeader = icon.closest(".css-row");
+    if (cssHeader) cssHeader.click();
+  });
+}
+
+function render(filterText = uiState.search) {
+  uiState.search = filterText;
   const tbody = document.querySelector("#schools tbody");
   tbody.innerHTML = "";
 
@@ -550,11 +603,24 @@ const cssClosedLabel = `${cssClosedCount} ${cssClosedCount > 1 ? "écoles fermé
 </script>
 <script>
 // Bind search UNE fois
-const searchEl = document.getElementById("search");
-if (searchEl && !searchEl.dataset.bound){
-  searchEl.addEventListener("input", (e) => render(e.target.value));
-  searchEl.dataset.bound = "1";
-}
+
+const searchInput = document.getElementById("search");
+
+if (searchInput) {
+  searchInput.addEventListener("focus", () => {
+    uiState.isInteracting = true;
+  });
+
+  searchInput.addEventListener("blur", () => {
+    uiState.isInteracting = false;
+  });
+
+  searchInput.addEventListener("input", (e) => {
+    uiState.search = e.target.value;
+    render(uiState.search);
+  });
+}  
+
 </script>
 
 <script>
@@ -593,6 +659,8 @@ function formatLastUpdate(dateString){
 async function loadSnapshot() {
   const loading = document.getElementById("loading");
   const lastUpdateEl = document.getElementById("lastUpdate");
+  
+  if (uiState.isInteracting) return;
 
   try {
     if (loading) loading.style.display = "block";
@@ -613,6 +681,8 @@ async function loadSnapshot() {
         ? snapshot.rows
         : [];
 
+captureUiState();
+    
     allRows = rows.map(x => ({
       name: x.name || "",
       css: x.css || "",
@@ -621,7 +691,8 @@ async function loadSnapshot() {
       statutGarde: norm(x.statut_garde ?? x.statutGarde),
     }));
 
-    render();
+    render(uiState.search);
+restoreUiState();
 
     if (lastUpdateEl) {
       lastUpdateEl.textContent =
@@ -678,7 +749,7 @@ document.querySelectorAll(".filter-btn").forEach(btn => {
 
     activeFilter = btn.dataset.filter;
 
-    render(document.getElementById("search").value);
+    render(uiState.search);
   });
 });
 </script>
