@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-19T17:45:40.597Z",
+  "generatedAt": "2026-03-19T17:45:42.078Z",
   "rows": [
     {
       "name": "Centre de formation professionnelle Val-d'Or",
@@ -285,7 +285,7 @@
       "name": "École Bellefeuille",
       "css": "Centre de services scolaire Lac-Abitibi",
       "region": "Abitibi-Témiscamingue",
-      "statut_cours": "Fermé",
+      "statut_cours": "ND",
       "statut_garde": "ND"
     },
     {
