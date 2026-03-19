@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-03-19T19:09:45.486Z",
+  "generatedAt": "2026-03-19T19:09:47.148Z",
   "rows": [
     {
       "name": "Centre de formation professionnelle Val-d'Or",
       "css": "Centre de services scolaire de l'Or-et-des-Bois",
       "region": "Abitibi-Témiscamingue",
-      "statut_cours": "Fermé",
+      "statut_cours": "ND",
       "statut_garde": "ND"
     },
     {
