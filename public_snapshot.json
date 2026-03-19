@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-19T17:28:08.872Z",
+  "generatedAt": "2026-03-19T17:28:12.582Z",
   "rows": [
     {
       "name": "Centre de formation professionnelle Val-d'Or",
@@ -166,8 +166,8 @@
       "name": "Centre d'éducation des adultes La Passerelle",
       "css": "Centre de services scolaire Harricana",
       "region": "Abitibi-Témiscamingue",
-      "statut_cours": "ND",
-      "statut_garde": "Fermé"
+      "statut_cours": "Fermé",
+      "statut_garde": "ND"
     },
     {
       "name": "Centre de formation professionnelle Harricana",
