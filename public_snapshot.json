@@ -1,166 +1,166 @@
 {
-  "generatedAt": "2026-03-19T14:56:53.263Z",
+  "generatedAt": "2026-03-19T15:32:36.636Z",
   "rows": [
     {
       "name": "Centre de formation professionnelle Val-d'Or",
       "css": "Centre de services scolaire de l'Or-et-des-Bois",
       "region": "Abitibi-Témiscamingue",
-      "statut_cours": "ND",
-      "statut_garde": "ND"
+      "statut_cours": "Fermé",
+      "statut_garde": "Fermé"
     },
     {
       "name": "Centre L'Horizon",
       "css": "Centre de services scolaire de l'Or-et-des-Bois",
       "region": "Abitibi-Témiscamingue",
-      "statut_cours": "ND",
-      "statut_garde": "ND"
+      "statut_cours": "Fermé",
+      "statut_garde": "Fermé"
     },
     {
       "name": "Centre La Concorde",
       "css": "Centre de services scolaire de l'Or-et-des-Bois",
       "region": "Abitibi-Témiscamingue",
-      "statut_cours": "ND",
-      "statut_garde": "ND"
+      "statut_cours": "Fermé",
+      "statut_garde": "Fermé"
     },
     {
       "name": "Centre Le Trait-d'Union",
       "css": "Centre de services scolaire de l'Or-et-des-Bois",
       "region": "Abitibi-Témiscamingue",
-      "statut_cours": "ND",
-      "statut_garde": "ND"
+      "statut_cours": "Fermé",
+      "statut_garde": "Fermé"
     },
     {
       "name": "École Chanoine-Delisle",
       "css": "Centre de services scolaire de l'Or-et-des-Bois",
       "region": "Abitibi-Témiscamingue",
-      "statut_cours": "ND",
-      "statut_garde": "ND"
+      "statut_cours": "Fermé",
+      "statut_garde": "Fermé"
     },
     {
       "name": "École Charles-René-Lalande",
       "css": "Centre de services scolaire de l'Or-et-des-Bois",
       "region": "Abitibi-Témiscamingue",
-      "statut_cours": "ND",
-      "statut_garde": "ND"
+      "statut_cours": "Fermé",
+      "statut_garde": "Fermé"
     },
     {
       "name": "École Des Explorateurs",
       "css": "Centre de services scolaire de l'Or-et-des-Bois",
       "region": "Abitibi-Témiscamingue",
-      "statut_cours": "ND",
-      "statut_garde": "ND"
+      "statut_cours": "Fermé",
+      "statut_garde": "Fermé"
     },
     {
       "name": "École Louis-Querbes",
       "css": "Centre de services scolaire de l'Or-et-des-Bois",
       "region": "Abitibi-Témiscamingue",
-      "statut_cours": "ND",
-      "statut_garde": "ND"
+      "statut_cours": "Fermé",
+      "statut_garde": "Fermé"
     },
     {
       "name": "École Notre-Dame-de-Fatima",
       "css": "Centre de services scolaire de l'Or-et-des-Bois",
       "region": "Abitibi-Témiscamingue",
-      "statut_cours": "ND",
-      "statut_garde": "ND"
+      "statut_cours": "Fermé",
+      "statut_garde": "Fermé"
     },
     {
       "name": "École Notre-Dame-de-l'Assomption",
       "css": "Centre de services scolaire de l'Or-et-des-Bois",
       "region": "Abitibi-Témiscamingue",
-      "statut_cours": "ND",
-      "statut_garde": "ND"
+      "statut_cours": "Fermé",
+      "statut_garde": "Fermé"
     },
     {
       "name": "École Notre-Dame-du-Rosaire",
       "css": "Centre de services scolaire de l'Or-et-des-Bois",
       "region": "Abitibi-Témiscamingue",
-      "statut_cours": "ND",
-      "statut_garde": "ND"
+      "statut_cours": "Fermé",
+      "statut_garde": "Fermé"
     },
     {
       "name": "École Papillon-d'Or - École alternative",
       "css": "Centre de services scolaire de l'Or-et-des-Bois",
       "region": "Abitibi-Témiscamingue",
-      "statut_cours": "ND",
-      "statut_garde": "ND"
+      "statut_cours": "Fermé",
+      "statut_garde": "Fermé"
     },
     {
       "name": "École Pavillon Saint-Paul",
       "css": "Centre de services scolaire de l'Or-et-des-Bois",
       "region": "Abitibi-Témiscamingue",
-      "statut_cours": "ND",
-      "statut_garde": "ND"
+      "statut_cours": "Fermé",
+      "statut_garde": "Fermé"
     },
     {
       "name": "École Saint-Isidore",
       "css": "Centre de services scolaire de l'Or-et-des-Bois",
       "region": "Abitibi-Témiscamingue",
-      "statut_cours": "ND",
-      "statut_garde": "ND"
+      "statut_cours": "Fermé",
+      "statut_garde": "Fermé"
     },
     {
       "name": "École Saint-Joseph",
       "css": "Centre de services scolaire de l'Or-et-des-Bois",
       "region": "Abitibi-Témiscamingue",
-      "statut_cours": "ND",
-      "statut_garde": "ND"
+      "statut_cours": "Fermé",
+      "statut_garde": "Fermé"
     },
     {
       "name": "École Saint-Philippe",
       "css": "Centre de services scolaire de l'Or-et-des-Bois",
       "region": "Abitibi-Témiscamingue",
-      "statut_cours": "ND",
-      "statut_garde": "ND"
+      "statut_cours": "Fermé",
+      "statut_garde": "Fermé"
     },
     {
       "name": "École Saint-Sauveur",
       "css": "Centre de services scolaire de l'Or-et-des-Bois",
       "region": "Abitibi-Témiscamingue",
-      "statut_cours": "ND",
-      "statut_garde": "ND"
+      "statut_cours": "Fermé",
+      "statut_garde": "Fermé"
     },
     {
       "name": "École Sainte-Lucie",
       "css": "Centre de services scolaire de l'Or-et-des-Bois",
       "region": "Abitibi-Témiscamingue",
-      "statut_cours": "ND",
-      "statut_garde": "ND"
+      "statut_cours": "Fermé",
+      "statut_garde": "Fermé"
     },
     {
       "name": "École Sainte-Marie",
       "css": "Centre de services scolaire de l'Or-et-des-Bois",
       "region": "Abitibi-Témiscamingue",
-      "statut_cours": "ND",
-      "statut_garde": "ND"
+      "statut_cours": "Fermé",
+      "statut_garde": "Fermé"
     },
     {
       "name": "École secondaire La Concorde",
       "css": "Centre de services scolaire de l'Or-et-des-Bois",
       "region": "Abitibi-Témiscamingue",
-      "statut_cours": "ND",
-      "statut_garde": "ND"
+      "statut_cours": "Fermé",
+      "statut_garde": "Fermé"
     },
     {
       "name": "École secondaire Le Transit",
       "css": "Centre de services scolaire de l'Or-et-des-Bois",
       "region": "Abitibi-Témiscamingue",
-      "statut_cours": "ND",
-      "statut_garde": "ND"
+      "statut_cours": "Fermé",
+      "statut_garde": "Fermé"
     },
     {
       "name": "École secondaire Le Tremplin",
       "css": "Centre de services scolaire de l'Or-et-des-Bois",
       "region": "Abitibi-Témiscamingue",
-      "statut_cours": "ND",
-      "statut_garde": "ND"
+      "statut_cours": "Fermé",
+      "statut_garde": "Fermé"
     },
     {
       "name": "Polyvalente Le Carrefour",
       "css": "Centre de services scolaire de l'Or-et-des-Bois",
       "region": "Abitibi-Témiscamingue",
-      "statut_cours": "ND",
-      "statut_garde": "ND"
+      "statut_cours": "Fermé",
+      "statut_garde": "Fermé"
     },
     {
       "name": "Centre d'éducation des adultes La Passerelle",
