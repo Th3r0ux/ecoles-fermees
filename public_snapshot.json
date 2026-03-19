@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-19T17:54:12.232Z",
+  "generatedAt": "2026-03-19T17:54:14.855Z",
   "rows": [
     {
       "name": "Centre de formation professionnelle Val-d'Or",
@@ -2232,7 +2232,7 @@
       "css": "Centre de services scolaire de Portneuf",
       "region": "Capitale-Nationale (Québec)",
       "statut_cours": "Fermé",
-      "statut_garde": "Fermé"
+      "statut_garde": "ND"
     },
     {
       "name": "Centre de formation de Portneuf (Saint-Raymond)",
