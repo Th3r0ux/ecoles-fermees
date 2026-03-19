@@ -272,6 +272,24 @@ h1{
   font-size:12px;
   color:#64748b;
 }
+
+.clear-btn{
+  position:absolute;
+  right:12px;
+  top:50%;
+  transform:translateY(-50%);
+  border:none;
+  background:none;
+  font-size:18px;
+  color:#cbd5e1;
+  cursor:pointer;
+  padding:4px;
+}
+
+.clear-btn:hover{
+  color:#ef4444; /* rouge au hover */
+}
+  
 #noResults{
   padding:16px;
   background:#fff;
@@ -319,6 +337,7 @@ h1{
     placeholder="Rechercher une école, un CSS ou une région…"
     autocomplete="off"
   >
+  <button id="clearSearch" class="clear-btn" style="display:none;">✕</button>
   <div id="searchSuggestions" class="search-suggestions" style="display:none;"></div>
 </div>
   
@@ -761,9 +780,13 @@ function selectSuggestion(row) {
   const schoolKey = `${row.name}|||${row.css}|||${row.region}`;
 
   searchInput.value = row.name;
-  uiState.search = row.name;
-  uiState.selectedSchoolKey = schoolKey;
+uiState.search = row.name;
+uiState.selectedSchoolKey = schoolKey;
 
+const clearBtn = document.getElementById("clearSearch");
+if (clearBtn) {
+  clearBtn.style.display = "block";
+}
   hideSuggestions();
   render(uiState.search);
   scrollToFirstSchoolResult();
@@ -803,6 +826,7 @@ function renderSuggestions(query) {
 // Bind search UNE fois
 
 const searchInput = document.getElementById("search");
+const clearBtn = document.getElementById("clearSearch");
 
 if (searchInput) {
   searchInput.addEventListener("focus", () => {
@@ -821,6 +845,11 @@ if (searchInput) {
  searchInput.addEventListener("input", (e) => {
   uiState.search = e.target.value;
   uiState.selectedSchoolKey = null;
+
+  if (clearBtn) {
+    clearBtn.style.display = e.target.value ? "block" : "none";
+  }
+
   render(uiState.search);
   renderSuggestions(uiState.search);
 });
@@ -866,6 +895,19 @@ if (searchInput) {
     }
   });
 }
+
+if (clearBtn) {
+  clearBtn.addEventListener("click", () => {
+    searchInput.value = "";
+    uiState.search = "";
+    uiState.selectedSchoolKey = null;
+
+    clearBtn.style.display = "none";
+    hideSuggestions();
+    render("");
+    searchInput.focus();
+  });
+}  
 
 document.addEventListener("click", (e) => {
   const box = document.getElementById("searchSuggestions");
