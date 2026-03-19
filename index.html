@@ -239,6 +239,58 @@ h1{
   box-shadow:0 0 0 3px rgba(148,163,184,0.16);
 }
 
+.sticky-controls{
+  position: sticky;
+  top: 0;
+  z-index: 120;
+  background: rgba(243,244,246,0.96);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 10px 0 12px 0;
+  margin-bottom: 10px;
+}
+
+.sticky-controls-inner{
+  max-width: 1100px;
+}
+
+.sticky-controls::after{
+  content: "";
+  display: block;
+  height: 1px;
+  margin-top: 10px;
+  background: linear-gradient(to right, transparent, #dbe2ea 12%, #dbe2ea 88%, transparent);
+}
+
+/* Donne un peu plus d'air au search sticky */
+.sticky-controls .search-box{
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+
+/* Filtres plus compacts dans le sticky */
+.sticky-controls #filters{
+  margin: 8px 0 10px 0 !important;
+}
+
+/* Dernière mise à jour plus discrète */
+.sticky-controls #lastUpdate{
+  margin: 0 !important;
+  font-size: 13px !important;
+  color: #64748b !important;
+}
+
+@media (max-width: 720px){
+  .sticky-controls{
+    top: 0;
+    padding: 8px 0 10px 0;
+  }
+
+  .sticky-controls .search-box{
+    max-width: 100%;
+  }
+}  
+
 /* CSS rows */
 .css-row td{
   background:#f9fbfc;
@@ -307,7 +359,7 @@ h1{
   border:1px solid #dbe2ea;
   border-radius:12px;
   box-shadow:0 10px 24px rgba(15,23,42,0.10);
-  z-index:50;
+  z-index:200;
   overflow:hidden;
 }
 
@@ -401,24 +453,29 @@ h1{
 <body>
 <div class="page">
 <h1>Écoles fermées au Québec</h1>
-<div class="search-box">
-  <span class="search-icon">🔎</span>
-  <input 
-    id="search" 
-    type="text" 
-    placeholder="Rechercher une école, un CSS ou une région…"
-    autocomplete="off"
-  >
-  <button id="clearSearch" class="clear-btn" style="display:none;">✕</button>
-  <div id="searchSuggestions" class="search-suggestions" style="display:none;"></div>
+
+<div class="sticky-controls">
+  <div class="sticky-controls-inner">
+    <div class="search-box">
+      <span class="search-icon">🔎</span>
+      <input 
+        id="search" 
+        type="text" 
+        placeholder="Rechercher une école, un CSS ou une région…"
+        autocomplete="off"
+      >
+      <button id="clearSearch" class="clear-btn" style="display:none;">✕</button>
+      <div id="searchSuggestions" class="search-suggestions" style="display:none;"></div>
+    </div>
+
+    <div id="filters" style="margin:10px 0 15px 0;">
+      <button class="filter-btn active" data-filter="all">Tout</button>
+      <button class="filter-btn" data-filter="closed">Fermetures</button>
+    </div>
+
+    <div id="lastUpdate" style="margin:10px 0 15px 0;font-size:14px;color:#444;"></div>
+  </div>
 </div>
-  
-  <div id="filters" style="margin:10px 0 15px 0;">
-  <button class="filter-btn active" data-filter="all">Tout</button>
-  <button class="filter-btn" data-filter="closed">Fermetures</button>
-</div>
-  
-<div id="lastUpdate" style="margin:10px 0 15px 0;font-size:14px;color:#444;"></div>
 
 <div id="loading" style="margin:10px 0;color:#666;">
   Chargement des données…
