@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-19T17:28:14.245Z",
+  "generatedAt": "2026-03-19T17:39:27.927Z",
   "rows": [
     {
       "name": "Centre de formation professionnelle Val-d'Or",
@@ -614,7 +614,7 @@
       "name": "Centre de formation de Rimouski-Neigette-Éducation des adultes",
       "css": "Centre de services scolaire des Phares",
       "region": "Bas-St-Laurent",
-      "statut_cours": "ND",
+      "statut_cours": "Fermé",
       "statut_garde": "ND"
     },
     {
