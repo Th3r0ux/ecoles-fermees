@@ -213,6 +213,13 @@ h1{
   font-size:13px;
   opacity:0.5;
 }  
+
+#noResults{
+  padding:16px;
+  background:#fff;
+  border:1px solid #e5e7eb;
+  border-radius:10px;
+}  
   
 </style>
   
@@ -255,6 +262,14 @@ h1{
   </thead>
   <tbody></tbody>
 </table>
+  
+<div id="noResults" style="display:none;margin-top:20px;color:#555;">
+  Aucun résultat trouvé.<br>
+  <span style="font-size:13px;color:#777;">
+    Essayez le nom d’une école, d’un CSS ou d’une région.
+  </span>
+</div>  
+  
 <script>
   
 let activeFilter = "all";
@@ -363,6 +378,15 @@ function cssId(regionId, css) {
 
   return true;
 });
+
+  const noResultsEl = document.getElementById("noResults");
+
+  if (filtered.length === 0) {
+  if (noResultsEl) noResultsEl.style.display = "block";
+  return;
+} else {
+  if (noResultsEl) noResultsEl.style.display = "none";
+}
 
   // 2) Regrouper par région
   const groups = {};
