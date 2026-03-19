@@ -139,9 +139,7 @@ body{
   
   <div id="filters" style="margin:10px 0 15px 0;">
   <button class="filter-btn active" data-filter="all">Tout</button>
-  <button class="filter-btn" data-filter="closed">Fermées</button>
-  <button class="filter-btn" data-filter="region">Régions</button>
-  <button class="filter-btn" data-filter="css">CSS</button>
+  <button class="filter-btn" data-filter="closed">Fermetures</button>
 </div>
   
 <div id="lastUpdate" style="margin:10px 0 15px 0;font-size:14px;color:#444;"></div>
@@ -216,14 +214,6 @@ function cssId(regionId, css) {
   // 🎯 filtre boutons
   if (activeFilter === "closed") {
     return r.statutCours === "Fermé";
-  }
-
-  if (activeFilter === "region") {
-    return true; // on gère au niveau affichage
-  }
-
-  if (activeFilter === "css") {
-    return true;
   }
 
   return true;
