@@ -887,6 +887,7 @@ function formatGarde(status) {
     type="button"
     data-action="clear-css-check"
     data-css-name="${cssName.replace(/"/g, '&quot;')}"
+    data-region-name="${regionName.replace(/"/g, '&quot;')}"
     style="padding:4px 8px;font-size:12px;"
   >
     Revérifier ❌
@@ -1024,6 +1025,7 @@ function formatGarde(status) {
     type="button"
     data-action="clear-css-check"
     data-css-name="${cssName.replace(/"/g, '&quot;')}"
+    data-region-name="${region.replace(/"/g, '&quot;')}"
     style="padding:4px 8px;font-size:12px;"
   >
     Revérifier ❌
@@ -1134,45 +1136,50 @@ function formatGarde(status) {
   // 3) handler unique: toggle région / toggle css / update status
   if (!list.dataset.bound) {
     list.addEventListener("click", async (e) => {
-      const t = e.target;
-      if (t instanceof HTMLInputElement && t.type === "checkbox") return;
+  const t = e.target;
 
-      if (t instanceof HTMLButtonElement && t.dataset.action === "clear-css-check") {
-  e.stopPropagation();
+  const clearBtn = e.target.closest('button[data-action="clear-css-check"]');
+  if (clearBtn) {
+    e.preventDefault();
+    e.stopPropagation();
 
-  const cssName = t.dataset.cssName;
-  if (!cssName) return;
+    const cssName = clearBtn.dataset.cssName;
+    const regionName = clearBtn.dataset.regionName;
+    if (!cssName || !regionName) return;
 
-  msg.textContent = "Effacement du crochet…";
-  t.disabled = true;
+    msg.textContent = "Effacement du crochet…";
+    clearBtn.disabled = true;
 
-  const { error } = await supabase.rpc("clear_css_manual_updates", {
-    p_css_name: cssName
-  });
+    const { error } = await supabase.rpc("clear_css_manual_updates", {
+      p_region_name: regionName,
+      p_css_name: cssName
+    });
 
-  t.disabled = false;
+    clearBtn.disabled = false;
 
-  if (error) {
-    console.error(error);
-    msg.textContent = "Erreur effacement ✔ : " + error.message;
+    if (error) {
+      console.error(error);
+      msg.textContent = "Erreur effacement ✔ : " + error.message;
+      return;
+    }
+
+    for (const item of schools) {
+      if (
+        (item.region || "Autre") === regionName &&
+        (item.css || "Autre") === cssName
+      ) {
+        item.manual_updated_at = null;
+      }
+    }
+
+    const cssHeader = clearBtn.closest('[data-kind="css"]');
+    const rid = cssHeader?.getAttribute("data-region");
+    if (rid) updateClosedLabelsForRegion(rid);
+
+    msg.textContent = "";
+    await publishSnapshot();
     return;
   }
-
-  for (const item of schools) {
-    if ((item.css || "Autre") === cssName) {
-      item.manual_updated_at = null;
-    }
-  }
-
-  const cssHeader = t.closest('[data-kind="css"]');
-  const rid = cssHeader?.getAttribute("data-region");
-  if (rid) updateClosedLabelsForRegion(rid);
-
-  msg.textContent = "";
-  await publishSnapshot();
-  return;
-}
-
       if (t instanceof HTMLButtonElement && t.dataset.action === "css-batch") {
   e.stopPropagation();
 
@@ -1428,6 +1435,7 @@ item.manual_updated_at = payload.manual_updated_at;
     type="button"
     data-action="clear-css-check"
     data-css-name="${cssName.replace(/"/g, '&quot;')}"
+    data-region-name="${(clickable.dataset.regionName || 'Autre').replace(/"/g, '&quot;')}"
     style="padding:4px 8px;font-size:12px;"
   >
     Revérifier ❌
