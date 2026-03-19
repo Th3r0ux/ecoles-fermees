@@ -29,17 +29,7 @@ body{
     border-radius: 6px;
 }
 
-.open {
-    background-color: #e6f4ea;
-}
 
-.closed {
-    background-color: #fdecea;
-}
-
-.nd {
-    background-color: #f0f0f0;
-}
 
 #schools {
   width: 100%;
@@ -183,7 +173,34 @@ h1{
   background:#f9fafb;
 }  
 
+.badge{
+  display:inline-flex;
+  align-items:center;
+  padding:5px 10px;
+  border-radius:999px;
+  font-size:13px;
+  font-weight:600;
+  line-height:1;
+  white-space:nowrap;
+}
+
+.badge-green{
+  background:#e8f5e9;
+  color:#2e7d32;
+}
+
+.badge-red{
+  background:#fdecea;
+  color:#c62828;
+}
+
+.badge-gray{
+  background:#f1f3f5;
+  color:#555;
+}
+  
 </style>
+  
 </head>
 <body>
 <div class="page">
@@ -228,22 +245,22 @@ let allRows = [];
 
 function formatCours(status) {
   if (status === "Fermé") {
-    return '<span style="color:#c62828;font-weight:600;">Suspendus</span>';
+    return '<span class="badge badge-red">Suspendus</span>';
   }
   if (status === "Ouvert") {
-    return '<span style="color:#2e7d32;font-weight:600;">Classes ouvertes</span>';
+   return '<span class="badge badge-green">Classes ouvertes</span>';
   }
-  return '<span style="color:#000;">n.d.</span>';
+  return '<span class="badge badge-gray">n.d.</span>';
 }
 
 function formatGarde(status) {
   if (status === "Fermé") {
-    return '<span style="color:#c62828;font-weight:600;">Fermé</span>';
+    return '<span class="badge badge-red">Fermé</span>';
   }
   if (status === "Ouvert") {
-    return '<span style="color:#2e7d32;font-weight:600;">Ouvert</span>';
+    return '<span class="badge badge-green">Ouvert</span>';
   }
-  return '<span style="color:#000;">n.d.</span>';
+  return '<span class="badge badge-gray">n.d.</span>';
 }
 
 function render(filterText = "") {
