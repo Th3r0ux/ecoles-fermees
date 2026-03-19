@@ -250,6 +250,14 @@ h1{
   margin-bottom: 10px;
 }
 
+/* Désactive le sticky quand l'app est affichée dans un iframe */
+html.inside-iframe .sticky-controls{
+  position: static;
+  top: auto;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}  
+
 .sticky-controls-inner{
   max-width: 1100px;
 }
@@ -1204,6 +1212,11 @@ function updateMobilePlaceholder() {
 
 window.addEventListener("load", updateMobilePlaceholder);
 window.addEventListener("resize", updateMobilePlaceholder);
+</script>  
+<script>
+if (window.self !== window.top) {
+  document.documentElement.classList.add("inside-iframe");
+}
 </script>  
 </body>
 </html>
