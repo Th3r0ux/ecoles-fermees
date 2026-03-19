@@ -74,8 +74,10 @@ body{
 #schools tbody tr {
   border: 1px solid #eee;
   border-radius: 10px;
-  margin: 12px 0;
+  margin: 12px 8px;
   overflow: hidden; /* important pour border-radius */
+  width: calc(100% - 16px);
+  box-sizing: border-box;
 }
 
 #schools td {
@@ -118,6 +120,8 @@ body{
 #schools tr:not(.region-row):not(.css-row) td:first-child strong{
   font-weight: 350;     /* enlève le bold */
 }
+
+  
 
 .filter-btn{
   padding:8px 14px;
