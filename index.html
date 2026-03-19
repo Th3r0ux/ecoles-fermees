@@ -60,40 +60,57 @@ body{
   border-bottom: 1px solid #edf1f5;
 }
 
-/* Mobile: transforme chaque ligne en "carte" */
+/* Mobile: transforme chaque ligne en carte */
 @media (max-width: 720px) {
   #schools thead {
     display: none;
   }
 
-  #schools, #schools tbody, #schools tr, #schools td {
+  #schools,
+  #schools tbody {
     display: block;
     width: 100%;
   }
 
-#schools tbody tr {
-  border: 1px solid #eee;
-  border-radius: 10px;
-  margin: 12px 8px;
-  overflow: hidden; /* important pour border-radius */
-  width: calc(100% - 16px);
-  box-sizing: border-box;
-}
+  #schools tr {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+  }
 
-#schools td {
-  padding: 12px 14px;
-  border: none;
-}
+  #schools td {
+    display: block;
+    width: auto;
+    box-sizing: border-box;
+    padding: 12px 14px;
+    border: none;
+  }
+
+  #schools tbody tr {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    margin: 12px 0;
+    overflow: hidden;
+    background: #fff;
+  }
+
+  /* Donne enfin de l'air aux cartes régions / CSS */
+  #schools tr.region-row,
+  #schools tr.css-row {
+    width: calc(100% - 20px);
+    margin-left: 10px;
+    margin-right: 10px;
+  }
 
   /* Étiquettes avant les valeurs */
   #schools td:nth-child(2)::before {
     content: "▪️ Cours : ";
-    font-weight: 200;
+    font-weight: 400;
   }
 
   #schools td:nth-child(3)::before {
     content: "▪️ Service de garde : ";
-    font-weight: 200;
+    font-weight: 400;
   }
 }
 
@@ -105,24 +122,53 @@ body{
   font-size:15px;
 }
 
-  @media (max-width: 720px){
+.group-line{
+  display:flex;
+  align-items:flex-start;
+  gap:8px;
+}
+
+.group-icon{
+  display:inline-block;
+  width:18px;
+  flex:0 0 18px;
+}
+
+.group-title{
+  min-width:0;
+}
+
+.group-count{
+  display:inline;
+  font-weight:400;
+  color:#666;
+  margin-left:6px;
+}
+
+@media (max-width: 720px){
   .region-row td,
   .css-row td{
     margin: 0 8px;
     width: calc(100% - 16px);
     box-sizing: border-box;
   }
-}
 
-@media (max-width: 720px){
-  #schools td[style*="padding-left"]{
-    padding-left: 2px !important;
+  .group-count{
+    display:block;
+    margin-left:26px;
+    margin-top:4px;
   }
 }
 
+  
+
 @media (max-width: 720px){
+  #schools .css-row td{
+    padding-left: 14px !important;
+  }
+
   #schools tr:not(.region-row):not(.css-row) td:first-child{
-    padding-left: 10px !important;
+    padding-left: 18px !important;
   }
 }
 
@@ -566,12 +612,14 @@ groups[region].forEach(r => {
     headerTr.className = "region-row";
     headerTr.style.cursor = "pointer";
     headerTr.innerHTML = `
-      <td colspan="3">
-        <span id="${regionId}-icon" style="display:inline-block;width:18px;">${autoExpand ? "▼" : "▶"}</span>
-        ${region}
-        <span style="font-weight:400;color:#666;">(${closedLabel})</span>
-      </td>
-    `;
+  <td colspan="3">
+    <div class="group-line">
+      <span id="${regionId}-icon" class="group-icon">${autoExpand ? "▼" : "▶"}</span>
+      <span class="group-title">${region}</span>
+    </div>
+    <span class="group-count">(${closedLabel})</span>
+  </td>
+`;
     tbody.appendChild(headerTr);
 
 headerTr.addEventListener("click", () => {
@@ -617,10 +665,12 @@ headerTr.addEventListener("click", () => {
 
         cssHeader.innerHTML = `
           <td colspan="3" style="padding-left:26px;font-weight:700;">
-            <span id="${cssRegionId}-icon" style="display:inline-block;width:18px;">▶</span>
-            ${cssName}
-            <span style="font-weight:400;color:#666;">(${cssClosedLabel})</span>
-          </td>
+  <div class="group-line">
+    <span id="${cssRegionId}-icon" class="group-icon">▶</span>
+    <span class="group-title">${cssName}</span>
+  </div>
+  <span class="group-count">(${cssClosedLabel})</span>
+</td>
         `;
         headerTr.insertAdjacentElement("afterend", cssHeader);
 
@@ -697,10 +747,12 @@ headerTr.addEventListener("click", () => {
 const cssClosedLabel = `${cssClosedCount} ${cssClosedCount > 1 ? "écoles fermées" : "école fermée"}`;
     cssHeader.innerHTML = `
   <td colspan="3" style="padding-left:26px;font-weight:700;">
-    <span id="${cssRegionId}-icon" style="display:inline-block;width:18px;">▼</span>
-    ${cssName}
-    <span style="font-weight:400;color:#666;">(${cssClosedLabel})</span>
-  </td>
+  <div class="group-line">
+    <span id="${cssRegionId}-icon" class="group-icon">▼</span>
+    <span class="group-title">${cssName}</span>
+  </div>
+  <span class="group-count">(${cssClosedLabel})</span>
+</td>
 `;
     tbody.appendChild(cssHeader);
 
