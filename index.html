@@ -1131,6 +1131,21 @@ document.querySelectorAll(".filter-btn").forEach(btn => {
 <div class="footer">
   © Guillaume Théroux | Noovo Info
 </div>  
-</div>  
+</div>
+<script>
+function updateMobilePlaceholder() {
+  const input = document.getElementById("search");
+  if (!input) return;
+
+  if (window.innerWidth <= 720) {
+    input.placeholder = "Rechercher une école, un CSS…";
+  } else {
+    input.placeholder = "Rechercher une école, un CSS ou une région…";
+  }
+}
+
+window.addEventListener("load", updateMobilePlaceholder);
+window.addEventListener("resize", updateMobilePlaceholder);
+</script>  
 </body>
 </html>
