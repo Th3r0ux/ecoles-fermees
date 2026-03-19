@@ -7,6 +7,7 @@
 <title>Écoles fermées au Québec</title>  
 
 <style>
+  
 body{
   font-family:
     -apple-system,
@@ -16,8 +17,12 @@ body{
     "Helvetica Neue",
     Arial,
     sans-serif;
+  
+  background:#f6f8fb;
+  color:#111827;
+  margin:0;
 }
-
+  
 .school {
     padding: 10px;
     margin-bottom: 8px;
@@ -39,14 +44,23 @@ body{
 #schools {
   width: 100%;
   border-collapse: collapse;
+  margin-top:20px;
+  background:#fff;
+  border-radius:14px;
+  overflow:hidden;
+  box-shadow:0 2px 6px rgba(0,0,0,0.04);
 }
+
 #schools th, #schools td {
   padding: 12px 10px;
   vertical-align: top;
 }
+
 #schools thead tr {
-  border-bottom: 2px solid #ddd;
+  background:#fafafa;
+  border-bottom: 1px solid #e5e7eb;
 }
+
 #schools tbody tr {
   border-bottom: 1px solid #eee;
 }
@@ -88,9 +102,10 @@ body{
 
 .region-row td{
   padding: 14px 10px;
-  font-weight: 800;
-  border-top: 2px solid #ddd;
-  background: #fafafa;
+  font-weight: 700;
+  border-top: 1px solid #e5e7eb;
+  background: #f1f5f9;
+  font-size:15px;
 }
 
 @media (max-width: 720px){
@@ -109,26 +124,69 @@ body{
   font-weight: 350;     /* enlève le bold */
 }
 
-  .filter-btn{
-  padding:8px 12px;
+.filter-btn{
+  padding:8px 14px;
   margin-right:6px;
   border-radius:999px;
-  border:1px solid #ddd;
+  border:1px solid #d0d7de;
   background:#fff;
   cursor:pointer;
   font-size:14px;
+  transition:all 0.15s ease;
+}
+
+.filter-btn:hover{
+  background:#f3f4f6;
 }
 
 .filter-btn.active{
-  background:#111;
+  background:#111827;
   color:#fff;
-  border-color:#111;
+  border-color:#111827;
+} 
+
+.page{
+  max-width:1100px;
+  margin:0 auto;
+  padding:24px 16px 40px;
 }
+
+h1{
+  font-size:28px;
+  margin-bottom:10px;
+}
+
+#search{
+  width:100%;
+  max-width:680px;
+  padding:14px 16px;
+  font-size:16px;
+  border:1px solid #d0d7de;
+  border-radius:12px;
+  outline:none;
+  box-sizing:border-box;
+}
+
+#search:focus{
+  border-color:#6b7280;
+  box-shadow:0 0 0 3px rgba(100,116,139,0.12);
+}
+
+/* CSS rows */
+.css-row td{
+  background:#f8fafc;
+  font-size:14px;
+}
+
+/* Hover */
+#schools tbody tr:hover{
+  background:#f9fafb;
+}  
 
 </style>
 </head>
 <body>
-
+<div class="page">
 <h1>Écoles fermées au Québec</h1>
 <input 
   id="search" 
@@ -574,6 +632,6 @@ document.querySelectorAll(".filter-btn").forEach(btn => {
   });
 });
 </script>
-  
+</div>  
 </body>
 </html>
