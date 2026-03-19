@@ -227,12 +227,53 @@ h1{
   opacity:0.45;
 } 
 
+.search-suggestions{
+  position:absolute;
+  top:calc(100% + 6px);
+  left:0;
+  right:0;
+  background:#fff;
+  border:1px solid #dbe2ea;
+  border-radius:12px;
+  box-shadow:0 10px 24px rgba(15,23,42,0.10);
+  z-index:50;
+  overflow:hidden;
+}
+
+.search-suggestion{
+  padding:12px 14px;
+  cursor:pointer;
+  border-bottom:1px solid #edf1f5;
+  background:#fff;
+}
+
+.search-suggestion:last-child{
+  border-bottom:none;
+}
+
+.search-suggestion:hover,
+.search-suggestion.active{
+  background:#f8fafc;
+}
+
+.search-suggestion-name{
+  font-size:14px;
+  font-weight:600;
+  color:#0f172a;
+}
+
+.search-suggestion-meta{
+  margin-top:2px;
+  font-size:12px;
+  color:#64748b;
+}  
+
 #noResults{
   padding:16px;
   background:#fff;
   border:1px solid #e5e7eb;
   border-radius:10px;
-}  
+}   
 
 .info-box{
   margin-top:8px;
@@ -272,7 +313,9 @@ h1{
     id="search" 
     type="text" 
     placeholder="Rechercher une école, un CSS ou une région…"
+    autocomplete="off"
   >
+  <div id="searchSuggestions" class="search-suggestions" style="display:none;"></div>
 </div>
   
   <div id="filters" style="margin:10px 0 15px 0;">
@@ -316,6 +359,7 @@ let allRows = [];
 
 const uiState = {
   search: "",
+  selectedSchoolKey: null,
   openRegions: new Set(),
   openCss: new Set(),
   isInteracting: false
@@ -399,14 +443,18 @@ function cssId(regionId, css) {
 }
 
   // 1) Filtrer
-  const filtered = allRows.filter(r => {
+ const filtered = allRows.filter(r => {
 
   // 🔎 filtre recherche
-  const matchesSearch = !query || (
-    r.name.toLowerCase().includes(query) ||
-    r.css.toLowerCase().includes(query) ||
-    r.region.toLowerCase().includes(query)
-  );
+  const selectedKey = uiState.selectedSchoolKey;
+
+  const matchesSearch = selectedKey
+    ? `${r.name}|||${r.css}|||${r.region}` === selectedKey
+    : !query || (
+        r.name.toLowerCase().includes(query) ||
+        r.css.toLowerCase().includes(query) ||
+        r.region.toLowerCase().includes(query)
+      );
 
   if (!matchesSearch) return false;
 
@@ -648,6 +696,105 @@ const cssClosedLabel = `${cssClosedCount} ${cssClosedCount > 1 ? "écoles fermé
 }  // <-- ferme la fonction render()
 
 </script>
+
+<script>
+function getSchoolSuggestions(query) {
+  const q = query.trim().toLowerCase();
+  if (q.length < 2) return [];
+
+  const seen = new Set();
+
+  return allRows
+    .filter(r => {
+      const name = (r.name || "").toLowerCase();
+      return name.includes(q);
+    })
+    .sort((a, b) => {
+      const an = (a.name || "").toLowerCase();
+      const bn = (b.name || "").toLowerCase();
+
+      const aStarts = an.startsWith(q) ? 0 : 1;
+      const bStarts = bn.startsWith(q) ? 0 : 1;
+      if (aStarts !== bStarts) return aStarts - bStarts;
+
+      return an.localeCompare(bn, "fr");
+    })
+    .filter(r => {
+      const key = `${r.name}|||${r.css}|||${r.region}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .slice(0, 8);
+}
+
+function hideSuggestions() {
+  const box = document.getElementById("searchSuggestions");
+  if (!box) return;
+  box.style.display = "none";
+  box.innerHTML = "";
+}
+
+function scrollToFirstSchoolResult() {
+  setTimeout(() => {
+    const firstSchoolRow = document.querySelector(
+      '#schools tbody tr:not(.region-row):not(.css-row)'
+    );
+
+    if (firstSchoolRow) {
+      firstSchoolRow.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+      });
+    }
+  }, 80);
+}
+
+function selectSuggestion(row) {
+  const searchInput = document.getElementById("search");
+  if (!searchInput) return;
+
+  const schoolKey = `${row.name}|||${row.css}|||${row.region}`;
+
+  searchInput.value = row.name;
+  uiState.search = row.name;
+  uiState.selectedSchoolKey = schoolKey;
+
+  hideSuggestions();
+  render(uiState.search);
+  scrollToFirstSchoolResult();
+}
+
+function renderSuggestions(query) {
+  const box = document.getElementById("searchSuggestions");
+  if (!box) return;
+
+  const suggestions = getSchoolSuggestions(query);
+
+  if (!query.trim() || suggestions.length === 0) {
+    hideSuggestions();
+    return;
+  }
+
+  box.innerHTML = suggestions.map((r, index) => `
+    <div class="search-suggestion" data-index="${index}">
+      <div class="search-suggestion-name">${r.name}</div>
+      <div class="search-suggestion-meta">${r.css} · ${r.region}</div>
+    </div>
+  `).join("");
+
+  box.style.display = "block";
+
+  const items = box.querySelectorAll(".search-suggestion");
+  items.forEach((item, index) => {
+    item.addEventListener("mousedown", (e) => {
+      e.preventDefault();
+      selectSuggestion(suggestions[index]);
+    });
+  });
+}
+</script>
+  
 <script>
 // Bind search UNE fois
 
@@ -656,18 +803,75 @@ const searchInput = document.getElementById("search");
 if (searchInput) {
   searchInput.addEventListener("focus", () => {
     uiState.isInteracting = true;
+    renderSuggestions(searchInput.value);
   });
 
   searchInput.addEventListener("blur", () => {
     uiState.isInteracting = false;
+
+    setTimeout(() => {
+      hideSuggestions();
+    }, 150);
   });
 
-  searchInput.addEventListener("input", (e) => {
-    uiState.search = e.target.value;
-    render(uiState.search);
-  });
-}  
+ searchInput.addEventListener("input", (e) => {
+  uiState.search = e.target.value;
+  uiState.selectedSchoolKey = null;
+  render(uiState.search);
+  renderSuggestions(uiState.search);
+});
 
+  searchInput.addEventListener("keydown", (e) => {
+    const box = document.getElementById("searchSuggestions");
+    const items = box ? Array.from(box.querySelectorAll(".search-suggestion")) : [];
+    const active = box ? box.querySelector(".search-suggestion.active") : null;
+    let activeIndex = items.findIndex(item => item.classList.contains("active"));
+
+    if (e.key === "ArrowDown") {
+      if (!items.length) return;
+      e.preventDefault();
+
+      if (activeIndex >= 0) items[activeIndex].classList.remove("active");
+      activeIndex = activeIndex < items.length - 1 ? activeIndex + 1 : 0;
+      items[activeIndex].classList.add("active");
+      return;
+    }
+
+    if (e.key === "ArrowUp") {
+      if (!items.length) return;
+      e.preventDefault();
+
+      if (activeIndex >= 0) items[activeIndex].classList.remove("active");
+      activeIndex = activeIndex > 0 ? activeIndex - 1 : items.length - 1;
+      items[activeIndex].classList.add("active");
+      return;
+    }
+
+    if (e.key === "Enter") {
+  if (active) {
+    e.preventDefault();
+    const index = Number(active.dataset.index);
+    const suggestions = getSchoolSuggestions(uiState.search);
+    const match = suggestions[index];
+    if (match) selectSuggestion(match);
+  }
+}
+
+    if (e.key === "Escape") {
+      hideSuggestions();
+    }
+  });
+}
+
+document.addEventListener("click", (e) => {
+  const box = document.getElementById("searchSuggestions");
+  const wrapper = document.querySelector(".search-box");
+
+  if (!box || !wrapper) return;
+  if (!wrapper.contains(e.target)) {
+    hideSuggestions();
+  }
+});
 </script>
 
 <script>
@@ -731,12 +935,12 @@ async function loadSnapshot() {
 captureUiState();
     
     allRows = rows.map(x => ({
-      name: x.name || "",
-      css: x.css || "",
-      region: x.region || "",
-      statutCours: norm(x.statut_cours ?? x.statutCours),
-      statutGarde: norm(x.statut_garde ?? x.statutGarde),
-    }));
+  name: (x.name || "").trim(),
+  css: (x.css || "").trim(),
+  region: (x.region || "").trim(),
+  statutCours: norm(x.statut_cours ?? x.statutCours),
+  statutGarde: norm(x.statut_garde ?? x.statutGarde),
+}));
 
     render(uiState.search);
 restoreUiState();
