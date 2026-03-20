@@ -463,12 +463,12 @@ html.inside-iframe .sticky-controls{
 }
 
 #schools tr.animating-open td{
-  animation: rowOpen 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: rowOpen 150ms cubic-bezier(0.22, 1, 0.36, 1) both;
   animation-delay: var(--row-delay, 0ms);
 }
 
 #schools tr.animating-close td{
-  animation: rowClose 170ms ease both;
+  animation: rowClose 110ms ease both;
   animation-delay: var(--row-delay, 0ms);
 }
 
@@ -633,7 +633,7 @@ function restoreUiState() {
 function showRows(rows, displayValue = "table-row") {
   rows.forEach((tr, index) => {
     tr.classList.remove("animating-close");
-    tr.style.setProperty("--row-delay", `${index * 14}ms`);
+    tr.style.setProperty("--row-delay", `${index * 8}ms`);
     tr.style.display = displayValue;
 
     void tr.offsetWidth; // force reflow léger pour relancer l'animation proprement
@@ -652,7 +652,7 @@ function hideRows(rows) {
     .filter(tr => tr.style.display !== "none")
     .forEach((tr, index) => {
       tr.classList.remove("animating-open");
-      tr.style.setProperty("--row-delay", `${index * 10}ms`);
+      tr.style.setProperty("--row-delay", `${index * 6}ms`);
       tr.classList.add("animating-close");
 
       tr.addEventListener("animationend", () => {
