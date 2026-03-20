@@ -565,6 +565,37 @@ const uiState = {
   isInteracting: false
 };
 
+const STORAGE_KEY = "ecolesFermeesUiState";
+
+function saveUiState() {
+  const payload = {
+    search: uiState.search || "",
+    selectedSchoolKey: uiState.selectedSchoolKey || null,
+    openRegions: Array.from(uiState.openRegions || []),
+    openCss: Array.from(uiState.openCss || []),
+    activeFilter: activeFilter || "all"
+  };
+
+  sessionStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+}
+
+function loadUiState() {
+  try {
+    const raw = sessionStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+
+    const saved = JSON.parse(raw);
+
+    uiState.search = saved.search || "";
+    uiState.selectedSchoolKey = saved.selectedSchoolKey || null;
+    uiState.openRegions = new Set(saved.openRegions || []);
+    uiState.openCss = new Set(saved.openCss || []);
+    activeFilter = saved.activeFilter || "all";
+  } catch (e) {
+    console.error("Impossible de relire uiState", e);
+  }
+}  
+
 function formatCours(status) {
   if (status === "Fermé") {
     return '<span class="badge badge-red">Suspendus</span>';
@@ -608,6 +639,8 @@ function captureUiState() {
       uiState.openCss.add(cssRegionId);
     }
   });
+
+  saveUiState();
 }
 
 function restoreUiState() {
@@ -820,12 +853,12 @@ headerTr.addEventListener("click", () => {
 
         // toggle CSS
         cssHeader.addEventListener("click", (e) => {
-          e.stopPropagation();
-          const schoolRows = Array.from(
-            tbody.querySelectorAll(`tr[data-css="${cssRegionId}"]`)
-          ).filter(tr => !tr.classList.contains("css-row"));
+  e.stopPropagation();
+  const schoolRows = Array.from(
+    tbody.querySelectorAll(`tr[data-css="${cssRegionId}"]`)
+  ).filter(tr => !tr.classList.contains("css-row"));
 
-          const anyVisible = schoolRows.some(tr => tr.style.display !== "none");
+  const anyVisible = schoolRows.some(tr => tr.style.display !== "none");
 
   if (anyVisible) {
     hideRows(schoolRows.slice().reverse());
@@ -833,9 +866,10 @@ headerTr.addEventListener("click", () => {
     showRows(schoolRows);
   }
 
-          const icon = document.getElementById(`${cssRegionId}-icon`);
-          if (icon) icon.textContent = anyVisible ? "▶" : "▼";
-        });
+  const icon = document.getElementById(`${cssRegionId}-icon`);
+  if (icon) icon.textContent = anyVisible ? "▶" : "▼";
+  captureUiState();
+});
       });
 
     // refresh après création
@@ -849,6 +883,7 @@ headerTr.addEventListener("click", () => {
   hideRows(regionRows.slice().reverse());
   const icon = document.getElementById(`${regionId}-icon`);
   if (icon) icon.textContent = "▶";
+  captureUiState();
   return;
 }
 
@@ -873,7 +908,8 @@ headerTr.addEventListener("click", () => {
   }
 
   const icon = document.getElementById(`${regionId}-icon`);
-  if (icon) icon.textContent = "▼";
+if (icon) icon.textContent = "▼";
+captureUiState();
 });
 
     // --- LAZY LOAD ---
@@ -925,7 +961,6 @@ const cssClosedLabel = `${cssClosedCount} ${cssClosedCount > 1 ? "écoles fermé
    cssHeader.addEventListener("click", (e) => {
   e.stopPropagation(); // IMPORTANT: sinon ça déclenche aussi le toggle de région
   const rows = Array.from(tbody.querySelectorAll(`tr[data-css="${cssRegionId}"]`));
-  // on exclut le header CSS lui-même
   const schoolRows = rows.filter(tr => !tr.classList.contains("css-row"));
   const anyVisible = schoolRows.some(tr => tr.style.display !== "none");
 
@@ -936,6 +971,7 @@ const cssClosedLabel = `${cssClosedCount} ${cssClosedCount > 1 ? "écoles fermé
   }
 
   document.getElementById(`${cssRegionId}-icon`).textContent = anyVisible ? "▶" : "▼";
+  captureUiState();
 });
 
   });
@@ -1007,14 +1043,16 @@ function selectSuggestion(row) {
   const schoolKey = `${row.name}|||${row.css}|||${row.region}`;
 
   searchInput.value = row.name;
-uiState.search = row.name;
-uiState.selectedSchoolKey = schoolKey;
+  uiState.search = row.name;
+  uiState.selectedSchoolKey = schoolKey;
 
-const clearBtn = document.getElementById("clearSearch");
-if (clearBtn) {
-  clearBtn.style.display = "block";
-}
+  const clearBtn = document.getElementById("clearSearch");
+  if (clearBtn) {
+    clearBtn.style.display = "block";
+  }
+
   hideSuggestions();
+  saveUiState();
   render(uiState.search);
   scrollToFirstSchoolResult();
 }
@@ -1069,7 +1107,7 @@ if (searchInput) {
     }, 150);
   });
 
- searchInput.addEventListener("input", (e) => {
+searchInput.addEventListener("input", (e) => {
   uiState.search = e.target.value;
   uiState.selectedSchoolKey = null;
 
@@ -1077,6 +1115,7 @@ if (searchInput) {
     clearBtn.style.display = e.target.value ? "block" : "none";
   }
 
+  saveUiState();
   render(uiState.search);
   renderSuggestions(uiState.search);
 });
@@ -1131,10 +1170,11 @@ if (clearBtn) {
 
     clearBtn.style.display = "none";
     hideSuggestions();
+    saveUiState();
     render("");
     searchInput.focus();
   });
-}  
+}
 
 document.addEventListener("click", (e) => {
   const box = document.getElementById("searchSuggestions");
@@ -1205,9 +1245,7 @@ async function loadSnapshot() {
         ? snapshot.rows
         : [];
 
-captureUiState();
-    
-    allRows = rows.map(x => ({
+allRows = rows.map(x => ({
   name: (x.name || "").trim(),
   css: (x.css || "").trim(),
   region: (x.region || "").trim(),
@@ -1215,7 +1253,7 @@ captureUiState();
   statutGarde: norm(x.statut_garde ?? x.statutGarde),
 }));
 
-    render(uiState.search);
+render(uiState.search);
 restoreUiState();
 
     if (lastUpdateEl) {
@@ -1232,6 +1270,22 @@ restoreUiState();
     }
   }
 }
+
+loadUiState();
+
+const searchInputInit = document.getElementById("search");
+if (searchInputInit) {
+  searchInputInit.value = uiState.search || "";
+}
+
+const clearBtnInit = document.getElementById("clearSearch");
+if (clearBtnInit) {
+  clearBtnInit.style.display = uiState.search ? "block" : "none";
+}
+  
+document.querySelectorAll(".filter-btn").forEach(btn => {
+  btn.classList.toggle("active", btn.dataset.filter === activeFilter);
+});
 
 loadSnapshot();
 setInterval(loadSnapshot, 15000);
@@ -1272,6 +1326,7 @@ document.querySelectorAll(".filter-btn").forEach(btn => {
     btn.classList.add("active");
 
     activeFilter = btn.dataset.filter;
+    saveUiState();
 
     render(uiState.search);
   });
