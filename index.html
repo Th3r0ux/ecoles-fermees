@@ -454,6 +454,45 @@ html.inside-iframe .sticky-controls{
   margin-top: 30px;
   background: #f9fafb;
 }
+
+/* Animation douce ouverture / fermeture */
+#schools tr.animating-open td,
+#schools tr.animating-close td{
+  transform-origin: top center;
+  will-change: opacity, transform;
+}
+
+#schools tr.animating-open td{
+  animation: rowOpen 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--row-delay, 0ms);
+}
+
+#schools tr.animating-close td{
+  animation: rowClose 170ms ease both;
+  animation-delay: var(--row-delay, 0ms);
+}
+
+@keyframes rowOpen{
+  from{
+    opacity: 0;
+    transform: translateY(-6px) scaleY(0.985);
+  }
+  to{
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+  }
+}
+
+@keyframes rowClose{
+  from{
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+  }
+  to{
+    opacity: 0;
+    transform: translateY(-4px) scaleY(0.985);
+  }
+}
   
 </style>
   
@@ -589,6 +628,39 @@ function restoreUiState() {
     const cssHeader = icon.closest(".css-row");
     if (cssHeader) cssHeader.click();
   });
+}
+
+function showRows(rows, displayValue = "table-row") {
+  rows.forEach((tr, index) => {
+    tr.classList.remove("animating-close");
+    tr.style.setProperty("--row-delay", `${index * 14}ms`);
+    tr.style.display = displayValue;
+
+    void tr.offsetWidth; // force reflow léger pour relancer l'animation proprement
+
+    tr.classList.add("animating-open");
+
+    tr.addEventListener("animationend", () => {
+      tr.classList.remove("animating-open");
+      tr.style.removeProperty("--row-delay");
+    }, { once: true });
+  });
+}
+
+function hideRows(rows) {
+  rows
+    .filter(tr => tr.style.display !== "none")
+    .forEach((tr, index) => {
+      tr.classList.remove("animating-open");
+      tr.style.setProperty("--row-delay", `${index * 10}ms`);
+      tr.classList.add("animating-close");
+
+      tr.addEventListener("animationend", () => {
+        tr.classList.remove("animating-close");
+        tr.style.removeProperty("--row-delay");
+        tr.style.display = "none";
+      }, { once: true });
+    });
 }
 
 function render(filterText = uiState.search) {
@@ -754,7 +826,12 @@ headerTr.addEventListener("click", () => {
           ).filter(tr => !tr.classList.contains("css-row"));
 
           const anyVisible = schoolRows.some(tr => tr.style.display !== "none");
-          schoolRows.forEach(tr => tr.style.display = anyVisible ? "none" : "table-row");
+
+  if (anyVisible) {
+    hideRows(schoolRows.slice().reverse());
+  } else {
+    showRows(schoolRows);
+  }
 
           const icon = document.getElementById(`${cssRegionId}-icon`);
           if (icon) icon.textContent = anyVisible ? "▶" : "▼";
@@ -769,24 +846,24 @@ headerTr.addEventListener("click", () => {
   const regionIsOpen = regionRows.some(tr => tr.style.display !== "none");
 
   if (regionIsOpen) {
-    regionRows.forEach(tr => tr.style.display = "none");
-    const icon = document.getElementById(`${regionId}-icon`);
-    if (icon) icon.textContent = "▶";
-    return;
-  }
+  hideRows(regionRows.slice().reverse());
+  const icon = document.getElementById(`${regionId}-icon`);
+  if (icon) icon.textContent = "▶";
+  return;
+}
 
   // ouvrir région
   const cssHeaders = regionRows.filter(tr => tr.classList.contains("css-row"));
 
   if (autoExpand) {
-    // en autoExpand: tout visible
-    regionRows.forEach(tr => tr.style.display = "table-row");
-  } else {
-    // en <5: montrer seulement les CSS, garder écoles cachées
-    cssHeaders.forEach(tr => tr.style.display = "table-row");
-    regionRows.forEach(tr => {
-      if (!tr.classList.contains("css-row")) tr.style.display = "none";
-    });
+  // en autoExpand: tout visible
+  showRows(regionRows);
+} else {
+  // en <5: montrer seulement les CSS, garder écoles cachées
+  showRows(cssHeaders);
+  regionRows.forEach(tr => {
+    if (!tr.classList.contains("css-row")) tr.style.display = "none";
+  });
     // reset icônes CSS
     cssHeaders.forEach(h => {
       const id = h.getAttribute("data-css");
@@ -845,15 +922,21 @@ const cssClosedLabel = `${cssClosedCount} ${cssClosedCount > 1 ? "écoles fermé
     });
 
     // Toggle CSS
-    cssHeader.addEventListener("click", (e) => {
-      e.stopPropagation(); // IMPORTANT: sinon ça déclenche aussi le toggle de région
-      const rows = Array.from(tbody.querySelectorAll(`tr[data-css="${cssRegionId}"]`));
-      // on exclut le header CSS lui-même
-      const schoolRows = rows.filter(tr => !tr.classList.contains("css-row"));
-      const anyVisible = schoolRows.some(tr => tr.style.display !== "none");
-      schoolRows.forEach(tr => tr.style.display = anyVisible ? "none" : "table-row");
-      document.getElementById(`${cssRegionId}-icon`).textContent = anyVisible ? "▶" : "▼";
-    });
+   cssHeader.addEventListener("click", (e) => {
+  e.stopPropagation(); // IMPORTANT: sinon ça déclenche aussi le toggle de région
+  const rows = Array.from(tbody.querySelectorAll(`tr[data-css="${cssRegionId}"]`));
+  // on exclut le header CSS lui-même
+  const schoolRows = rows.filter(tr => !tr.classList.contains("css-row"));
+  const anyVisible = schoolRows.some(tr => tr.style.display !== "none");
+
+  if (anyVisible) {
+    hideRows(schoolRows.slice().reverse());
+  } else {
+    showRows(schoolRows);
+  }
+
+  document.getElementById(`${cssRegionId}-icon`).textContent = anyVisible ? "▶" : "▼";
+});
 
   });
 
