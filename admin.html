@@ -163,43 +163,8 @@
     <p style="margin-top:10px;">
     <a href="reset-password.html">Mot de passe oublié ?</a>
   </p>
-
-  <div id="resetRequestBox" style="display:none; margin-top:16px; padding:16px; border:1px solid #ddd; border-radius:10px; background:#fafafa;">
-    <h3 style="margin-top:0;">Réinitialiser le mot de passe</h3>
-    <p style="margin-top:0;">Entrez votre courriel pour recevoir un lien de réinitialisation.</p>
-
-    <input
-      id="resetEmail"
-      type="email"
-      placeholder="Votre courriel"
-      style="width:100%; padding:10px; margin-bottom:10px; box-sizing:border-box;"
-    />
-
-    <button id="sendResetBtn" type="button">
-      Envoyer le lien
-    </button>
-
-    <p id="resetRequestMsg" style="margin-top:10px;"></p>
-  </div>
   </div>
 
-  <div id="resetPasswordBox" style="display:none; margin:14px 0; padding:16px; border:1px solid #ddd; border-radius:10px; background:#fafafa; max-width:420px;">
-  <h3 style="margin-top:0;">Choisir un nouveau mot de passe</h3>
-  <p style="margin-top:0;">Entrez votre nouveau mot de passe pour terminer la réinitialisation.</p>
-
-  <input
-    id="newPassword"
-    type="password"
-    placeholder="Nouveau mot de passe"
-    style="display:block; margin:8px 0; padding:10px; width:100%; box-sizing:border-box;"
-  />
-
-  <button id="saveNewPasswordBtn" type="button" style="padding:10px 14px;">
-    Enregistrer le nouveau mot de passe
-  </button>
-
-  <p id="resetPasswordMsg" style="margin-top:10px;"></p>
-</div>
   
   <div id="okBox" style="display:none;">
     <p>✅ Connecté.</p>
@@ -308,7 +273,13 @@
     
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: { persistSession: true, storage: window.localStorage, autoRefreshToken: true, detectSessionInUrl: true }
+})
+
+  supabase.auth.onAuthStateChange((_event, _session) => {
+  refreshUI();
 });
+
+    
 
 async function publishSnapshot() {
   try {
@@ -348,15 +319,8 @@ async function publishSnapshot() {
     const msg = document.getElementById("msg");
     const loginBox = document.getElementById("loginBox");
     const okBox = document.getElementById("okBox");
-    const forgotPasswordLink = document.getElementById("forgotPasswordLink");
-const resetRequestBox = document.getElementById("resetRequestBox");
-const resetEmail = document.getElementById("resetEmail");
-const sendResetBtn = document.getElementById("sendResetBtn");
-const resetRequestMsg = document.getElementById("resetRequestMsg");
-    const resetPasswordBox = document.getElementById("resetPasswordBox");
-const newPassword = document.getElementById("newPassword");
-const saveNewPasswordBtn = document.getElementById("saveNewPasswordBtn");
-const resetPasswordMsg = document.getElementById("resetPasswordMsg");
+    
+  
 
     const adminUI = document.getElementById("adminUI");
     const masterBox = document.getElementById("masterBox");
@@ -415,7 +379,6 @@ function askConfirm(message) {
     const AUTO_LOGOUT_MS = 2 * 60 * 60 * 1000; // 2h
 const AUTO_LOGOUT_KEY = "autoLogoutAt";
 let autoLogoutTimer = null;
-let isPasswordRecovery = false;
     
 function clearAutoLogoutTimer() {
   if (autoLogoutTimer) {
@@ -455,72 +418,43 @@ function scheduleAutoLogout() {
   }, msLeft);
 }
 
-    async function refreshUI() {
+async function refreshUI() {
   const { data: { session } } = await supabase.auth.getSession();
 
- if (session) {
-  if (isPasswordRecovery) {
+  if (session) {
     loginBox.style.display = "none";
+    okBox.style.display = "block";
+    adminUI.style.display = "block";
+    masterBox.style.display = "block";
+
+    if (!adminUI.dataset.loaded) {
+      await loadAllWithButtons();
+      adminUI.dataset.loaded = "1";
+    }
+
+    scheduleAutoLogout();
+
+  } else {
+    loginBox.style.display = "block";
     okBox.style.display = "none";
     adminUI.style.display = "none";
     masterBox.style.display = "none";
-    resetPasswordBox.style.display = "block";
+
+    adminUI.dataset.loaded = "";
+    document.getElementById("list").innerHTML = "";
+    const q = document.getElementById("q");
+    if (q) q.value = "";
     msg.textContent = "";
+    document.getElementById("email").value = "";
+    document.getElementById("password").value = "";
     clearAutoLogoutTimer();
     localStorage.removeItem(AUTO_LOGOUT_KEY);
-    return;
   }
 
-  loginBox.style.display = "none";
-  resetPasswordBox.style.display = "none";
-  okBox.style.display = "block";
-  adminUI.style.display = "block";
-  masterBox.style.display = "block";
-
-  // Charge UNE seule fois
-  if (!adminUI.dataset.loaded) {
-    await loadAllWithButtons();
-    adminUI.dataset.loaded = "1";
-  }
-
-  scheduleAutoLogout();
-
-} else {
-  loginBox.style.display = "block";
-  resetPasswordBox.style.display = "none";
-  okBox.style.display = "none";
-  adminUI.style.display = "none";
-  masterBox.style.display = "none";
-
-  // reset (optionnel mais clean)
-  adminUI.dataset.loaded = "";
-  document.getElementById("list").innerHTML = "";
-  const q = document.getElementById("q");
-  if (q) q.value = "";
-  msg.textContent = "";
-  document.getElementById("email").value = "";
-  document.getElementById("password").value = "";
-  clearAutoLogoutTimer();
-  localStorage.removeItem(AUTO_LOGOUT_KEY);
+  setTimeout(updateScrollHint, 0);
 }
 
-setTimeout(updateScrollHint, 0);
-}
-
-    // ✅ UI toujours synchronisée avec l'état Supabase
-supabase.auth.onAuthStateChange((event, _session) => {
-  if (event === "PASSWORD_RECOVERY") {
-    isPasswordRecovery = true;
-  }
-
-  if (event === "SIGNED_OUT") {
-    isPasswordRecovery = false;
-  }
-
-  refreshUI();
-});
-
-    document.getElementById("loginBtn").addEventListener("click", async () => {
+document.getElementById("loginBtn").addEventListener("click", async () => {
   msg.textContent = "";
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
@@ -530,82 +464,6 @@ supabase.auth.onAuthStateChange((event, _session) => {
 
   await refreshUI();
 });
-
-   forgotPasswordLink?.addEventListener("click", (e) => {
-  e.preventDefault();
-  resetRequestBox.style.display =
-    resetRequestBox.style.display === "none" ? "block" : "none";
-
-  resetRequestMsg.textContent = "";
-  resetEmail.value = document.getElementById("email").value.trim();
-});
-
-sendResetBtn?.addEventListener("click", async () => {
-  const email = resetEmail.value.trim();
-
-  if (!email) {
-    resetRequestMsg.textContent = "Veuillez entrer votre courriel.";
-    resetRequestMsg.style.color = "#b00";
-    return;
-  }
-
-  sendResetBtn.disabled = true;
-  resetRequestMsg.style.color = "#444";
-  resetRequestMsg.textContent = "Envoi en cours...";
-
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: "https://th3r0ux.github.io/ecoles-fermees/admin.html"
-  });
-
-  sendResetBtn.disabled = false;
-
-  if (error) {
-    resetRequestMsg.textContent = "Erreur : " + error.message;
-    resetRequestMsg.style.color = "#b00";
-    return;
-  }
-
-  resetRequestMsg.textContent = "Lien envoyé. Vérifiez votre boîte courriel.";
-  resetRequestMsg.style.color = "#2e7d32";
-}); 
-
- saveNewPasswordBtn?.addEventListener("click", async () => {
-  const password = newPassword.value.trim();
-
-  if (password.length < 8) {
-    resetPasswordMsg.textContent = "Le mot de passe doit contenir au moins 8 caractères.";
-    resetPasswordMsg.style.color = "#b00";
-    return;
-  }
-
-  saveNewPasswordBtn.disabled = true;
-  resetPasswordMsg.textContent = "Enregistrement en cours...";
-  resetPasswordMsg.style.color = "#444";
-
-  const { error } = await supabase.auth.updateUser({
-    password
-  });
-
-  saveNewPasswordBtn.disabled = false;
-
-  if (error) {
-    resetPasswordMsg.textContent = "Erreur : " + error.message;
-    resetPasswordMsg.style.color = "#b00";
-    return;
-  }
-
-  resetPasswordMsg.textContent = "Mot de passe mis à jour. Redirection...";
-  resetPasswordMsg.style.color = "#2e7d32";
-
-  newPassword.value = "";
-  isPasswordRecovery = false; 
-
-  window.history.replaceState({}, document.title, window.location.pathname);
-
-  setTimeout(async () => {
-    await refreshUI();
-  }, 800);
-});   
 
 
 // ENTER dans email ou password = login
