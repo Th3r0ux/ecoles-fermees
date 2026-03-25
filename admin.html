@@ -420,11 +420,15 @@ function clearAutoLogoutTimer() {
   }
 }
 
-async function forceLogout() {
+async function forceLogout(reason = "") {
   clearAutoLogoutTimer();
   localStorage.removeItem(AUTO_LOGOUT_KEY);
   await supabase.auth.signOut({ scope: "local" });
   await refreshUI();
+
+  if (reason === "expired") {
+    msg.textContent = "Session expirée. Veuillez vous reconnecter.";
+  }
 }
 
 function scheduleAutoLogout() {
@@ -447,8 +451,8 @@ function scheduleAutoLogout() {
 
   // sinon → timer
   autoLogoutTimer = setTimeout(() => {
-    forceLogout();
-  }, msLeft);
+  forceLogout("expired");
+}, msLeft);
 }
 
 async function isAdminAllowed() {
