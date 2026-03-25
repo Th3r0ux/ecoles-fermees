@@ -548,7 +548,25 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
   const password = document.getElementById("password").value;
 
   const { error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) msg.textContent = error.message;
+
+  if (error) {
+    const raw = (error.message || "").toLowerCase();
+
+    if (
+      raw.includes("invalid login credentials") ||
+      raw.includes("invalid credentials")
+    ) {
+      msg.textContent = "Identifiants invalides.";
+    } else if (raw.includes("email not confirmed")) {
+      msg.textContent = "Ce compte doit être confirmé avant de se connecter.";
+    } else if (raw.includes("too many requests") || raw.includes("rate limit")) {
+      msg.textContent = "Trop de tentatives. Réessayez dans quelques minutes.";
+    } else {
+      msg.textContent = "Connexion impossible pour le moment.";
+    }
+
+    return;
+  }
 
   await refreshUI();
 });
