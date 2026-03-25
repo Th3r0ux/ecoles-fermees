@@ -183,6 +183,24 @@
   </div>
   </div>
 
+  <div id="resetPasswordBox" style="display:none; margin:14px 0; padding:16px; border:1px solid #ddd; border-radius:10px; background:#fafafa; max-width:420px;">
+  <h3 style="margin-top:0;">Choisir un nouveau mot de passe</h3>
+  <p style="margin-top:0;">Entrez votre nouveau mot de passe pour terminer la réinitialisation.</p>
+
+  <input
+    id="newPassword"
+    type="password"
+    placeholder="Nouveau mot de passe"
+    style="display:block; margin:8px 0; padding:10px; width:100%; box-sizing:border-box;"
+  />
+
+  <button id="saveNewPasswordBtn" type="button" style="padding:10px 14px;">
+    Enregistrer le nouveau mot de passe
+  </button>
+
+  <p id="resetPasswordMsg" style="margin-top:10px;"></p>
+</div>
+  
   <div id="okBox" style="display:none;">
     <p>✅ Connecté.</p>
     <button id="logoutBtn" style="padding:10px 14px;">Se déconnecter</button>
@@ -335,6 +353,10 @@ const resetRequestBox = document.getElementById("resetRequestBox");
 const resetEmail = document.getElementById("resetEmail");
 const sendResetBtn = document.getElementById("sendResetBtn");
 const resetRequestMsg = document.getElementById("resetRequestMsg");
+    const resetPasswordBox = document.getElementById("resetPasswordBox");
+const newPassword = document.getElementById("newPassword");
+const saveNewPasswordBtn = document.getElementById("saveNewPasswordBtn");
+const resetPasswordMsg = document.getElementById("resetPasswordMsg");
 
     const adminUI = document.getElementById("adminUI");
     const masterBox = document.getElementById("masterBox");
@@ -436,10 +458,29 @@ function scheduleAutoLogout() {
   const { data: { session } } = await supabase.auth.getSession();
 
   if (session) {
+  const hash = window.location.hash || "";
+  const isRecoveryMode =
+    hash.includes("type=recovery") ||
+    hash.includes("access_token=") ||
+    hash.includes("refresh_token=");
+
+  if (isRecoveryMode) {
     loginBox.style.display = "none";
-    okBox.style.display = "block";
-    adminUI.style.display = "block";
-    masterBox.style.display = "block";
+    okBox.style.display = "none";
+    adminUI.style.display = "none";
+    masterBox.style.display = "none";
+    resetPasswordBox.style.display = "block";
+    msg.textContent = "";
+    clearAutoLogoutTimer();
+    localStorage.removeItem(AUTO_LOGOUT_KEY);
+    return;
+  }
+
+  loginBox.style.display = "none";
+  resetPasswordBox.style.display = "none";
+  okBox.style.display = "block";
+  adminUI.style.display = "block";
+  masterBox.style.display = "block";
 
     // Charge UNE seule fois
     if (!adminUI.dataset.loaded) {
@@ -450,10 +491,11 @@ function scheduleAutoLogout() {
     scheduleAutoLogout();
     
   } else {
-    loginBox.style.display = "block";
-    okBox.style.display = "none";
-    adminUI.style.display = "none";
-    masterBox.style.display = "none";
+  loginBox.style.display = "block";
+  resetPasswordBox.style.display = "none";
+  okBox.style.display = "none";
+  adminUI.style.display = "none";
+  masterBox.style.display = "none";
 
     // reset (optionnel mais clean)
     adminUI.dataset.loaded = "";
