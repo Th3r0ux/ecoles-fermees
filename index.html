@@ -1292,51 +1292,30 @@ setInterval(loadSnapshot, 15000);
 </script>
   
 <script>
-<script>
-function getDocHeight() {
-  return Math.ceil(
-    Math.max(
-      document.body.scrollHeight,
-      document.body.offsetHeight,
-      document.documentElement.scrollHeight,
-      document.documentElement.offsetHeight,
-      document.documentElement.clientHeight
-    )
-  );
-}
-
 function sendHeight() {
-  parent.postMessage({ iframeHeight: getDocHeight() }, "*");
+  const height = Math.max(
+    document.body.scrollHeight,
+    document.documentElement.scrollHeight
+  );
+
+  parent.postMessage({ iframeHeight: height }, "*");
 }
 
-function sendHeightNextFrame() {
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      sendHeight();
-    });
-  });
-}
+window.addEventListener("load", sendHeight);
+window.addEventListener("resize", sendHeight);
 
-window.addEventListener("load", sendHeightNextFrame);
-window.addEventListener("resize", sendHeightNextFrame);
-
-document.addEventListener("click", () => {
-  sendHeightNextFrame();
+const observer = new MutationObserver(() => {
+  sendHeight();
 });
 
-document.addEventListener("animationend", sendHeightNextFrame, true);
-document.addEventListener("transitionend", sendHeightNextFrame, true);
-
-const resizeObserver = new ResizeObserver(() => {
-  sendHeightNextFrame();
+observer.observe(document.body, {
+  childList: true,
+  subtree: true,
+  attributes: true
 });
 
-resizeObserver.observe(document.body);
-resizeObserver.observe(document.documentElement);
-
-setTimeout(sendHeightNextFrame, 150);
-setTimeout(sendHeightNextFrame, 500);
-setTimeout(sendHeightNextFrame, 1000);
+setTimeout(sendHeight, 300);
+setTimeout(sendHeight, 1000);
 </script>
   
   <script>
