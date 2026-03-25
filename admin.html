@@ -167,9 +167,37 @@
 
   
   <div id="okBox" style="display:none;">
-    <p>✅ Connecté.</p>
-    <button id="logoutBtn" style="padding:10px 14px;">Se déconnecter</button>
+  <p>✅ Connecté.</p>
+  <button id="logoutBtn" style="padding:10px 14px;">Se déconnecter</button>
+
+  <div style="margin-top:16px; padding:16px; border:1px solid #ddd; border-radius:10px; background:#fafafa; max-width:420px;">
+    <h3 style="margin-top:0;">Changer mon mot de passe</h3>
+
+    <input
+      id="changePasswordNew"
+      type="password"
+      placeholder="Nouveau mot de passe"
+      style="display:block; margin:8px 0; padding:10px; width:100%; box-sizing:border-box;"
+    >
+
+    <p style="margin:6px 0 0 0; color:#666; font-size:14px;">
+      Minimum 12 caractères, avec au moins une lettre et un chiffre.
+    </p>
+
+    <input
+      id="changePasswordConfirm"
+      type="password"
+      placeholder="Confirmer le nouveau mot de passe"
+      style="display:block; margin:12px 0 8px 0; padding:10px; width:100%; box-sizing:border-box;"
+    >
+
+    <button id="changePasswordBtn" type="button" style="padding:10px 14px;">
+      Mettre à jour mon mot de passe
+    </button>
+
+    <p id="changePasswordMsg" style="margin-top:10px;"></p>
   </div>
+</div>
 
 <div id="masterBox" style="display:none;margin:14px 0;padding:12px;border:1px solid #ddd;border-radius:10px;background:#fafafa;">
   <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
@@ -325,6 +353,11 @@ async function publishSnapshot() {
     const adminUI = document.getElementById("adminUI");
     const masterBox = document.getElementById("masterBox");
 
+    const changePasswordNew = document.getElementById("changePasswordNew");
+const changePasswordConfirm = document.getElementById("changePasswordConfirm");
+const changePasswordBtn = document.getElementById("changePasswordBtn");
+const changePasswordMsg = document.getElementById("changePasswordMsg");
+
     // fonction de confirmation await
 
     const confirmModal = document.getElementById("confirmModal");
@@ -437,6 +470,24 @@ async function isAdminAllowed() {
   return data?.is_active === true;
 }    
 
+function validatePassword(password) {
+  const value = (password || "").trim();
+
+  if (value.length < 12) {
+    return "Le mot de passe doit contenir au moins 12 caractères.";
+  }
+
+  if (!/[A-Za-z]/.test(value)) {
+    return "Le mot de passe doit contenir au moins une lettre.";
+  }
+
+  if (!/[0-9]/.test(value)) {
+    return "Le mot de passe doit contenir au moins un chiffre.";
+  }
+
+  return "";
+}
+    
 async function refreshUI() {
   const { data: { session } } = await supabase.auth.getSession();
 
@@ -494,6 +545,44 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
   if (error) msg.textContent = error.message;
 
   await refreshUI();
+});
+
+    changePasswordBtn?.addEventListener("click", async () => {
+  const password = changePasswordNew.value.trim();
+  const confirmPassword = changePasswordConfirm.value.trim();
+
+  const passwordError = validatePassword(password);
+
+  if (passwordError) {
+    changePasswordMsg.textContent = passwordError;
+    changePasswordMsg.style.color = "#b00";
+    return;
+  }
+
+  if (password !== confirmPassword) {
+    changePasswordMsg.textContent = "La confirmation du mot de passe ne correspond pas.";
+    changePasswordMsg.style.color = "#b00";
+    return;
+  }
+
+  changePasswordBtn.disabled = true;
+  changePasswordMsg.textContent = "Mise à jour en cours...";
+  changePasswordMsg.style.color = "#444";
+
+  const { error } = await supabase.auth.updateUser({ password });
+
+  changePasswordBtn.disabled = false;
+
+  if (error) {
+    changePasswordMsg.textContent = "Erreur : " + error.message;
+    changePasswordMsg.style.color = "#b00";
+    return;
+  }
+
+  changePasswordNew.value = "";
+  changePasswordConfirm.value = "";
+  changePasswordMsg.textContent = "Mot de passe mis à jour avec succès.";
+  changePasswordMsg.style.color = "#2e7d32";
 });
 
 
