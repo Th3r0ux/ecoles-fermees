@@ -674,9 +674,11 @@ function showRows(rows, displayValue = "table-row") {
     tr.classList.add("animating-open");
 
     tr.addEventListener("animationend", () => {
-      tr.classList.remove("animating-open");
-      tr.style.removeProperty("--row-delay");
-    }, { once: true });
+  tr.classList.remove("animating-close");
+  tr.style.removeProperty("--row-delay");
+  tr.style.display = "none";
+  sendHeightAfterLayout();
+}, { once: true });
   });
 }
 
@@ -1293,10 +1295,10 @@ setInterval(loadSnapshot, 15000);
   
 <script>
 function sendHeight() {
-  const height = Math.max(
-    document.body.scrollHeight,
-    document.documentElement.scrollHeight
-  );
+  const page = document.querySelector(".page");
+  const target = page || document.body;
+
+  const height = Math.ceil(target.scrollHeight);
 
   parent.postMessage({ iframeHeight: height }, "*");
 }
@@ -1313,9 +1315,18 @@ window.addEventListener("load", sendHeightAfterLayout);
 window.addEventListener("resize", sendHeightAfterLayout);
 
 document.addEventListener("animationend", sendHeightAfterLayout, true);
+document.addEventListener("transitionend", sendHeightAfterLayout, true);
 
-setTimeout(sendHeightAfterLayout, 300);
-setTimeout(sendHeightAfterLayout, 1000);
+const resizeObserver = new ResizeObserver(() => {
+  sendHeightAfterLayout();
+});
+
+const pageEl = document.querySelector(".page");
+if (pageEl) resizeObserver.observe(pageEl);
+
+setTimeout(sendHeightAfterLayout, 150);
+setTimeout(sendHeightAfterLayout, 400);
+setTimeout(sendHeightAfterLayout, 900);
 </script>
   
   <script>
