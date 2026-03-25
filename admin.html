@@ -330,6 +330,11 @@ async function publishSnapshot() {
     const msg = document.getElementById("msg");
     const loginBox = document.getElementById("loginBox");
     const okBox = document.getElementById("okBox");
+    const forgotPasswordLink = document.getElementById("forgotPasswordLink");
+const resetRequestBox = document.getElementById("resetRequestBox");
+const resetEmail = document.getElementById("resetEmail");
+const sendResetBtn = document.getElementById("sendResetBtn");
+const resetRequestMsg = document.getElementById("resetRequestMsg");
 
     const adminUI = document.getElementById("adminUI");
     const masterBox = document.getElementById("masterBox");
@@ -481,6 +486,44 @@ supabase.auth.onAuthStateChange((_event, _session) => {
 
   await refreshUI();
 });
+
+   forgotPasswordLink?.addEventListener("click", (e) => {
+  e.preventDefault();
+  resetRequestBox.style.display =
+    resetRequestBox.style.display === "none" ? "block" : "none";
+
+  resetRequestMsg.textContent = "";
+  resetEmail.value = document.getElementById("email").value.trim();
+});
+
+sendResetBtn?.addEventListener("click", async () => {
+  const email = resetEmail.value.trim();
+
+  if (!email) {
+    resetRequestMsg.textContent = "Veuillez entrer votre courriel.";
+    resetRequestMsg.style.color = "#b00";
+    return;
+  }
+
+  sendResetBtn.disabled = true;
+  resetRequestMsg.style.color = "#444";
+  resetRequestMsg.textContent = "Envoi en cours...";
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: "https://th3r0ux.github.io/ecoles-fermees/admin.html"
+  });
+
+  sendResetBtn.disabled = false;
+
+  if (error) {
+    resetRequestMsg.textContent = "Erreur : " + error.message;
+    resetRequestMsg.style.color = "#b00";
+    return;
+  }
+
+  resetRequestMsg.textContent = "Lien envoyé. Vérifiez votre boîte courriel.";
+  resetRequestMsg.style.color = "#2e7d32";
+}); 
 
 
 // ENTER dans email ou password = login
