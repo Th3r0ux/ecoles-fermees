@@ -415,7 +415,8 @@ function askConfirm(message) {
     const AUTO_LOGOUT_MS = 2 * 60 * 60 * 1000; // 2h
 const AUTO_LOGOUT_KEY = "autoLogoutAt";
 let autoLogoutTimer = null;
-
+let isPasswordRecovery = false;
+    
 function clearAutoLogoutTimer() {
   if (autoLogoutTimer) {
     clearTimeout(autoLogoutTimer);
@@ -457,14 +458,8 @@ function scheduleAutoLogout() {
     async function refreshUI() {
   const { data: { session } } = await supabase.auth.getSession();
 
-  if (session) {
-  const hash = window.location.hash || "";
-  const isRecoveryMode =
-    hash.includes("type=recovery") ||
-    hash.includes("access_token=") ||
-    hash.includes("refresh_token=");
-
-  if (isRecoveryMode) {
+ if (session) {
+  if (isPasswordRecovery) {
     loginBox.style.display = "none";
     okBox.style.display = "none";
     adminUI.style.display = "none";
@@ -482,39 +477,46 @@ function scheduleAutoLogout() {
   adminUI.style.display = "block";
   masterBox.style.display = "block";
 
-    // Charge UNE seule fois
-    if (!adminUI.dataset.loaded) {
-      await loadAllWithButtons();
-      adminUI.dataset.loaded = "1";
-    }
+  // Charge UNE seule fois
+  if (!adminUI.dataset.loaded) {
+    await loadAllWithButtons();
+    adminUI.dataset.loaded = "1";
+  }
 
-    scheduleAutoLogout();
-    
-  } else {
+  scheduleAutoLogout();
+
+} else {
   loginBox.style.display = "block";
   resetPasswordBox.style.display = "none";
   okBox.style.display = "none";
   adminUI.style.display = "none";
   masterBox.style.display = "none";
 
-    // reset (optionnel mais clean)
-    adminUI.dataset.loaded = "";
-    document.getElementById("list").innerHTML = "";
-    const q = document.getElementById("q");
-    if (q) q.value = "";
-    msg.textContent = "";
-    // ✅ vider les champs de connexion au logout
+  // reset (optionnel mais clean)
+  adminUI.dataset.loaded = "";
+  document.getElementById("list").innerHTML = "";
+  const q = document.getElementById("q");
+  if (q) q.value = "";
+  msg.textContent = "";
   document.getElementById("email").value = "";
   document.getElementById("password").value = "";
-    clearAutoLogoutTimer();
-localStorage.removeItem(AUTO_LOGOUT_KEY);
-  }
+  clearAutoLogoutTimer();
+  localStorage.removeItem(AUTO_LOGOUT_KEY);
+}
 
-  setTimeout(updateScrollHint, 0);
+setTimeout(updateScrollHint, 0);
 }
 
     // ✅ UI toujours synchronisée avec l'état Supabase
-supabase.auth.onAuthStateChange((_event, _session) => {
+supabase.auth.onAuthStateChange((event, _session) => {
+  if (event === "PASSWORD_RECOVERY") {
+    isPasswordRecovery = true;
+  }
+
+  if (event === "SIGNED_OUT") {
+    isPasswordRecovery = false;
+  }
+
   refreshUI();
 });
 
@@ -596,6 +598,7 @@ sendResetBtn?.addEventListener("click", async () => {
   resetPasswordMsg.style.color = "#2e7d32";
 
   newPassword.value = "";
+  isPasswordRecovery = false; 
 
   window.history.replaceState({}, document.title, window.location.pathname);
 
