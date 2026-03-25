@@ -418,40 +418,71 @@ function scheduleAutoLogout() {
   }, msLeft);
 }
 
+async function isAdminAllowed() {
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user?.email) return false;
+
+  const { data, error } = await supabase
+    .from("admin_access")
+    .select("email, is_active")
+    .eq("email", user.email)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Erreur admin_access:", error);
+    return false;
+  }
+
+  return data?.is_active === true;
+}    
+
 async function refreshUI() {
   const { data: { session } } = await supabase.auth.getSession();
 
-  if (session) {
-    loginBox.style.display = "none";
-    okBox.style.display = "block";
-    adminUI.style.display = "block";
-    masterBox.style.display = "block";
+ if (session) {
+  const allowed = await isAdminAllowed();
 
-    if (!adminUI.dataset.loaded) {
-      await loadAllWithButtons();
-      adminUI.dataset.loaded = "1";
-    }
-
-    scheduleAutoLogout();
-
-  } else {
+  if (!allowed) {
+    await supabase.auth.signOut({ scope: "local" });
+    msg.textContent = "Accès non autorisé.";
     loginBox.style.display = "block";
     okBox.style.display = "none";
     adminUI.style.display = "none";
     masterBox.style.display = "none";
-
-    adminUI.dataset.loaded = "";
-    document.getElementById("list").innerHTML = "";
-    const q = document.getElementById("q");
-    if (q) q.value = "";
-    msg.textContent = "";
-    document.getElementById("email").value = "";
-    document.getElementById("password").value = "";
-    clearAutoLogoutTimer();
-    localStorage.removeItem(AUTO_LOGOUT_KEY);
+    return;
   }
 
-  setTimeout(updateScrollHint, 0);
+  loginBox.style.display = "none";
+  okBox.style.display = "block";
+  adminUI.style.display = "block";
+  masterBox.style.display = "block";
+
+  if (!adminUI.dataset.loaded) {
+    await loadAllWithButtons();
+    adminUI.dataset.loaded = "1";
+  }
+
+  scheduleAutoLogout();
+
+} else {
+  loginBox.style.display = "block";
+  okBox.style.display = "none";
+  adminUI.style.display = "none";
+  masterBox.style.display = "none";
+
+  adminUI.dataset.loaded = "";
+  document.getElementById("list").innerHTML = "";
+  const q = document.getElementById("q");
+  if (q) q.value = "";
+  msg.textContent = "";
+  document.getElementById("email").value = "";
+  document.getElementById("password").value = "";
+  clearAutoLogoutTimer();
+  localStorage.removeItem(AUTO_LOGOUT_KEY);
+}
+
+setTimeout(updateScrollHint, 0);
 }
 
 document.getElementById("loginBtn").addEventListener("click", async () => {
