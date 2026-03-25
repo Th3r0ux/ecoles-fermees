@@ -456,10 +456,12 @@ async function isAdminAllowed() {
 
   if (!user?.email) return false;
 
+  const normalizedEmail = (user.email || "").trim().toLowerCase();
+
   const { data, error } = await supabase
     .from("admin_access")
     .select("email, is_active")
-    .eq("email", user.email)
+    .eq("email", normalizedEmail)
     .maybeSingle();
 
   if (error) {
@@ -468,7 +470,7 @@ async function isAdminAllowed() {
   }
 
   return data?.is_active === true;
-}    
+}
 
 function validatePassword(password) {
   const value = (password || "").trim();
