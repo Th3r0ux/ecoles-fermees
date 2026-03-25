@@ -497,7 +497,7 @@ function validatePassword(password) {
 async function refreshUI() {
   const { data: { session } } = await supabase.auth.getSession();
 
- if (session) {
+if (session) {
   const allowed = await isAdminAllowed();
 
   if (!allowed) {
@@ -509,6 +509,8 @@ async function refreshUI() {
     masterBox.style.display = "none";
     return;
   }
+
+  msg.textContent = "";
 
   loginBox.style.display = "none";
   okBox.style.display = "block";
@@ -568,6 +570,7 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
     return;
   }
 
+  msg.textContent = "";
   await refreshUI();
 });
 
@@ -657,8 +660,8 @@ document.addEventListener("click", async (e) => {
     return;
   }
 
-  msg.textContent = "Déconnecté ✅";
-  await refreshUI();
+ await refreshUI();
+msg.textContent = "Déconnecté.";
 });
     
     refreshUI();
