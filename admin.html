@@ -423,6 +423,11 @@ function clearAutoLogoutTimer() {
 async function forceLogout(reason = "") {
   clearAutoLogoutTimer();
   localStorage.removeItem(AUTO_LOGOUT_KEY);
+
+  if (reason === "expired") {
+    await logSecurityEvent("logout_auto", { reason: "session_expired" });
+  }
+
   await supabase.auth.signOut({ scope: "local" });
   await refreshUI();
 
@@ -634,7 +639,12 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
     return;
   }
 
+  await logSecurityEvent("password_changed", {
+  source: "authenticated_session"
+});    
+      
   changePasswordNew.value = "";
+      
   changePasswordConfirm.value = "";
   changePasswordMsg.textContent = "Mot de passe mis à jour avec succès.";
   changePasswordMsg.style.color = "#2e7d32";
