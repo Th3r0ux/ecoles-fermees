@@ -567,6 +567,43 @@ sendResetBtn?.addEventListener("click", async () => {
   resetRequestMsg.style.color = "#2e7d32";
 }); 
 
+ saveNewPasswordBtn?.addEventListener("click", async () => {
+  const password = newPassword.value.trim();
+
+  if (password.length < 8) {
+    resetPasswordMsg.textContent = "Le mot de passe doit contenir au moins 8 caractères.";
+    resetPasswordMsg.style.color = "#b00";
+    return;
+  }
+
+  saveNewPasswordBtn.disabled = true;
+  resetPasswordMsg.textContent = "Enregistrement en cours...";
+  resetPasswordMsg.style.color = "#444";
+
+  const { error } = await supabase.auth.updateUser({
+    password
+  });
+
+  saveNewPasswordBtn.disabled = false;
+
+  if (error) {
+    resetPasswordMsg.textContent = "Erreur : " + error.message;
+    resetPasswordMsg.style.color = "#b00";
+    return;
+  }
+
+  resetPasswordMsg.textContent = "Mot de passe mis à jour. Redirection...";
+  resetPasswordMsg.style.color = "#2e7d32";
+
+  newPassword.value = "";
+
+  window.history.replaceState({}, document.title, window.location.pathname);
+
+  setTimeout(async () => {
+    await refreshUI();
+  }, 800);
+});   
+
 
 // ENTER dans email ou password = login
 const emailInput = document.getElementById("email");
