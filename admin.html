@@ -516,14 +516,20 @@ if (session) {
   const allowed = await isAdminAllowed();
 
   if (!allowed) {
-    await supabase.auth.signOut({ scope: "local" });
-    msg.textContent = "Accès non autorisé.";
-    loginBox.style.display = "block";
-    okBox.style.display = "none";
-    adminUI.style.display = "none";
-    masterBox.style.display = "none";
-    return;
-  }
+  const { data: { user } } = await supabase.auth.getUser();
+
+  await logSecurityEvent("access_denied", {
+    email: user?.email?.toLowerCase() ?? null
+  });
+
+  await supabase.auth.signOut({ scope: "local" });
+  msg.textContent = "Accès non autorisé.";
+  loginBox.style.display = "block";
+  okBox.style.display = "none";
+  adminUI.style.display = "none";
+  masterBox.style.display = "none";
+  return;
+}
 
   msg.textContent = "";
 
@@ -561,12 +567,17 @@ setTimeout(updateScrollHint, 0);
 
 document.getElementById("loginBtn").addEventListener("click", async () => {
   msg.textContent = "";
-  const email = document.getElementById("email").value.trim();
+  const email = document.getElementById("email").value.trim().toLowerCase();
   const password = document.getElementById("password").value;
 
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
+    await logSecurityEvent("login_failed", {
+      email,
+      reason: error.message || "unknown"
+    });
+
     const raw = (error.message || "").toLowerCase();
 
     if (
@@ -584,6 +595,8 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
 
     return;
   }
+
+  await logSecurityEvent("login_success", { email });
 
   msg.textContent = "";
   await refreshUI();
@@ -665,6 +678,8 @@ document.addEventListener("click", async (e) => {
   msg.textContent = "Déconnexion…";
   btn.disabled = true;
 
+  await logSecurityEvent("logout_manual");
+  
   const { error } = await supabase.auth.signOut({ scope: "local" });
 
   btn.disabled = false;
