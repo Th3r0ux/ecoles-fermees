@@ -1301,21 +1301,21 @@ function sendHeight() {
   parent.postMessage({ iframeHeight: height }, "*");
 }
 
-window.addEventListener("load", sendHeight);
-window.addEventListener("resize", sendHeight);
+function sendHeightAfterLayout() {
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      sendHeight();
+    });
+  });
+}
 
-const observer = new MutationObserver(() => {
-  sendHeight();
-});
+window.addEventListener("load", sendHeightAfterLayout);
+window.addEventListener("resize", sendHeightAfterLayout);
 
-observer.observe(document.body, {
-  childList: true,
-  subtree: true,
-  attributes: true
-});
+document.addEventListener("animationend", sendHeightAfterLayout, true);
 
-setTimeout(sendHeight, 300);
-setTimeout(sendHeight, 1000);
+setTimeout(sendHeightAfterLayout, 300);
+setTimeout(sendHeightAfterLayout, 1000);
 </script>
   
   <script>
