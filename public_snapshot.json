@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-26T00:30:01.065Z",
+  "generatedAt": "2026-03-26T00:30:02.212Z",
   "rows": [
     {
       "name": "Centre de formation professionnelle Val-d'Or",
@@ -7621,7 +7621,7 @@
       "name": "Centre L'Avenir",
       "css": "Centre de services scolaire des Affluents",
       "region": "Lanaudière",
-      "statut_cours": "Fermé",
+      "statut_cours": "ND",
       "statut_garde": "ND"
     },
     {
