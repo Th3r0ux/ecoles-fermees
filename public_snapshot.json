@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-26T01:22:52.723Z",
+  "generatedAt": "2026-03-26T01:24:32.233Z",
   "rows": [
     {
       "name": "Centre de formation professionnelle Val-d'Or",
@@ -614,308 +614,308 @@
       "name": "Centre de formation de Rimouski-Neigette-Éducation des adultes",
       "css": "Centre de services scolaire des Phares",
       "region": "Bas-St-Laurent",
-      "statut_cours": "ND",
+      "statut_cours": "Fermé",
       "statut_garde": "ND"
     },
     {
       "name": "Centre de formation de Rimouski-Neigette-Formation professionnelle",
       "css": "Centre de services scolaire des Phares",
       "region": "Bas-St-Laurent",
-      "statut_cours": "ND",
+      "statut_cours": "Fermé",
       "statut_garde": "ND"
     },
     {
       "name": "Centre de formation des adultes de Mont-Joli–Mitis",
       "css": "Centre de services scolaire des Phares",
       "region": "Bas-St-Laurent",
-      "statut_cours": "ND",
+      "statut_cours": "Fermé",
       "statut_garde": "ND"
     },
     {
       "name": "Centre de formation professionnelle de Mont-Joli–Mitis",
       "css": "Centre de services scolaire des Phares",
       "region": "Bas-St-Laurent",
-      "statut_cours": "ND",
+      "statut_cours": "Fermé",
       "statut_garde": "ND"
     },
     {
       "name": "École Boijoli (primaire)",
       "css": "Centre de services scolaire des Phares",
       "region": "Bas-St-Laurent",
-      "statut_cours": "ND",
+      "statut_cours": "Fermé",
       "statut_garde": "ND"
     },
     {
       "name": "École Boijoli (secondaire)",
       "css": "Centre de services scolaire des Phares",
       "region": "Bas-St-Laurent",
-      "statut_cours": "ND",
+      "statut_cours": "Fermé",
       "statut_garde": "ND"
     },
     {
       "name": "École D’Auteuil",
       "css": "Centre de services scolaire des Phares",
       "region": "Bas-St-Laurent",
-      "statut_cours": "ND",
+      "statut_cours": "Fermé",
       "statut_garde": "ND"
     },
     {
       "name": "École de l’Aquarelle",
       "css": "Centre de services scolaire des Phares",
       "region": "Bas-St-Laurent",
-      "statut_cours": "ND",
+      "statut_cours": "Fermé",
       "statut_garde": "ND"
     },
     {
       "name": "École de l’Écho-des-Montagnes",
       "css": "Centre de services scolaire des Phares",
       "region": "Bas-St-Laurent",
-      "statut_cours": "ND",
+      "statut_cours": "Fermé",
       "statut_garde": "ND"
     },
     {
       "name": "École de l’Écho-des-Montagnes (primaire)",
       "css": "Centre de services scolaire des Phares",
       "region": "Bas-St-Laurent",
-      "statut_cours": "ND",
+      "statut_cours": "Fermé",
       "statut_garde": "ND"
     },
     {
       "name": "École de l’Estran",
       "css": "Centre de services scolaire des Phares",
       "region": "Bas-St-Laurent",
-      "statut_cours": "ND",
+      "statut_cours": "Fermé",
       "statut_garde": "ND"
     },
     {
       "name": "École de la Colombe",
       "css": "Centre de services scolaire des Phares",
       "region": "Bas-St-Laurent",
-      "statut_cours": "ND",
+      "statut_cours": "Fermé",
       "statut_garde": "ND"
     },
     {
       "name": "École de la Rose-des-Vents",
       "css": "Centre de services scolaire des Phares",
       "region": "Bas-St-Laurent",
-      "statut_cours": "ND",
+      "statut_cours": "Fermé",
       "statut_garde": "ND"
     },
     {
       "name": "École de Mont-Saint-Louis",
       "css": "Centre de services scolaire des Phares",
       "region": "Bas-St-Laurent",
-      "statut_cours": "ND",
+      "statut_cours": "Fermé",
       "statut_garde": "ND"
     },
     {
       "name": "École de Sainte-Luce",
       "css": "Centre de services scolaire des Phares",
       "region": "Bas-St-Laurent",
-      "statut_cours": "ND",
+      "statut_cours": "Fermé",
       "statut_garde": "ND"
     },
     {
       "name": "École des Alizés",
       "css": "Centre de services scolaire des Phares",
       "region": "Bas-St-Laurent",
-      "statut_cours": "ND",
+      "statut_cours": "Fermé",
       "statut_garde": "ND"
     },
     {
       "name": "École des Beaux-Séjours–D’Amours",
       "css": "Centre de services scolaire des Phares",
       "region": "Bas-St-Laurent",
-      "statut_cours": "ND",
+      "statut_cours": "Fermé",
       "statut_garde": "ND"
     },
     {
       "name": "École des Beaux-Séjours–de Sainte-Odile",
       "css": "Centre de services scolaire des Phares",
       "region": "Bas-St-Laurent",
-      "statut_cours": "ND",
+      "statut_cours": "Fermé",
       "statut_garde": "ND"
     },
     {
       "name": "École des Bois-et-Marées",
       "css": "Centre de services scolaire des Phares",
       "region": "Bas-St-Laurent",
-      "statut_cours": "ND",
+      "statut_cours": "Fermé",
       "statut_garde": "ND"
     },
     {
       "name": "École des Cheminots–de l'Envol",
       "css": "Centre de services scolaire des Phares",
       "region": "Bas-St-Laurent",
-      "statut_cours": "ND",
+      "statut_cours": "Fermé",
       "statut_garde": "ND"
     },
     {
       "name": "École des Cheminots–de Saint-Rémi",
       "css": "Centre de services scolaire des Phares",
       "region": "Bas-St-Laurent",
-      "statut_cours": "ND",
+      "statut_cours": "Fermé",
       "statut_garde": "ND"
     },
     {
       "name": "École des Cheminots–des Quatre-Vents",
       "css": "Centre de services scolaire des Phares",
       "region": "Bas-St-Laurent",
-      "statut_cours": "ND",
+      "statut_cours": "Fermé",
       "statut_garde": "ND"
     },
     {
       "name": "École des Hauts-Plateaux–de la Source (primaire)",
       "css": "Centre de services scolaire des Phares",
       "region": "Bas-St-Laurent",
-      "statut_cours": "ND",
+      "statut_cours": "Fermé",
       "statut_garde": "ND"
     },
     {
       "name": "École des Hauts-Plateaux–de la Source (secondaire)",
       "css": "Centre de services scolaire des Phares",
       "region": "Bas-St-Laurent",
-      "statut_cours": "ND",
+      "statut_cours": "Fermé",
       "statut_garde": "ND"
     },
     {
       "name": "École des Hauts-Plateaux–Marie-Élisabeth",
       "css": "Centre de services scolaire des Phares",
       "region": "Bas-St-Laurent",
-      "statut_cours": "ND",
+      "statut_cours": "Fermé",
       "statut_garde": "ND"
     },
     {
       "name": "École des Merisiers (primaire)",
       "css": "Centre de services scolaire des Phares",
       "region": "Bas-St-Laurent",
-      "statut_cours": "ND",
+      "statut_cours": "Fermé",
       "statut_garde": "ND"
     },
     {
       "name": "École des Merisiers (secondaire)",
       "css": "Centre de services scolaire des Phares",
       "region": "Bas-St-Laurent",
-      "statut_cours": "ND",
+      "statut_cours": "Fermé",
       "statut_garde": "ND"
     },
     {
       "name": "École des Sources",
       "css": "Centre de services scolaire des Phares",
       "region": "Bas-St-Laurent",
-      "statut_cours": "ND",
+      "statut_cours": "Fermé",
       "statut_garde": "ND"
     },
     {
       "name": "École du Boisé-des-Prés - Lab-École Rimouski",
       "css": "Centre de services scolaire des Phares",
       "region": "Bas-St-Laurent",
-      "statut_cours": "ND",
+      "statut_cours": "Fermé",
       "statut_garde": "ND"
     },
     {
       "name": "École du Grand-Pavois–de Saint-Yves",
       "css": "Centre de services scolaire des Phares",
       "region": "Bas-St-Laurent",
-      "statut_cours": "ND",
+      "statut_cours": "Fermé",
       "statut_garde": "ND"
     },
     {
       "name": "École du Grand-Pavois–de Sainte-Agnès",
       "css": "Centre de services scolaire des Phares",
       "region": "Bas-St-Laurent",
-      "statut_cours": "ND",
+      "statut_cours": "Fermé",
       "statut_garde": "ND"
     },
     {
       "name": "École du Mistral",
       "css": "Centre de services scolaire des Phares",
       "region": "Bas-St-Laurent",
-      "statut_cours": "ND",
+      "statut_cours": "Fermé",
       "statut_garde": "ND"
     },
     {
       "name": "École du Portage–de la Rivière",
       "css": "Centre de services scolaire des Phares",
       "region": "Bas-St-Laurent",
-      "statut_cours": "ND",
+      "statut_cours": "Fermé",
       "statut_garde": "ND"
     },
     {
       "name": "École du Portage–du Clair-Soleil",
       "css": "Centre de services scolaire des Phares",
       "region": "Bas-St-Laurent",
-      "statut_cours": "ND",
+      "statut_cours": "Fermé",
       "statut_garde": "ND"
     },
     {
       "name": "École du Rocher",
       "css": "Centre de services scolaire des Phares",
       "region": "Bas-St-Laurent",
-      "statut_cours": "ND",
+      "statut_cours": "Fermé",
       "statut_garde": "ND"
     },
     {
       "name": "École Élisabeth-Turgeon",
       "css": "Centre de services scolaire des Phares",
       "region": "Bas-St-Laurent",
-      "statut_cours": "ND",
+      "statut_cours": "Fermé",
       "statut_garde": "ND"
     },
     {
       "name": "École Grand Défi",
       "css": "Centre de services scolaire des Phares",
       "region": "Bas-St-Laurent",
-      "statut_cours": "ND",
+      "statut_cours": "Fermé",
       "statut_garde": "ND"
     },
     {
       "name": "École Langevin",
       "css": "Centre de services scolaire des Phares",
       "region": "Bas-St-Laurent",
-      "statut_cours": "ND",
+      "statut_cours": "Fermé",
       "statut_garde": "ND"
     },
     {
       "name": "École Lavoie",
       "css": "Centre de services scolaire des Phares",
       "region": "Bas-St-Laurent",
-      "statut_cours": "ND",
+      "statut_cours": "Fermé",
       "statut_garde": "ND"
     },
     {
       "name": "École Lévesque",
       "css": "Centre de services scolaire des Phares",
       "region": "Bas-St-Laurent",
-      "statut_cours": "ND",
+      "statut_cours": "Fermé",
       "statut_garde": "ND"
     },
     {
       "name": "École Norjoli",
       "css": "Centre de services scolaire des Phares",
       "region": "Bas-St-Laurent",
-      "statut_cours": "ND",
+      "statut_cours": "Fermé",
       "statut_garde": "ND"
     },
     {
       "name": "École Paul-Hubert",
       "css": "Centre de services scolaire des Phares",
       "region": "Bas-St-Laurent",
-      "statut_cours": "ND",
+      "statut_cours": "Fermé",
       "statut_garde": "ND"
     },
     {
       "name": "École Saint-Jean",
       "css": "Centre de services scolaire des Phares",
       "region": "Bas-St-Laurent",
-      "statut_cours": "ND",
+      "statut_cours": "Fermé",
       "statut_garde": "ND"
     },
     {
       "name": "École Saint-Rosaire (primaire)",
       "css": "Centre de services scolaire des Phares",
       "region": "Bas-St-Laurent",
-      "statut_cours": "ND",
+      "statut_cours": "Fermé",
       "statut_garde": "ND"
     },
     {
