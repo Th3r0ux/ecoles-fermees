@@ -1197,6 +1197,78 @@ body.authenticated{
     align-items:flex-start;
   }
 }
+
+    /* Dépromouvoir la zone paramètres */
+.admin-grid{
+  grid-template-columns: 1fr 320px;
+  align-items: start;
+}
+
+.admin-card{
+  padding: 16px 18px;
+  border-radius: 18px;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
+}
+
+.admin-card h3{
+  font-size: 16px;
+  line-height: 1.2;
+  margin-bottom: 6px;
+  letter-spacing: -0.01em;
+}
+
+.admin-card p{
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.admin-field{
+  margin-top: 10px;
+}
+
+.admin-field label{
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+#changePasswordNew,
+#changePasswordConfirm{
+  min-height: 46px;
+  border-radius: 14px;
+  font-size: 14px;
+}
+
+.admin-helper{
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+#changePasswordBtn{
+  min-height: 42px;
+  padding: 0 14px;
+  font-size: 14px;
+}
+
+.admin-status-chip{
+  min-height: 30px;
+  font-size: 12px;
+  padding: 0 10px;
+}
+
+.admin-grid .admin-card:last-child{
+  background: rgba(255,255,255,0.72);
+}
+
+@media (max-width: 900px){
+  .admin-grid{
+    grid-template-columns: 1fr;
+  }
+}
+
+.admin-card-muted{
+  background: rgba(255,255,255,0.72);
+  border: 1px solid #e4ebf5;
+}
     
 </style>
 </head>
@@ -1313,14 +1385,15 @@ body.authenticated{
       <p id="changePasswordMsg"></p>
     </div>
 
-    <div class="admin-card">
-      <h3>Accès et sécurité</h3>
-      <p>Votre session expire automatiquement après 2 heures d’inactivité ou de session ouverte.</p>
+    <div class="admin-card admin-card-muted">
+  <h3>Sécurité</h3>
+  <p>Déconnexion automatique après 2 heures.</p>
 
-      <div style="margin-top:14px; display:flex; flex-wrap:wrap; gap:10px;">
-        <span class="admin-status-chip">Session locale sécurisée</span>
-        <span class="admin-status-chip">Journalisation active</span>
-      </div>
+  <div style="margin-top:10px; display:flex; flex-wrap:wrap; gap:8px;">
+    <span class="admin-status-chip">Session locale sécurisée</span>
+    <span class="admin-status-chip">Journalisation active</span>
+  </div>
+</div>
     </div>
   </div>
 </div>
