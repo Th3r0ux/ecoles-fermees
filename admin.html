@@ -1269,6 +1269,50 @@ body.authenticated{
   background: rgba(255,255,255,0.72);
   border: 1px solid #e4ebf5;
 }
+
+ #passwordModal{
+  display:none;
+  position:fixed;
+  inset:0;
+  background: rgba(9, 18, 33, 0.52);
+  z-index:10001;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.password-modal-card{
+  width:100%;
+  max-width:560px;
+  background: rgba(255,255,255,0.97);
+  border-radius: 24px;
+  box-shadow: 0 24px 70px rgba(0,0,0,0.22);
+  padding: 24px;
+  border: 1px solid rgba(255,255,255,0.85);
+}
+
+.password-modal-text{
+  font-size: 14px;
+  line-height: 1.5;
+  color: #667085;
+  margin-bottom: 8px;
+}
+
+#changePasswordCurrent,
+#changePasswordNew,
+#changePasswordConfirm{
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 640px){
+  .password-modal-card{
+    border-radius: 22px;
+    padding: 20px;
+  }
+}   
     
 </style>
 </head>
@@ -1350,40 +1394,16 @@ body.authenticated{
   </div>
 
   <div class="admin-grid">
-    <div class="admin-card">
-      <h3>Changer mon mot de passe</h3>
-      <p>Utilisez un mot de passe robuste pour protéger l’accès à l’administration.</p>
+   <div class="admin-card admin-card-muted">
+  <h3>Mot de passe</h3>
+  <p>Modifiez votre mot de passe administrateur à partir d’une fenêtre sécurisée.</p>
 
-      <div class="admin-field">
-        <label for="changePasswordNew">Nouveau mot de passe</label>
-        <input
-          id="changePasswordNew"
-          type="password"
-          placeholder="Nouveau mot de passe"
-        >
-      </div>
-
-      <div class="admin-helper">
-        Minimum 12 caractères, avec au moins une lettre et un chiffre.
-      </div>
-
-      <div class="admin-field">
-        <label for="changePasswordConfirm">Confirmer le nouveau mot de passe</label>
-        <input
-          id="changePasswordConfirm"
-          type="password"
-          placeholder="Confirmer le nouveau mot de passe"
-        >
-      </div>
-
-      <div style="margin-top:14px;">
-        <button id="changePasswordBtn" type="button" class="admin-btn admin-btn-primary">
-          Mettre à jour mon mot de passe
-        </button>
-      </div>
-
-      <p id="changePasswordMsg"></p>
-    </div>
+  <div style="margin-top:12px;">
+    <button id="openPasswordModalBtn" type="button" class="admin-btn">
+      Changer mon mot de passe
+    </button>
+  </div>
+</div>
 
     <div class="admin-card admin-card-muted">
   <h3>Sécurité</h3>
@@ -1464,7 +1484,60 @@ body.authenticated{
   <div id="list" style="margin-top:16px;"></div>
 </div>
 
+<div id="passwordModal" style="display:none;">
+  <div class="password-modal-card">
+    <div class="confirm-kicker">Zone sécurisée</div>
 
+    <div class="confirm-title">
+      Changer mon mot de passe
+    </div>
+
+    <div class="password-modal-text">
+      Entrez votre mot de passe actuel avant de définir un nouveau mot de passe.
+    </div>
+
+    <div class="admin-field">
+      <label for="changePasswordCurrent">Mot de passe actuel</label>
+      <input
+        id="changePasswordCurrent"
+        type="password"
+        placeholder="Mot de passe actuel"
+      >
+    </div>
+
+    <div class="admin-field">
+      <label for="changePasswordNew">Nouveau mot de passe</label>
+      <input
+        id="changePasswordNew"
+        type="password"
+        placeholder="Nouveau mot de passe"
+      >
+    </div>
+
+    <div class="admin-helper">
+      Minimum 12 caractères, avec au moins une lettre et un chiffre.
+    </div>
+
+    <div class="admin-field">
+      <label for="changePasswordConfirm">Confirmer le nouveau mot de passe</label>
+      <input
+        id="changePasswordConfirm"
+        type="password"
+        placeholder="Confirmer le nouveau mot de passe"
+      >
+    </div>
+
+    <p id="changePasswordMsg"></p>
+
+    <div class="confirm-actions" style="margin-top:16px;">
+      <button type="button" id="closePasswordModalBtn" class="admin-btn">Annuler</button>
+      <button type="button" id="changePasswordBtn" class="admin-btn admin-btn-primary">
+        Mettre à jour
+      </button>
+    </div>
+  </div>
+</div>
+  
 <div id="confirmModal">
   <div class="confirm-card">
     <div class="confirm-kicker">Confirmation requise</div>
@@ -1536,18 +1609,19 @@ async function publishSnapshot() {
     window.publishSnapshot = publishSnapshot;
 
 
+const msg = document.getElementById("msg");
+const loginBox = document.getElementById("loginBox");
+const okBox = document.getElementById("okBox");
 
+const adminUI = document.getElementById("adminUI");
+const masterBox = document.getElementById("masterBox");
 
-    const msg = document.getElementById("msg");
-    const loginBox = document.getElementById("loginBox");
-    const okBox = document.getElementById("okBox");
-    
-  
+const openPasswordModalBtn = document.getElementById("openPasswordModalBtn");
+const passwordModal = document.getElementById("passwordModal");
+const closePasswordModalBtn = document.getElementById("closePasswordModalBtn");
 
-    const adminUI = document.getElementById("adminUI");
-    const masterBox = document.getElementById("masterBox");
-
-    const changePasswordNew = document.getElementById("changePasswordNew");
+const changePasswordCurrent = document.getElementById("changePasswordCurrent");
+const changePasswordNew = document.getElementById("changePasswordNew");
 const changePasswordConfirm = document.getElementById("changePasswordConfirm");
 const changePasswordBtn = document.getElementById("changePasswordBtn");
 const changePasswordMsg = document.getElementById("changePasswordMsg");
@@ -1849,9 +1923,18 @@ resetLoginAttempts();
   await refreshUI();
 });
 
-    changePasswordBtn?.addEventListener("click", async () => {
+  changePasswordBtn?.addEventListener("click", async () => {
+  const currentPassword = changePasswordCurrent.value;
   const password = changePasswordNew.value.trim();
   const confirmPassword = changePasswordConfirm.value.trim();
+
+  changePasswordMsg.textContent = "";
+
+  if (!currentPassword) {
+    changePasswordMsg.textContent = "Entrez votre mot de passe actuel.";
+    changePasswordMsg.style.color = "#b00";
+    return;
+  }
 
   const passwordError = validatePassword(password);
 
@@ -1868,31 +1951,68 @@ resetLoginAttempts();
   }
 
   changePasswordBtn.disabled = true;
-  changePasswordMsg.textContent = "Mise à jour en cours...";
+  changePasswordBtn.textContent = "Mise à jour...";
+  changePasswordMsg.textContent = "Vérification en cours...";
   changePasswordMsg.style.color = "#444";
 
-  const { error } = await supabase.auth.updateUser({ password });
+  try {
+    const { data: userData } = await supabase.auth.getUser();
+    const email = userData?.user?.email?.trim().toLowerCase();
 
-  changePasswordBtn.disabled = false;
-  changePasswordBtn.textContent = "Mettre à jour mon mot de passe";
+    if (!email) {
+      changePasswordMsg.textContent = "Impossible de vérifier la session actuelle.";
+      changePasswordMsg.style.color = "#b00";
+      return;
+    }
 
-  if (error) {
-    changePasswordMsg.textContent = "Erreur : " + error.message;
-    changePasswordMsg.style.color = "#b00";
-    return;
+    const reauthClient = createClient(SUPABASE_URL, SUPABASE_KEY, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false
+      }
+    });
+
+    const { error: reauthError } = await reauthClient.auth.signInWithPassword({
+      email,
+      password: currentPassword
+    });
+
+    await reauthClient.auth.signOut();
+
+    if (reauthError) {
+      changePasswordMsg.textContent = "Mot de passe actuel invalide.";
+      changePasswordMsg.style.color = "#b00";
+      return;
+    }
+
+    changePasswordMsg.textContent = "Mise à jour en cours...";
+    changePasswordMsg.style.color = "#444";
+
+    const { error } = await supabase.auth.updateUser({ password });
+
+    if (error) {
+      changePasswordMsg.textContent = "Erreur : " + error.message;
+      changePasswordMsg.style.color = "#b00";
+      return;
+    }
+
+    await logSecurityEvent("password_changed", {
+      source: "authenticated_session"
+    });
+
+    changePasswordMsg.textContent = "Mot de passe mis à jour avec succès.";
+    changePasswordMsg.style.color = "#2e7d32";
+
+    setTimeout(() => {
+      closePasswordModal();
+    }, 700);
+
+  } finally {
+    changePasswordBtn.disabled = false;
+    changePasswordBtn.textContent = "Mettre à jour";
   }
-
-  await logSecurityEvent("password_changed", {
-  source: "authenticated_session"
-});    
-      
-  changePasswordNew.value = "";
-      
-  changePasswordConfirm.value = "";
-  changePasswordMsg.textContent = "Mot de passe mis à jour avec succès.";
-  changePasswordMsg.style.color = "#2e7d32";
-});
-
+}); 
 
 // ENTER dans email ou password = login
 const emailInput = document.getElementById("email");
@@ -1946,6 +2066,34 @@ document.addEventListener("click", async (e) => {
 
  await refreshUI();
 msg.textContent = "Déconnecté.";
+});
+
+    function openPasswordModal() {
+  changePasswordMsg.textContent = "";
+  changePasswordCurrent.value = "";
+  changePasswordNew.value = "";
+  changePasswordConfirm.value = "";
+  passwordModal.style.display = "flex";
+  setTimeout(() => changePasswordCurrent.focus(), 0);
+}
+
+function closePasswordModal() {
+  passwordModal.style.display = "none";
+}
+
+openPasswordModalBtn?.addEventListener("click", openPasswordModal);
+closePasswordModalBtn?.addEventListener("click", closePasswordModal);
+
+passwordModal?.addEventListener("click", (e) => {
+  if (e.target === passwordModal) {
+    closePasswordModal();
+  }
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && passwordModal?.style.display === "flex") {
+    closePasswordModal();
+  }
 });
     
     refreshUI();
