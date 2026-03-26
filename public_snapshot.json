@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-26T01:03:25.567Z",
+  "generatedAt": "2026-03-26T01:17:16.502Z",
   "rows": [
     {
       "name": "Centre de formation professionnelle Val-d'Or",
@@ -4597,7 +4597,7 @@
       "name": "Centre d’éducation des adultes de L’Islet-Sud",
       "css": "Centre de services scolaire de la Côte-du-Sud",
       "region": "Chaudière-Appalaches",
-      "statut_cours": "ND",
+      "statut_cours": "Fermé",
       "statut_garde": "ND"
     },
     {
