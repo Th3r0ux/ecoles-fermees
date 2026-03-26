@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-26T01:24:59.543Z",
+  "generatedAt": "2026-03-26T01:54:57.148Z",
   "rows": [
     {
       "name": "Centre de formation professionnelle Val-d'Or",
@@ -7866,7 +7866,7 @@
       "name": "École Entramis",
       "css": "Centre de services scolaire des Affluents",
       "region": "Lanaudière",
-      "statut_cours": "ND",
+      "statut_cours": "Fermé",
       "statut_garde": "ND"
     },
     {
