@@ -940,137 +940,264 @@ body.authenticated{
   }
 } 
     
-  .region-row{
-    padding: 14px 10px;
-    font-weight: 800;
-    border-top: 2px solid #ddd;
-    background: #fafafa;
-    cursor: pointer;
-    border-radius: 10px;
-    margin-top: 12px;
-  }
-  .css-row{
-    padding: 10px 10px;
-    font-weight: 700;
-    background: #fff;
-    border: 1px solid #eee;
-    border-radius: 10px;
-    margin: 8px 0 0 0;
-    cursor: pointer;
-  }
-  .school-row{
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    padding: 10px;
-    margin: 10px 0;
-    background: #fff;
-  }
-  .muted{ color:#666; font-size:13px; }
-  .row-flex{ margin-top:10px; display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
-  button{ padding:8px 10px; }
-
- #batchBar{
-  position: sticky;
-  top: 10px;
-  z-index: 2000;
-
-  background: #fff8e1;
-  border: 2px solid #f0c36d;
-
-  box-shadow: 0 8px 18px rgba(0,0,0,.15);
-
-  padding: 14px;
-  border-radius: 12px;
-
-  margin: 12px 0;
+.admin-topbar{
+  position: relative;
+  overflow: hidden;
 }
 
-#batchBar{ margin:12px 0; }
-
-/* Bonus mobile (si tu veux éviter l'encoche iPhone) */
-@supports (top: calc(env(safe-area-inset-top) + 10px)) {
-  #batchBar{ top: calc(env(safe-area-inset-top) + 10px); }
-} 
-
-#batchBar button{
-  background: #fff;
-  border: 2px solid #0004e0;
-  font-weight: 600;
+.admin-topbar::after{
+  content:"";
+  position:absolute;
+  inset:auto -80px -100px auto;
+  width:220px;
+  height:220px;
+  border-radius:50%;
+  background: radial-gradient(circle, rgba(11,92,255,0.12), transparent 68%);
+  pointer-events:none;
 }
 
-#batchBar button:hover{
-  background: #edf1ff;
+#okBox{
+  padding-top: 28px;
 }
 
-     #batchBar > div:not(:first-child){
-  padding-left: 28px;
+#masterBox{
+  margin-top: 18px;
 }
 
-#batchBar::before{
-  content: "MODE BATCH";
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: .5px;
-
-  background: #e0a800;
-  color: white;
-
-  padding: 3px 8px;
-  border-radius: 6px;
-
-  position: absolute;
-  top: -10px;
-  left: 12px;
+.admin-search-card{
+  padding: 20px;
 }
 
-#batchSelectedNames{
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 10px;
-  max-width: 900px;
+.region-row,
+.css-row,
+.school-row{
+  transition: transform .14s ease, box-shadow .14s ease, border-color .14s ease, background-color .14s ease;
 }
 
-.batch-tag{
-  display: inline-flex;
-  align-items: center;
-  max-width: 400px;
-  padding: 6px 10px;
+.region-row:hover,
+.css-row:hover,
+.school-row:hover{
+  transform: translateY(-1px);
+}
+
+.region-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+}
+
+.region-main{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-width:0;
+}
+
+.region-icon,
+.css-icon{
+  width: 18px;
+  flex: 0 0 18px;
+  text-align:center;
+  color:#2450c5;
+  font-weight:900;
+}
+
+.region-name,
+.css-name{
+  font-weight: 850;
+  color: #0f172a;
+}
+
+.region-count,
+.css-count{
+  color: #667085;
+  font-weight: 500;
+}
+
+.css-row{
+  display:flex;
+  justify-content:space-between;
+  gap:16px;
+  align-items:flex-start;
+  flex-wrap:wrap;
+}
+
+.css-main{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:8px;
+  min-width: 240px;
+}
+
+.css-actions{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  align-items:flex-end;
+}
+
+.css-action-row{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+
+.css-action-label{
+  font-weight:700;
+  color:#475467;
+  min-width:48px;
+}
+
+.school-row{
+  padding: 16px;
+  background: linear-gradient(180deg, #ffffff 0%, #fcfdff 100%);
+}
+
+.school-head{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom: 12px;
+}
+
+.school-checkbox{
+  width:18px;
+  height:18px;
+  accent-color: #0b5cff;
+  cursor:pointer;
+}
+
+.school-name{
+  font-size: 17px;
+  font-weight: 850;
+  color: #0f172a;
+}
+
+.school-status{
+  display:grid;
+  grid-template-columns: repeat(2, minmax(180px, 1fr));
+  gap:10px;
+  margin-bottom: 12px;
+}
+
+.school-status-card{
+  border: 1px solid #e6edf7;
+  border-radius: 14px;
+  padding: 10px 12px;
+  background: #f8fbff;
+}
+
+.school-status-label{
+  display:block;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: #667085;
+  margin-bottom: 4px;
+}
+
+.school-status-value{
+  font-size: 15px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.status-badge{
+  display:inline-flex;
+  align-items:center;
+  min-height: 28px;
+  padding: 0 10px;
   border-radius: 999px;
-  background: #cdd5ff;
-  border: 1px solid #6d83f0;
-  color: #1c44e6;
   font-size: 13px;
-  font-weight: 600;
-  line-height: 1.2;
-  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+  font-weight: 800;
+  line-height: 1;
+  border: 1px solid transparent;
+}
+
+.status-open{
+  background:#ecfdf3;
+  color:#18794e;
+  border-color:#cfead8;
+}
+
+.status-closed{
+  background:#fef3f2;
+  color:#b42318;
+  border-color:#f3c7c7;
+}
+
+.status-nd{
+  background:#f2f4f7;
+  color:#667085;
+  border-color:#e4e7ec;
+}
+
+.row-flex{
+  gap: 6px;
+}
+
+.row-label{
+  font-weight:800;
+  color:#475467;
+  min-width:56px;
+}
+
+.saved-pill{
+  display:inline-flex;
+  align-items:center;
+  min-height:28px;
+  padding:0 10px;
+  border-radius:999px;
+  background:#ecfdf3;
+  color:#18794e;
+  border:1px solid #cfead8;
+  font-size:12px;
+  font-weight:800;
+}
+
+.clear-check-btn{
+  border: 1px solid #dbe5f2;
+  background: #fff;
+  color: #2450c5;
+  border-radius: 999px;
+  min-height: 30px;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 800;
   cursor: pointer;
 }
 
-.batch-tag:hover{
-  background: #6d83f0;
+.clear-check-btn:hover{
+  background:#f5f8ff;
 }
 
-    .css-checkmark{
-  color: #2e7d32;
-  font-weight: 900;
-  font-size: 28px;
-  line-height: 1;
-  margin-left: 8px;
-  vertical-align: middle;
+#msg{
+  max-width: 1200px;
+  margin: 14px auto 0;
+  padding: 0 16px;
+  box-sizing: border-box;
+  font-weight: 700;
+  color: #2450c5;
+}
+
+@media (max-width: 720px){
+  .school-status{
+    grid-template-columns: 1fr;
+  }
+
+  .css-row{
+    align-items:stretch;
+  }
+
+  .css-actions{
+    align-items:flex-start;
+  }
 }
     
-  #scrollHint{
-  position: fixed;
-  left: 0; right: 0; bottom: 0;
-  height: 64px;
-  pointer-events: none;
-  z-index: 9999;
-  background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0.96));
-  opacity: 1;
-  transition: opacity .15s;
-}
-#scrollHint.hidden{ opacity: 0; }
 </style>
 </head>
 
@@ -1898,11 +2025,10 @@ if (item) {
 }
 
     const savedEl = document.getElementById(`saved-${id}`);
-    if (savedEl) {
-      savedEl.style.color = "#2e7d32";
-      savedEl.textContent = "Enregistré ✅";
-      setTimeout(() => { savedEl.textContent = ""; }, 1200);
-    }
+if (savedEl) {
+  savedEl.innerHTML = '<span class="saved-pill">Enregistré ✅</span>';
+  setTimeout(() => { savedEl.innerHTML = ""; }, 900);
+}
   }
 
   // Recalcule immédiatement les compteurs si les cours ont changé
@@ -2037,7 +2163,7 @@ async function masterSetAll(val){
     document.querySelectorAll('[data-kind="region"]').forEach(rh => updateClosedLabelsForRegion(rh.getAttribute("data-region")));
 
     const saved = document.getElementById("masterSaved");
-    if (saved) { saved.textContent = "Enregistré ✅"; setTimeout(()=> saved.textContent = "", 1200); }
+    if (saved) { saved.innerHTML = '<span class="saved-pill">Toutes les écoles mises à jour</span>'; setTimeout(()=> saved.innerHTML = "", 1200); }
 
     msg.textContent = "";
     await publishSnapshot();
@@ -2046,25 +2172,25 @@ async function masterSetAll(val){
   }
 }
       
-  function formatCours(status) {
-  if (status === "Fermé") {
-    return '<span style="color:#c62828;font-weight:600;">Fermé</span>';
+  function badgeStatus(status) {
+  const v = normVal(status);
+
+  if (v === "Fermé") {
+    return `<span class="status-badge status-closed">Fermé</span>`;
   }
-  if (status === "Ouvert") {
-    return '<span style="color:#2e7d32;font-weight:600;">Ouvert</span>';
+  if (v === "Ouvert") {
+    return `<span class="status-badge status-open">Ouvert</span>`;
   }
-  return status;
+  return `<span class="status-badge status-nd">ND</span>`;
+}
+
+function formatCours(status) {
+  return badgeStatus(status);
 }
 
 function formatGarde(status) {
-  if (status === "Fermé") {
-    return '<span style="color:#c62828;font-weight:600;">Fermé</span>';
-  }
-  if (status === "Ouvert") {
-    return '<span style="color:#2e7d32;font-weight:600;">Ouvert</span>';
-  }
-  return status;
-}    
+  return badgeStatus(status);
+}
 
   function priorityRank(s) {
     const c = normVal(s.statut_cours);
@@ -2089,12 +2215,14 @@ function formatGarde(status) {
 
   // 3) Update region header HTML while keeping icon + name
   const iconEl = document.getElementById(`${rid}-icon`);
-  const icon = iconEl ? iconEl.textContent : "▶";
-  regionHeader.innerHTML = `
-    <span id="${rid}-icon" style="display:inline-block;width:18px;">${icon}</span>
-    ${regionName}
-    <span style="font-weight:400;color:#666;">(${regionClosedLabel})</span>
-  `;
+const icon = iconEl ? iconEl.textContent : "▶";
+regionHeader.innerHTML = `
+  <div class="region-main">
+    <span id="${rid}-icon" class="region-icon">${icon}</span>
+    <span class="region-name">${regionName}</span>
+    <span class="region-count">(${regionClosedLabel})</span>
+  </div>
+`;
 
   // 4) Update each CSS header under this region
   const cssHeaders = list.querySelectorAll(`[data-kind="css"][data-region="${rid}"]`);
@@ -2110,52 +2238,49 @@ function formatGarde(status) {
 
     const cssClosedLabel = `${cssClosedCount} ${cssClosedCount > 1 ? "écoles fermées" : "école fermée"}`;
 
-    const iconEl2 = document.getElementById(`${cid}-icon`);
-    const icon2 = iconEl2 ? iconEl2.textContent : "▶";
-    const cssCheck = cssCheckmarkHTML(regionName, cssName);
-    const clearBtn = cssCheck ? `
-  <button
-    type="button"
-    data-action="clear-css-check"
-    data-css-name="${cssName.replace(/"/g, '&quot;')}"
-    data-region-name="${regionName.replace(/"/g, '&quot;')}"
-    style="padding:4px 8px;font-size:12px;"
-  >
-    Revérifier ❌
-  </button>
-` : "";
+   const iconEl2 = document.getElementById(`${cid}-icon`);
+const icon2 = iconEl2 ? iconEl2.textContent : "▶";
+const cssCheck = cssCheckmarkHTML(regionName, cssName);
 
-    // Important: on réinjecte ton UI "Toutes les écoles :" + boutons
-    h.innerHTML = `
-  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-  <span id="${cid}-icon" style="display:inline-block;width:18px;">${icon2}</span>
-  <span>${cssName}</span>
-  ${cssCheck}
-  <span style="font-weight:400;color:#666;">(${cssClosedLabel})</span>
-  ${clearBtn}
-</div>
+h.innerHTML = `
+  <div class="css-main">
+    <span id="${cid}-icon" class="css-icon">${icon2}</span>
+    <span class="css-name">${cssName}</span>
+    ${cssCheck}
+    <span class="css-count">(${cssClosedLabel})</span>
+    ${cssCheck ? `
+      <button
+        type="button"
+        class="clear-check-btn"
+        data-action="clear-css-check"
+        data-css-name="${cssName.replace(/"/g, '&quot;')}"
+        data-region-name="${regionName.replace(/"/g, '&quot;')}"
+      >
+        Revérifier
+      </button>
+    ` : ""}
+  </div>
 
-    <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
-      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
-        <span style="font-weight:600;color:#444;margin-right:4px;">Cours :</span>
-        <button type="button" data-action="css-batch" data-mode="cours" data-css="${cid}" data-val="ND">ND</button>
-        <button type="button" data-action="css-batch" data-mode="cours" data-css="${cid}" data-val="Ouvert">Ouvert</button>
-        <button type="button" data-action="css-batch" data-mode="cours" data-css="${cid}" data-val="Fermé">Fermé</button>
-      </div>
+  <div class="css-actions">
+    <div class="css-action-row">
+      <span class="css-action-label">Cours</span>
+      <button type="button" data-action="css-batch" data-mode="cours" data-css="${cid}" data-val="ND">ND</button>
+      <button type="button" data-action="css-batch" data-mode="cours" data-css="${cid}" data-val="Ouvert">Ouvert</button>
+      <button type="button" data-action="css-batch" data-mode="cours" data-css="${cid}" data-val="Fermé">Fermé</button>
+    </div>
 
-      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
-        <span style="font-weight:600;color:#444;margin-right:4px;">Garde :</span>
-        <button type="button" data-action="css-batch" data-mode="garde" data-css="${cid}" data-val="ND">ND</button>
-        <button type="button" data-action="css-batch" data-mode="garde" data-css="${cid}" data-val="Ouvert">Ouvert</button>
-        <button type="button" data-action="css-batch" data-mode="garde" data-css="${cid}" data-val="Fermé">Fermé</button>
-      </div>
+    <div class="css-action-row">
+      <span class="css-action-label">Garde</span>
+      <button type="button" data-action="css-batch" data-mode="garde" data-css="${cid}" data-val="ND">ND</button>
+      <button type="button" data-action="css-batch" data-mode="garde" data-css="${cid}" data-val="Ouvert">Ouvert</button>
+      <button type="button" data-action="css-batch" data-mode="garde" data-css="${cid}" data-val="Fermé">Fermé</button>
+    </div>
 
-      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
-        <span style="font-weight:600;color:#444;margin-right:4px;">Tout :</span>
-        <button type="button" data-action="css-batch" data-mode="both" data-css="${cid}" data-val="ND">ND</button>
-        <button type="button" data-action="css-batch" data-mode="both" data-css="${cid}" data-val="Ouvert">Ouvert</button>
-        <button type="button" data-action="css-batch" data-mode="both" data-css="${cid}" data-val="Fermé">Fermé</button>
-      </div>
+    <div class="css-action-row">
+      <span class="css-action-label">Tout</span>
+      <button type="button" data-action="css-batch" data-mode="both" data-css="${cid}" data-val="ND">ND</button>
+      <button type="button" data-action="css-batch" data-mode="both" data-css="${cid}" data-val="Ouvert">Ouvert</button>
+      <button type="button" data-action="css-batch" data-mode="both" data-css="${cid}" data-val="Fermé">Fermé</button>
     </div>
   </div>
 `;
@@ -2315,45 +2440,52 @@ function formatGarde(status) {
   }
 
   // Fabrique une "carte école" (avec boutons)
-  function makeSchoolRow(s, rid, cid){
-    const cours = normVal(s.statut_cours);
-    const garde = normVal(s.statut_garde);
+function makeSchoolRow(s, rid, cid){
+  const cours = normVal(s.statut_cours);
+  const garde = normVal(s.statut_garde);
 
-    const row = document.createElement("div");
-    row.className = "school-row";
-    row.setAttribute("data-kind", "school");
-    row.setAttribute("data-region", rid);
-    row.setAttribute("data-css", cid);
-    row.setAttribute("data-school", String(s.id));
+  const row = document.createElement("div");
+  row.className = "school-row";
+  row.setAttribute("data-kind", "school");
+  row.setAttribute("data-region", rid);
+  row.setAttribute("data-css", cid);
+  row.setAttribute("data-school", String(s.id));
 
-    row.innerHTML = `
-  <div style="display:flex;align-items:center;gap:10px;">
-    <input type="checkbox" data-action="select" data-id="${s.id}">
-    <div style="font-weight:800;font-size:16px;">${s.name || ""}</div>
-  </div>
+  row.innerHTML = `
+    <div class="school-head">
+      <input class="school-checkbox" type="checkbox" data-action="select" data-id="${s.id}">
+      <div class="school-name">${s.name || ""}</div>
+    </div>
 
-  <div style="margin-top:10px;">
-<div>Cours: <strong id="cours-${s.id}">${formatCours(cours)}</strong></div>
-<div>Service de garde: <strong id="garde-${s.id}">${formatGarde(garde)}</strong></div>
+    <div class="school-status">
+      <div class="school-status-card">
+        <span class="school-status-label">Cours</span>
+        <div id="cours-${s.id}" class="school-status-value">${formatCours(cours)}</div>
       </div>
 
-      <div class="row-flex">
-        <span style="font-weight:700;margin-right:6px;">Cours:</span>
-        <button data-action="set" data-kind="cours" data-id="${s.id}" data-val="ND">ND</button>
-        <button data-action="set" data-kind="cours" data-id="${s.id}" data-val="Ouvert">Ouvert</button>
-        <button data-action="set" data-kind="cours" data-id="${s.id}" data-val="Fermé">Fermé</button>
+      <div class="school-status-card">
+        <span class="school-status-label">Service de garde</span>
+        <div id="garde-${s.id}" class="school-status-value">${formatGarde(garde)}</div>
       </div>
+    </div>
 
-      <div class="row-flex" style="margin-top:8px;">
-        <span style="font-weight:700;margin-right:6px;">Garde:</span>
-        <button data-action="set" data-kind="garde" data-id="${s.id}" data-val="ND">ND</button>
-        <button data-action="set" data-kind="garde" data-id="${s.id}" data-val="Ouvert">Ouvert</button>
-        <button data-action="set" data-kind="garde" data-id="${s.id}" data-val="Fermé">Fermé</button>
-        <span id="saved-${s.id}" style="margin-left:10px;color:#2e7d32;"></span>
-      </div>
-    `;
-    return row;
-  }
+    <div class="row-flex">
+      <span class="row-label">Cours</span>
+      <button data-action="set" data-kind="cours" data-id="${s.id}" data-val="ND">ND</button>
+      <button data-action="set" data-kind="cours" data-id="${s.id}" data-val="Ouvert">Ouvert</button>
+      <button data-action="set" data-kind="cours" data-id="${s.id}" data-val="Fermé">Fermé</button>
+    </div>
+
+    <div class="row-flex" style="margin-top:8px;">
+      <span class="row-label">Garde</span>
+      <button data-action="set" data-kind="garde" data-id="${s.id}" data-val="ND">ND</button>
+      <button data-action="set" data-kind="garde" data-id="${s.id}" data-val="Ouvert">Ouvert</button>
+      <button data-action="set" data-kind="garde" data-id="${s.id}" data-val="Fermé">Fermé</button>
+      <span id="saved-${s.id}"></span>
+    </div>
+  `;
+  return row;
+}
 
   // 1) rendu initial
   renderAdmin("");
@@ -2513,11 +2645,10 @@ function formatGarde(status) {
 }
 
   const savedEl = document.getElementById(`saved-${id}`);
-  if (savedEl) {
-    savedEl.style.color = "#2e7d32";
-    savedEl.textContent = "Enregistré ✅";
-    setTimeout(() => { savedEl.textContent = ""; }, 900);
-  }
+if (savedEl) {
+  savedEl.innerHTML = '<span class="saved-pill">Enregistré ✅</span>';
+  setTimeout(() => { savedEl.innerHTML = ""; }, 1200);
+}
 }
 
   const rid = cid.split("-css-")[0];
@@ -2530,72 +2661,74 @@ function formatGarde(status) {
 
       // A) UPDATE (boutons)
       if (t instanceof HTMLButtonElement && t.dataset.action === "set") {
-        const schoolId = t.dataset.id;
-        const val = t.dataset.val;
-        const kind = t.dataset.kind; // cours|garde
-        if (!schoolId || !val || !kind) return;
+  const schoolId = t.dataset.id;
+  const val = t.dataset.val;
+  const kind = t.dataset.kind; // cours|garde
+  if (!schoolId || !val || !kind) return;
 
-        const saved = document.getElementById(`saved-${schoolId}`);
-        if (saved) { saved.style.color = "#666"; saved.textContent = "…"; }
-
-        const { data: userData } = await supabase.auth.getUser();
-        const uid = userData?.user?.id ?? null;
-
-        const v = normVal(val);
-const payload = {
-  updated_at: new Date().toISOString(),
-  manual_updated_at: new Date().toISOString(),
-  updated_by: uid
-};
-if (kind === "cours") payload.statut_cours = v;
-if (kind === "garde") payload.statut_garde = v;
-
-        const { error } = await supabase
-          .from("school_status")
-          .update(payload)
-          .eq("school_id", schoolId);
-
-        if (error) {
-          console.error(error);
-          if (saved) { saved.style.color = "#b00"; saved.textContent = "Erreur"; }
-          return;
-        }
-
-        // update UI
-        const targetId = (kind === "cours") ? `cours-${schoolId}` : `garde-${schoolId}`;
-        const el = document.getElementById(targetId);
-        if (el) {
-  const v = normVal(val);
-  el.innerHTML = (kind === "cours") ? formatCours(v) : formatGarde(v);
-}
-
-        // update cache local
-        // update cache local
-const item = schools.find(x => String(x.id) === String(schoolId));
-if (item) {
-  const v = normVal(val);
-  item.updated_at = payload.updated_at;
-item.manual_updated_at = payload.manual_updated_at;
-
-  if (kind === "cours") {
-    item.statut_cours = v;
-
-    // ✅ met à jour les compteurs immédiatement
-    const rid = regionId(item.region || "Autre");
-    updateClosedLabelsForRegion(rid);
+  const saved = document.getElementById(`saved-${schoolId}`);
+  if (saved) {
+    saved.innerHTML = '<span class="saved-pill">Enregistrement…</span>';
   }
 
-  if (kind === "garde") {
-    item.statut_garde = v;
-    const rid = regionId(item.region || "Autre");
-    updateClosedLabelsForRegion(rid);
-  }
-}
+  const { data: userData } = await supabase.auth.getUser();
+  const uid = userData?.user?.id ?? null;
 
-        if (saved) { saved.style.color = "#2e7d32"; saved.textContent = "Enregistré ✅"; }
-        await publishSnapshot();
-        return;
+  const v = normVal(val);
+  const payload = {
+    updated_at: new Date().toISOString(),
+    manual_updated_at: new Date().toISOString(),
+    updated_by: uid
+  };
+  if (kind === "cours") payload.statut_cours = v;
+  if (kind === "garde") payload.statut_garde = v;
+
+  t.style.opacity = "0.6";
+  t.style.pointerEvents = "none";
+
+  try {
+    const { error } = await supabase
+      .from("school_status")
+      .update(payload)
+      .eq("school_id", schoolId);
+
+    if (error) {
+      console.error(error);
+      if (saved) {
+        saved.innerHTML = '<span class="saved-pill" style="background:#fef3f2;color:#b42318;border-color:#f3c7c7;">Erreur</span>';
       }
+      return;
+    }
+
+    const targetId = (kind === "cours") ? `cours-${schoolId}` : `garde-${schoolId}`;
+    const el = document.getElementById(targetId);
+    if (el) {
+      el.innerHTML = (kind === "cours") ? formatCours(v) : formatGarde(v);
+    }
+
+    const item = schools.find(x => String(x.id) === String(schoolId));
+    if (item) {
+      item.updated_at = payload.updated_at;
+      item.manual_updated_at = payload.manual_updated_at;
+      if (kind === "cours") item.statut_cours = v;
+      if (kind === "garde") item.statut_garde = v;
+
+      updateClosedLabelsForRegion(regionId(item.region || "Autre"));
+    }
+
+    if (saved) {
+      saved.innerHTML = '<span class="saved-pill">Enregistré ✅</span>';
+    }
+
+    msg.textContent = "";
+    await publishSnapshot();
+    return;
+
+  } finally {
+    t.style.opacity = "";
+    t.style.pointerEvents = "";
+  }
+}
 
       // B) TOGGLE (région / css) — on cherche le bloc le plus proche
       const clickable = t.closest?.('[data-kind="region"],[data-kind="css"]');
