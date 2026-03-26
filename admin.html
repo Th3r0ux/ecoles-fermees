@@ -3012,40 +3012,51 @@ if (savedEl) {
   </button>
 ` : "";
 
-            cssHeader.innerHTML = `
-  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;">
-    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-      <span id="${cid}-icon" style="display:inline-block;width:18px;">▶</span>
-      <span>${cssName}</span>
-      ${cssCheck}
-      <span style="font-weight:400;color:#666;">(${cssClosedLabel})</span>
-      ${clearBtn}
+          cssHeader.innerHTML = `
+  <div class="css-main">
+    <span id="${cid}-icon" class="css-icon">▶</span>
+    <span class="css-name">${cssName}</span>
+    ${cssCheck}
+    <span class="css-count">(${cssClosedLabel})</span>
+  </div>
+
+  <div class="css-actions">
+    ${cssCheck ? `
+      <div class="css-action-row">
+        <button
+          type="button"
+          class="clear-check-btn"
+          data-action="clear-css-check"
+          data-css-name="${cssName.replace(/"/g, '&quot;')}"
+          data-region-name="${(clickable.dataset.regionName || 'Autre').replace(/"/g, '&quot;')}"
+        >
+          Revérifier
+        </button>
+      </div>
+    ` : ""}
+
+    <div class="css-action-row">
+      <span class="css-action-label">Cours</span>
+      <button type="button" data-action="css-batch" data-mode="cours" data-css="${cid}" data-val="ND">ND</button>
+      <button type="button" data-action="css-batch" data-mode="cours" data-css="${cid}" data-val="Ouvert">Ouvert</button>
+      <button type="button" data-action="css-batch" data-mode="cours" data-css="${cid}" data-val="Fermé">Fermé</button>
     </div>
 
-    <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
-      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
-        <span style="font-weight:600;color:#444;margin-right:4px;">Cours :</span>
-        <button type="button" data-action="css-batch" data-mode="cours" data-css="${cid}" data-val="ND">ND</button>
-        <button type="button" data-action="css-batch" data-mode="cours" data-css="${cid}" data-val="Ouvert">Ouvert</button>
-        <button type="button" data-action="css-batch" data-mode="cours" data-css="${cid}" data-val="Fermé">Fermé</button>
-      </div>
+    <div class="css-action-row">
+      <span class="css-action-label">Garde</span>
+      <button type="button" data-action="css-batch" data-mode="garde" data-css="${cid}" data-val="ND">ND</button>
+      <button type="button" data-action="css-batch" data-mode="garde" data-css="${cid}" data-val="Ouvert">Ouvert</button>
+      <button type="button" data-action="css-batch" data-mode="garde" data-css="${cid}" data-val="Fermé">Fermé</button>
+    </div>
 
-      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
-        <span style="font-weight:600;color:#444;margin-right:4px;">Garde :</span>
-        <button type="button" data-action="css-batch" data-mode="garde" data-css="${cid}" data-val="ND">ND</button>
-        <button type="button" data-action="css-batch" data-mode="garde" data-css="${cid}" data-val="Ouvert">Ouvert</button>
-        <button type="button" data-action="css-batch" data-mode="garde" data-css="${cid}" data-val="Fermé">Fermé</button>
-      </div>
-
-      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
-        <span style="font-weight:600;color:#444;margin-right:4px;">Tout :</span>
-        <button type="button" data-action="css-batch" data-mode="both" data-css="${cid}" data-val="ND">ND</button>
-        <button type="button" data-action="css-batch" data-mode="both" data-css="${cid}" data-val="Ouvert">Ouvert</button>
-        <button type="button" data-action="css-batch" data-mode="both" data-css="${cid}" data-val="Fermé">Fermé</button>
-      </div>
+    <div class="css-action-row">
+      <span class="css-action-label">Tout</span>
+      <button type="button" data-action="css-batch" data-mode="both" data-css="${cid}" data-val="ND">ND</button>
+      <button type="button" data-action="css-batch" data-mode="both" data-css="${cid}" data-val="Ouvert">Ouvert</button>
+      <button type="button" data-action="css-batch" data-mode="both" data-css="${cid}" data-val="Fermé">Fermé</button>
     </div>
   </div>
-`;
+`;  
             
             regionContainer.appendChild(cssHeader);
 
