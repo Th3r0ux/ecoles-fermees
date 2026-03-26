@@ -1238,6 +1238,81 @@ body.authenticated .auth-shell{
   }
 }
 
+.region-row{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.region-main{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.region-name{
+  white-space: nowrap;
+}
+
+.region-count{
+  margin-left: auto;
+  white-space: nowrap;
+  text-align: right;
+}
+
+.css-row{
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: nowrap;
+}
+
+.css-main{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.css-name{
+  white-space: nowrap;
+}
+
+.css-count{
+  margin-left: auto;
+  white-space: nowrap;
+  text-align: right;
+}
+
+.css-actions{
+  flex: 0 0 auto;
+  margin-left: 16px;
+}
+
+@media (max-width: 720px){
+  .region-row,
+  .css-row{
+    flex-wrap: wrap;
+  }
+
+  .region-count,
+  .css-count{
+    margin-left: 0;
+    width: 100%;
+    text-align: left;
+  }
+
+  .css-actions{
+    margin-left: 0;
+    width: 100%;
+  }
+}
+   
    </style>
    
   
@@ -2348,8 +2423,8 @@ regionHeader.innerHTML = `
   <div class="region-main">
     <span id="${rid}-icon" class="region-icon">${icon}</span>
     <span class="region-name">${regionName}</span>
-    <span class="region-count">(${regionClosedLabel})</span>
   </div>
+  <span class="region-count">(${regionClosedLabel})</span>
 `;
 
   // 4) Update each CSS header under this region
@@ -2376,20 +2451,23 @@ h.innerHTML = `
     <span class="css-name">${cssName}</span>
     ${cssCheck}
     <span class="css-count">(${cssClosedLabel})</span>
-    ${cssCheck ? `
-      <button
-        type="button"
-        class="clear-check-btn"
-        data-action="clear-css-check"
-        data-css-name="${cssName.replace(/"/g, '&quot;')}"
-        data-region-name="${regionName.replace(/"/g, '&quot;')}"
-      >
-        Revérifier
-      </button>
-    ` : ""}
   </div>
 
   <div class="css-actions">
+    ${cssCheck ? `
+      <div class="css-action-row">
+        <button
+          type="button"
+          class="clear-check-btn"
+          data-action="clear-css-check"
+          data-css-name="${cssName.replace(/"/g, '&quot;')}"
+          data-region-name="${regionName.replace(/"/g, '&quot;')}"
+        >
+          Revérifier
+        </button>
+      </div>
+    ` : ""}
+
     <div class="css-action-row">
       <span class="css-action-label">Cours</span>
       <button type="button" data-action="css-batch" data-mode="cours" data-css="${cid}" data-val="ND">ND</button>
