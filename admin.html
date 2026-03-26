@@ -605,9 +605,18 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
   const email = document.getElementById("email").value.trim().toLowerCase();
   const password = document.getElementById("password").value;
 
+  const { blockedUntil } = getLoginState();
+
+  if (blockedUntil && Date.now() < blockedUntil) {
+    const seconds = Math.ceil((blockedUntil - Date.now()) / 1000);
+    msg.textContent = `Trop de tentatives. Réessayez dans ${seconds}s.`;
+    return;
+  }
+
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
+    recordFailedAttempt();
     await logSecurityEvent("login_failed", {
       email,
       reason: error.message || "unknown"
@@ -632,7 +641,7 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
   }
 
   await logSecurityEvent("login_success", { email });
-
+resetLoginAttempts();
   msg.textContent = "";
   await refreshUI();
 });
