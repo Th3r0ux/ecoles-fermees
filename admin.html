@@ -666,6 +666,12 @@ body.authenticated .auth-shell{
 #masterBox{
   display: none;
   margin: 18px auto 0;
+  padding-left: 16px;
+  padding-right: 16px;
+  box-sizing: border-box;
+}
+
+.master-card{
   padding: 18px 20px;
   border: 1px solid rgba(255,255,255,0.8);
   border-radius: 22px;
@@ -1318,14 +1324,16 @@ body.authenticated .auth-shell{
 </div>
 
 <div id="masterBox" style="display:none;">
-  <div class="master-row">
-    <span class="master-label">Toutes les écoles du Québec :</span>
+  <div class="master-card">
+    <div class="master-row">
+      <span class="master-label">Toutes les écoles du Québec :</span>
 
-    <button type="button" id="masterND" class="admin-btn">Tout à ND</button>
-    <button type="button" id="masterOpen" class="admin-btn admin-btn-primary">Tout Ouvert</button>
-    <button type="button" id="masterClose" class="admin-btn admin-btn-danger">Tout Fermé</button>
+      <button type="button" id="masterND" class="admin-btn">Tout à ND</button>
+      <button type="button" id="masterOpen" class="admin-btn admin-btn-primary">Tout Ouvert</button>
+      <button type="button" id="masterClose" class="admin-btn admin-btn-danger">Tout Fermé</button>
 
-    <span id="masterSaved"></span>
+      <span id="masterSaved"></span>
+    </div>
   </div>
 </div>
   
