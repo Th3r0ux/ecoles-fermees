@@ -2473,11 +2473,13 @@ h.innerHTML = `
       const closedCount = regionAllSchools.filter(x => normVal(x.statut_cours) === "Fermé").length;
       const closedLabel = `${closedCount} ${closedCount > 1 ? "écoles fermées" : "école fermée"}`;
 
-      regionBlock.innerHTML = `
-        <span id="${rid}-icon" style="display:inline-block;width:18px;">${autoExpand ? "▼" : "▶"}</span>
-        ${region}
-        <span style="font-weight:400;color:#666;">(${closedLabel})</span>
-      `;
+regionBlock.innerHTML = `
+  <div class="region-main">
+    <span id="${rid}-icon" class="region-icon">${autoExpand ? "▼" : "▶"}</span>
+    <span class="region-name">${region}</span>
+  </div>
+  <span class="region-count">(${closedLabel})</span>
+`;
       list.appendChild(regionBlock);
 
       // conteneur pour css + écoles (pour pouvoir cacher/montrer tout)
