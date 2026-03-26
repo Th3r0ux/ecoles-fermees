@@ -17,7 +17,8 @@
         sans-serif;
     }
   </style>
-  <style>
+
+ <style>
 
 :root{
   --auth-blue: #0b5cff;
@@ -31,6 +32,24 @@
   --auth-shadow: 0 24px 70px rgba(8, 15, 52, 0.18);
   --auth-shadow-soft: 0 10px 30px rgba(11, 92, 255, 0.12);
   --auth-radius: 30px;
+
+  --ui-bg: #f3f7fd;
+  --ui-surface: rgba(255,255,255,0.92);
+  --ui-surface-strong: #ffffff;
+  --ui-border: #dbe5f2;
+  --ui-border-strong: #c9d7ea;
+  --ui-text: #0f172a;
+  --ui-muted: #667085;
+  --ui-blue: #0b5cff;
+  --ui-blue-dark: #0847c7;
+  --ui-green: #18794e;
+  --ui-red: #b42318;
+  --ui-amber: #a15c00;
+  --ui-shadow: 0 18px 50px rgba(15, 23, 42, 0.10);
+  --ui-shadow-soft: 0 10px 24px rgba(15, 23, 42, 0.06);
+  --ui-radius-xl: 24px;
+  --ui-radius-lg: 18px;
+  --ui-radius-md: 14px;
 }
 
 html, body{
@@ -46,7 +65,14 @@ body{
   color: var(--auth-text);
 }
 
-/* ===== Zone login ===== */
+body.authenticated{
+  background:
+    radial-gradient(circle at top left, rgba(79, 140, 255, 0.10), transparent 28%),
+    linear-gradient(180deg, #eef4ff 0%, #f7faff 100%);
+}
+
+/* ===== Login ===== */
+
 .auth-shell{
   min-height: 100vh;
   display: flex;
@@ -315,70 +341,11 @@ body{
   line-height: 1.45;
 }
 
-/* Cache le shell login quand connecté */
 body.authenticated .auth-shell{
   display: none;
 }
 
-/* Quand connecté, on remet l'interface admin normale */
-#okBox,
-#masterBox,
-#adminUI{
-  max-width: 1200px;
-  margin-left: auto;
-  margin-right: auto;
-  box-sizing: border-box;
-}
-
-#okBox{ padding: 20px 16px 0; }
-#masterBox, #adminUI{ padding-left: 16px; padding-right: 16px; }
-
-@media (min-width: 768px){
-  .auth-top{
-    padding: 48px 32px 158px;
-  }
-
-  .auth-card-wrap{
-    max-width: 520px;
-    margin-top: -100px;
-    padding-bottom: 44px;
-  }
-
-  .auth-card{
-    padding: 36px 32px 26px;
-  }
-
-  .auth-card-head h2{
-    font-size: 32px;
-  }
-}
-
-   :root{
-  --ui-bg: #f3f7fd;
-  --ui-surface: rgba(255,255,255,0.92);
-  --ui-surface-strong: #ffffff;
-  --ui-border: #dbe5f2;
-  --ui-border-strong: #c9d7ea;
-  --ui-text: #0f172a;
-  --ui-muted: #667085;
-  --ui-blue: #0b5cff;
-  --ui-blue-dark: #0847c7;
-  --ui-green: #18794e;
-  --ui-red: #b42318;
-  --ui-amber: #a15c00;
-  --ui-shadow: 0 18px 50px rgba(15, 23, 42, 0.10);
-  --ui-shadow-soft: 0 10px 24px rgba(15, 23, 42, 0.06);
-  --ui-radius-xl: 24px;
-  --ui-radius-lg: 18px;
-  --ui-radius-md: 14px;
-}
-
-/* ===== Zone admin connectée ===== */
-body.authenticated{
-  background:
-    radial-gradient(circle at top left, rgba(79, 140, 255, 0.10), transparent 28%),
-    linear-gradient(180deg, #eef4ff 0%, #f7faff 100%);
-}
+/* ===== Shared layout ===== */
 
 #okBox,
 #masterBox,
@@ -390,7 +357,8 @@ body.authenticated{
 }
 
 #okBox{
-  padding: 24px 16px 0;
+  padding: 28px 16px 0;
+  padding-bottom: 0;
 }
 
 #masterBox,
@@ -399,7 +367,11 @@ body.authenticated{
   padding-right: 16px;
 }
 
+/* ===== Topbar ===== */
+
 .admin-topbar{
+  position: relative;
+  overflow: hidden;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -409,9 +381,20 @@ body.authenticated{
   border: 1px solid rgba(255,255,255,0.8);
   box-shadow: var(--ui-shadow);
   border-radius: 26px;
-  padding: 22px 22px;
+  padding: 22px;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+}
+
+.admin-topbar::after{
+  content:"";
+  position:absolute;
+  inset:auto -80px -100px auto;
+  width:220px;
+  height:220px;
+  border-radius:50%;
+  background: radial-gradient(circle, rgba(11,92,255,0.12), transparent 68%);
+  pointer-events:none;
 }
 
 .admin-topbar-title{
@@ -456,6 +439,8 @@ body.authenticated{
   flex-wrap: wrap;
   align-items: center;
 }
+
+/* ===== Buttons ===== */
 
 .admin-btn,
 #logoutBtn,
@@ -542,28 +527,47 @@ body.authenticated{
   background: #fff;
 }
 
+.admin-btn-ghost{
+  background: transparent;
+  border: 1px solid transparent;
+  color: #667085;
+  box-shadow: none;
+  padding: 0 8px;
+  min-height: 32px;
+}
+
+.admin-btn-ghost:hover{
+  background: rgba(255,255,255,0.55);
+  border-color: #dbe5f2;
+  color: #163152;
+  transform: none;
+}
+
+/* ===== Cards / settings ===== */
+
 .admin-grid{
   display: grid;
-  grid-template-columns: 1.15fr .85fr;
+  grid-template-columns: 1fr 320px;
   gap: 16px;
   margin-top: 16px;
+  align-items: start;
 }
 
 .admin-card{
   background: var(--ui-surface);
   border: 1px solid rgba(255,255,255,0.8);
-  box-shadow: var(--ui-shadow-soft);
-  border-radius: var(--ui-radius-xl);
-  padding: 20px;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
+  border-radius: 18px;
+  padding: 16px 18px;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
 
 .admin-card h3{
-  margin: 0 0 8px 0;
-  font-size: 22px;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
+  margin: 0 0 6px 0;
+  font-size: 16px;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
   font-weight: 850;
   color: var(--ui-text);
 }
@@ -571,72 +575,44 @@ body.authenticated{
 .admin-card p{
   margin: 0;
   color: var(--ui-muted);
-  line-height: 1.5;
-  font-size: 14px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.admin-card-muted{
+  background: rgba(255,255,255,0.72);
+  border: 1px solid #e4ebf5;
 }
 
 .admin-status-chip{
   display: inline-flex;
   align-items: center;
-  min-height: 34px;
-  padding: 0 12px;
+  min-height: 30px;
+  padding: 0 10px;
   border-radius: 999px;
   background: #edfdf3;
   border: 1px solid #cfead8;
   color: var(--ui-green);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 800;
 }
 
 .admin-field{
-  margin-top: 14px;
+  margin-top: 10px;
 }
 
 .admin-field label{
   display: block;
-  margin: 0 0 8px 2px;
-  font-size: 14px;
+  margin: 0 0 6px 2px;
+  font-size: 13px;
   font-weight: 800;
   color: #344054;
 }
 
-.admin-input,
-#q,
-#changePasswordNew,
-#changePasswordConfirm{
-  width: 100%;
-  box-sizing: border-box;
-  min-height: 54px;
-  border-radius: 16px;
-  border: 1px solid var(--ui-border);
-  background: #fff;
-  padding: 0 16px;
-  font-size: 15px;
-  color: var(--ui-text);
-  outline: none;
-  transition: border-color .16s ease, box-shadow .16s ease, background-color .16s ease;
-  box-shadow: 0 1px 2px rgba(16,24,40,0.03);
-}
-
-.admin-input::placeholder,
-#q::placeholder,
-#changePasswordNew::placeholder,
-#changePasswordConfirm::placeholder{
-  color: #98a2b3;
-}
-
-.admin-input:focus,
-#q:focus,
-#changePasswordNew:focus,
-#changePasswordConfirm:focus{
-  border-color: rgba(11, 92, 255, 0.85);
-  box-shadow: 0 0 0 4px rgba(11, 92, 255, 0.12), 0 6px 18px rgba(11, 92, 255, 0.08);
-}
-
 .admin-helper{
-  margin-top: 8px;
+  margin-top: 6px;
   color: var(--ui-muted);
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.45;
 }
 
@@ -647,10 +623,49 @@ body.authenticated{
   font-weight: 700;
 }
 
+/* ===== Inputs ===== */
+
+.admin-input,
+#q,
+#changePasswordCurrent,
+#changePasswordNew,
+#changePasswordConfirm{
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 46px;
+  border-radius: 14px;
+  border: 1px solid var(--ui-border);
+  background: #fff;
+  padding: 0 16px;
+  font-size: 14px;
+  color: var(--ui-text);
+  outline: none;
+  transition: border-color .16s ease, box-shadow .16s ease, background-color .16s ease;
+  box-shadow: 0 1px 2px rgba(16,24,40,0.03);
+}
+
+.admin-input::placeholder,
+#q::placeholder,
+#changePasswordCurrent::placeholder,
+#changePasswordNew::placeholder,
+#changePasswordConfirm::placeholder{
+  color: #98a2b3;
+}
+
+.admin-input:focus,
+#q:focus,
+#changePasswordCurrent:focus,
+#changePasswordNew:focus,
+#changePasswordConfirm:focus{
+  border-color: rgba(11, 92, 255, 0.85);
+  box-shadow: 0 0 0 4px rgba(11, 92, 255, 0.12), 0 6px 18px rgba(11, 92, 255, 0.08);
+}
+
+/* ===== Master bar ===== */
+
 #masterBox{
   display: none;
-  margin-top: 16px;
-  margin-bottom: 0;
+  margin: 18px auto 0;
   padding: 18px 20px;
   border: 1px solid rgba(255,255,255,0.8);
   border-radius: 22px;
@@ -679,6 +694,8 @@ body.authenticated{
   font-weight: 800;
 }
 
+/* ===== Search / admin content ===== */
+
 #adminUI{
   margin-top: 16px;
   padding-bottom: 32px;
@@ -689,7 +706,7 @@ body.authenticated{
   border: 1px solid rgba(255,255,255,0.8);
   box-shadow: var(--ui-shadow-soft);
   border-radius: 24px;
-  padding: 16px;
+  padding: 20px;
   margin-bottom: 16px;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -738,6 +755,8 @@ body.authenticated{
   padding-left: 44px;
 }
 
+/* ===== Batch bar ===== */
+
 #batchBar{
   position: sticky;
   top: 10px;
@@ -752,16 +771,16 @@ body.authenticated{
 
 #batchBar::before{
   content: "MODE BATCH";
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: .08em;
-  background: #d99100;
-  color: white;
-  padding: 4px 8px;
-  border-radius: 999px;
   position: absolute;
   top: -11px;
   left: 14px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #d99100;
+  color: white;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .08em;
 }
 
 #batchBar > div:not(:first-child){
@@ -796,177 +815,7 @@ body.authenticated{
   background: #fff8e9;
 }
 
-.region-row{
-  padding: 16px 16px;
-  font-weight: 850;
-  border: 1px solid #dbe5f2;
-  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
-  cursor: pointer;
-  border-radius: 18px;
-  margin-top: 14px;
-  box-shadow: 0 6px 18px rgba(15,23,42,0.04);
-}
-
-.css-row{
-  padding: 14px 14px;
-  font-weight: 700;
-  background: #fff;
-  border: 1px solid #e4ebf5;
-  border-radius: 16px;
-  margin: 10px 0 0 0;
-  cursor: pointer;
-  box-shadow: 0 4px 14px rgba(15,23,42,0.04);
-}
-
-.school-row{
-  border: 1px solid #e4ebf5;
-  border-radius: 18px;
-  padding: 14px;
-  margin: 10px 0;
-  background: #fff;
-  box-shadow: 0 4px 14px rgba(15,23,42,0.04);
-}
-
-.row-flex{
-  margin-top: 10px;
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-  align-items:center;
-}
-
-.muted{
-  color:#667085;
-  font-size:13px;
-}
-
-.css-checkmark{
-  color: #2e7d32;
-  font-weight: 900;
-  font-size: 26px;
-  line-height: 1;
-  margin-left: 6px;
-  vertical-align: middle;
-}
-
-#confirmModal{
-  display:none;
-  position:fixed;
-  inset:0;
-  background: rgba(9, 18, 33, 0.52);
-  z-index:10000;
-  align-items:center;
-  justify-content:center;
-  padding:20px;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-}
-
-.confirm-card{
-  width:100%;
-  max-width:520px;
-  background: rgba(255,255,255,0.96);
-  border-radius: 24px;
-  box-shadow: 0 24px 70px rgba(0,0,0,0.22);
-  padding: 24px;
-  border: 1px solid rgba(255,255,255,0.85);
-}
-
-.confirm-kicker{
-  display:inline-flex;
-  align-items:center;
-  min-height:30px;
-  padding: 0 12px;
-  border-radius:999px;
-  background:#fff4f2;
-  border:1px solid #ffd6d0;
-  color:#b42318;
-  font-size:12px;
-  font-weight:800;
-  letter-spacing:.02em;
-  margin-bottom:12px;
-}
-
-.confirm-title{
-  font-size: 24px;
-  font-weight: 850;
-  letter-spacing: -.02em;
-  margin-bottom: 10px;
-  color: var(--ui-text);
-}
-
-#confirmText{
-  font-size: 15px;
-  line-height: 1.55;
-  color: #344054;
-  margin-bottom: 20px;
-}
-
-.confirm-actions{
-  display:flex;
-  gap:10px;
-  justify-content:flex-end;
-  flex-wrap:wrap;
-}
-
-@media (max-width: 900px){
-  .admin-grid{
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 640px){
-  #okBox,
-  #masterBox,
-  #adminUI{
-    padding-left: 12px;
-    padding-right: 12px;
-  }
-
-  #okBox{
-    padding-top: 16px;
-  }
-
-  .admin-topbar,
-  .admin-card,
-  .admin-search-card{
-    border-radius: 22px;
-    padding: 18px;
-  }
-
-  .confirm-card{
-    border-radius: 22px;
-    padding: 20px;
-  }
-} 
-    
-.admin-topbar{
-  position: relative;
-  overflow: hidden;
-}
-
-.admin-topbar::after{
-  content:"";
-  position:absolute;
-  inset:auto -80px -100px auto;
-  width:220px;
-  height:220px;
-  border-radius:50%;
-  background: radial-gradient(circle, rgba(11,92,255,0.12), transparent 68%);
-  pointer-events:none;
-}
-
-#okBox{
-  padding-top: 28px;
-}
-
-#masterBox{
-  margin-top: 18px;
-}
-
-.admin-search-card{
-  padding: 20px;
-}
+/* ===== Region / CSS / school rows ===== */
 
 .region-row,
 .css-row,
@@ -985,6 +834,14 @@ body.authenticated{
   align-items:center;
   justify-content:space-between;
   gap:14px;
+  padding: 16px;
+  font-weight: 850;
+  border: 1px solid #dbe5f2;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  cursor: pointer;
+  border-radius: 18px;
+  margin-top: 14px;
+  box-shadow: 0 6px 18px rgba(15,23,42,0.04);
 }
 
 .region-main{
@@ -1018,9 +875,17 @@ body.authenticated{
 .css-row{
   display:flex;
   justify-content:space-between;
-  gap:16px;
   align-items:flex-start;
   flex-wrap:wrap;
+  gap:16px;
+  padding: 14px;
+  font-weight: 700;
+  background: #fff;
+  border: 1px solid #e4ebf5;
+  border-radius: 16px;
+  margin: 10px 0 0 0;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(15,23,42,0.04);
 }
 
 .css-main{
@@ -1051,9 +916,22 @@ body.authenticated{
   min-width:48px;
 }
 
+.css-checkmark{
+  color: #2e7d32;
+  font-weight: 900;
+  font-size: 26px;
+  line-height: 1;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
 .school-row{
   padding: 16px;
+  margin: 10px 0;
   background: linear-gradient(180deg, #ffffff 0%, #fcfdff 100%);
+  border: 1px solid #e4ebf5;
+  border-radius: 18px;
+  box-shadow: 0 4px 14px rgba(15,23,42,0.04);
 }
 
 .school-head{
@@ -1137,13 +1015,22 @@ body.authenticated{
 }
 
 .row-flex{
+  display:flex;
   gap: 6px;
+  flex-wrap:wrap;
+  align-items:center;
+  margin-top: 10px;
 }
 
 .row-label{
+  min-width:56px;
   font-weight:800;
   color:#475467;
-  min-width:56px;
+}
+
+.muted{
+  color:#667085;
+  font-size:13px;
 }
 
 .saved-pill{
@@ -1175,6 +1062,8 @@ body.authenticated{
   background:#f5f8ff;
 }
 
+/* ===== Global message / modals ===== */
+
 #msg{
   max-width: 1200px;
   margin: 14px auto 0;
@@ -1182,6 +1071,123 @@ body.authenticated{
   box-sizing: border-box;
   font-weight: 700;
   color: #2450c5;
+}
+
+#confirmModal,
+#passwordModal{
+  display:none;
+  position:fixed;
+  inset:0;
+  background: rgba(9, 18, 33, 0.52);
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+#confirmModal{
+  z-index:10000;
+}
+
+#passwordModal{
+  z-index:10001;
+}
+
+.confirm-card,
+.password-modal-card{
+  width:100%;
+  background: rgba(255,255,255,0.96);
+  border: 1px solid rgba(255,255,255,0.85);
+  box-shadow: 0 24px 70px rgba(0,0,0,0.22);
+}
+
+.confirm-card{
+  max-width:520px;
+  border-radius: 24px;
+  padding: 24px;
+}
+
+.password-modal-card{
+  max-width:560px;
+  border-radius: 24px;
+  padding: 24px;
+}
+
+.confirm-kicker{
+  display:inline-flex;
+  align-items:center;
+  min-height:30px;
+  padding: 0 12px;
+  border-radius:999px;
+  background:#fff4f2;
+  border:1px solid #ffd6d0;
+  color:#b42318;
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:.02em;
+  margin-bottom:12px;
+}
+
+.confirm-title{
+  font-size: 24px;
+  font-weight: 850;
+  letter-spacing: -.02em;
+  margin-bottom: 10px;
+  color: var(--ui-text);
+}
+
+#confirmText,
+.password-modal-text{
+  font-size: 14px;
+  line-height: 1.5;
+  color: #667085;
+}
+
+#confirmText{
+  font-size: 15px;
+  line-height: 1.55;
+  color: #344054;
+  margin-bottom: 20px;
+}
+
+.password-modal-text{
+  margin-bottom: 8px;
+}
+
+.confirm-actions{
+  display:flex;
+  gap:10px;
+  justify-content:flex-end;
+  flex-wrap:wrap;
+}
+
+/* ===== Responsive ===== */
+
+@media (min-width: 768px){
+  .auth-top{
+    padding: 48px 32px 158px;
+  }
+
+  .auth-card-wrap{
+    max-width: 520px;
+    margin-top: -100px;
+    padding-bottom: 44px;
+  }
+
+  .auth-card{
+    padding: 36px 32px 26px;
+  }
+
+  .auth-card-head h2{
+    font-size: 32px;
+  }
+}
+
+@media (max-width: 900px){
+  .admin-grid{
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 720px){
@@ -1198,154 +1204,37 @@ body.authenticated{
   }
 }
 
-    /* Dépromouvoir la zone paramètres */
-.admin-grid{
-  grid-template-columns: 1fr 320px;
-  align-items: start;
-}
-
-.admin-card{
-  padding: 16px 18px;
-  border-radius: 18px;
-  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
-}
-
-.admin-card h3{
-  font-size: 16px;
-  line-height: 1.2;
-  margin-bottom: 6px;
-  letter-spacing: -0.01em;
-}
-
-.admin-card p{
-  font-size: 13px;
-  line-height: 1.45;
-}
-
-.admin-field{
-  margin-top: 10px;
-}
-
-.admin-field label{
-  font-size: 13px;
-  margin-bottom: 6px;
-}
-
-#changePasswordNew,
-#changePasswordConfirm{
-  min-height: 46px;
-  border-radius: 14px;
-  font-size: 14px;
-}
-
-.admin-helper{
-  font-size: 12px;
-  margin-top: 6px;
-}
-
-#changePasswordBtn{
-  min-height: 42px;
-  padding: 0 14px;
-  font-size: 14px;
-}
-
-.admin-status-chip{
-  min-height: 30px;
-  font-size: 12px;
-  padding: 0 10px;
-}
-
-.admin-grid .admin-card:last-child{
-  background: rgba(255,255,255,0.72);
-}
-
-@media (max-width: 900px){
-  .admin-grid{
-    grid-template-columns: 1fr;
-  }
-}
-
-.admin-card-muted{
-  background: rgba(255,255,255,0.72);
-  border: 1px solid #e4ebf5;
-}
-
- #passwordModal{
-  display:none;
-  position:fixed;
-  inset:0;
-  background: rgba(9, 18, 33, 0.52);
-  z-index:10001;
-  align-items:center;
-  justify-content:center;
-  padding:20px;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-}
-
-.password-modal-card{
-  width:100%;
-  max-width:560px;
-  background: rgba(255,255,255,0.97);
-  border-radius: 24px;
-  box-shadow: 0 24px 70px rgba(0,0,0,0.22);
-  padding: 24px;
-  border: 1px solid rgba(255,255,255,0.85);
-}
-
-.password-modal-text{
-  font-size: 14px;
-  line-height: 1.5;
-  color: #667085;
-  margin-bottom: 8px;
-}
-
-#changePasswordCurrent,
-#changePasswordNew,
-#changePasswordConfirm{
-  width: 100%;
-  box-sizing: border-box;
-}
-
 @media (max-width: 640px){
+  #okBox,
+  #masterBox,
+  #adminUI{
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  #okBox{
+    padding-top: 16px;
+  }
+
+  .admin-topbar,
+  .admin-card,
+  .admin-search-card,
+  .confirm-card,
   .password-modal-card{
     border-radius: 22px;
     padding: 20px;
   }
-}   
 
-.admin-btn-ghost{
-  background: transparent;
-  border: 1px solid transparent;
-  color: #667085;
-  box-shadow: none;
-  padding: 0 8px;
-  min-height: 32px;
+  .admin-topbar,
+  .admin-card,
+  .admin-search-card{
+    padding: 18px;
+  }
 }
 
-.admin-btn-ghost:hover{
-  background: rgba(255,255,255,0.55);
-  border-color: #dbe5f2;
-  color: #163152;
-  transform: none;
-}
-
-#okBox{
-  padding-bottom: 0;
-}
-
-    #masterBox{
-  max-width: 1200px;
-  margin: 16px auto;
-  box-sizing: border-box;
-}
-
-    #masterBox{
-  padding-left: 16px;
-  padding-right: 16px;
-}
-    
-</style>
+   </style>
+   
+  
 </head>
 
 <body>
