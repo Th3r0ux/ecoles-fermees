@@ -1313,6 +1313,26 @@ body.authenticated{
     padding: 20px;
   }
 }   
+
+.admin-btn-ghost{
+  background: transparent;
+  border: 1px solid transparent;
+  color: #667085;
+  box-shadow: none;
+  padding: 0 8px;
+  min-height: 32px;
+}
+
+.admin-btn-ghost:hover{
+  background: rgba(255,255,255,0.55);
+  border-color: #dbe5f2;
+  color: #163152;
+  transform: none;
+}
+
+#okBox{
+  padding-bottom: 0;
+}
     
 </style>
 </head>
@@ -1387,34 +1407,13 @@ body.authenticated{
       <p>Gérez les statuts des écoles, publiez rapidement les changements et sécurisez l’accès à l’outil.</p>
     </div>
 
-    <div class="admin-topbar-actions">
-      <span class="admin-status-chip">✅ Connecté</span>
-      <button id="logoutBtn" class="admin-btn admin-btn-soft" type="button">Se déconnecter</button>
-    </div>
-  </div>
-
-  <div class="admin-grid">
-   <div class="admin-card admin-card-muted">
-  <h3>Mot de passe</h3>
-  <p>Modifiez votre mot de passe administrateur à partir d’une fenêtre sécurisée.</p>
-
-  <div style="margin-top:12px;">
-    <button id="openPasswordModalBtn" type="button" class="admin-btn">
-      Changer mon mot de passe
-    </button>
-  </div>
+   <div class="admin-topbar-actions">
+  <span class="admin-status-chip">✅ Connecté</span>
+  <button id="openPasswordModalBtn" class="admin-btn admin-btn-ghost" type="button">Mot de passe</button>
+  <button id="logoutBtn" class="admin-btn admin-btn-soft" type="button">Se déconnecter</button>
 </div>
-
-    <div class="admin-card admin-card-muted">
-  <h3>Sécurité</h3>
-  <p>Déconnexion automatique après 2 heures.</p>
-
-  <div style="margin-top:10px; display:flex; flex-wrap:wrap; gap:8px;">
-    <span class="admin-status-chip">Session locale sécurisée</span>
-    <span class="admin-status-chip">Journalisation active</span>
   </div>
-</div>
-    </div>
+
   </div>
 </div>
 
