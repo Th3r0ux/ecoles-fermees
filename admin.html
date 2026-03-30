@@ -2066,22 +2066,26 @@ function refreshBatchBar(){
   batchCount.textContent = String(n);
   batchBar.style.display = (n > 0) ? "block" : "none";
 
-  if (n === 0) {
-    batchSelectedNames.innerHTML = "";
-    return;
-  }
+ if (n === 0) {
+  batchSelectedNames.replaceChildren();
+  return;
+}
 
- batchSelectedNames.innerHTML = ids
-  .map(id => {
-    const item = schools.find(x => String(x.id) === String(id));
-    if (!item) return "";
-    return `
-      <button type="button" class="batch-tag" data-action="remove-tag" data-id="${id}">
-        ${item.name} ×
-      </button>
-    `;
-  })
-  .join("");
+batchSelectedNames.replaceChildren();
+
+ids.forEach(id => {
+  const item = schools.find(x => String(x.id) === String(id));
+  if (!item) return;
+
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "batch-tag";
+  btn.dataset.action = "remove-tag";
+  btn.dataset.id = String(id);
+  btn.textContent = `${item.name} ×`;
+
+  batchSelectedNames.appendChild(btn);
+});
   }
 
 async function batchSetSelected(mode, val){
