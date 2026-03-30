@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-30T23:46:01.447Z",
+  "generatedAt": "2026-03-30T23:46:12.054Z",
   "rows": [
     {
       "name": "Centre de formation professionnelle Val-d'Or",
@@ -1727,7 +1727,7 @@
       "name": "Centre de formation Charlevoix - Pavillon Les Cimes",
       "css": "Centre de services scolaire Charlevoix",
       "region": "Capitale-Nationale (Québec)",
-      "statut_cours": "Fermé",
+      "statut_cours": "ND",
       "statut_garde": "ND"
     },
     {
