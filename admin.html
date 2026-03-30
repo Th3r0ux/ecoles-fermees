@@ -2370,48 +2370,81 @@ regionHeader.innerHTML = `
 const icon2 = iconEl2 ? iconEl2.textContent : "▶";
 const cssCheck = cssCheckmarkHTML(regionName, cssName);
 
-h.innerHTML = `
-  <div class="css-main">
-    <span id="${cid}-icon" class="css-icon">${icon2}</span>
-    <span class="css-name">${cssName}</span>
-    ${cssCheck}
-    <span class="css-count">(${cssClosedLabel})</span>
-    ${cssCheck ? `
-      <button
-        type="button"
-        class="clear-check-btn"
-        data-action="clear-css-check"
-        data-css-name="${cssName.replace(/"/g, '&quot;')}"
-        data-region-name="${regionName.replace(/"/g, '&quot;')}"
-      >
-        Revérifier
-      </button>
-    ` : ""}
-  </div>
+h.replaceChildren();
 
-  <div class="css-actions">
-    <div class="css-action-row">
-      <span class="css-action-label">Cours</span>
-      <button type="button" data-action="css-batch" data-mode="cours" data-css="${cid}" data-val="ND">ND</button>
-      <button type="button" data-action="css-batch" data-mode="cours" data-css="${cid}" data-val="Ouvert">Ouvert</button>
-      <button type="button" data-action="css-batch" data-mode="cours" data-css="${cid}" data-val="Fermé">Fermé</button>
-    </div>
+// --- ligne principale
+const cssMain = document.createElement("div");
+cssMain.className = "css-main";
 
-    <div class="css-action-row">
-      <span class="css-action-label">Garde</span>
-      <button type="button" data-action="css-batch" data-mode="garde" data-css="${cid}" data-val="ND">ND</button>
-      <button type="button" data-action="css-batch" data-mode="garde" data-css="${cid}" data-val="Ouvert">Ouvert</button>
-      <button type="button" data-action="css-batch" data-mode="garde" data-css="${cid}" data-val="Fermé">Fermé</button>
-    </div>
+const iconSpan = document.createElement("span");
+iconSpan.id = `${cid}-icon`;
+iconSpan.className = "css-icon";
+iconSpan.textContent = icon2;
 
-    <div class="css-action-row">
-      <span class="css-action-label">Tout</span>
-      <button type="button" data-action="css-batch" data-mode="both" data-css="${cid}" data-val="ND">ND</button>
-      <button type="button" data-action="css-batch" data-mode="both" data-css="${cid}" data-val="Ouvert">Ouvert</button>
-      <button type="button" data-action="css-batch" data-mode="both" data-css="${cid}" data-val="Fermé">Fermé</button>
-    </div>
-  </div>
-`;
+const nameSpan = document.createElement("span");
+nameSpan.className = "css-name";
+nameSpan.textContent = cssName;
+
+cssMain.appendChild(iconSpan);
+cssMain.appendChild(nameSpan);
+
+// on garde ton HTML de crochet tel quel, mais on l'isole
+if (cssCheck) {
+  const checkWrap = document.createElement("span");
+  checkWrap.className = "css-check-wrap";
+  checkWrap.innerHTML = cssCheck;
+  cssMain.appendChild(checkWrap);
+}
+
+const countSpan = document.createElement("span");
+countSpan.className = "css-count";
+countSpan.textContent = `(${cssClosedLabel})`;
+cssMain.appendChild(countSpan);
+
+if (cssCheck) {
+  const clearBtn = document.createElement("button");
+  clearBtn.type = "button";
+  clearBtn.className = "clear-check-btn";
+  clearBtn.dataset.action = "clear-css-check";
+  clearBtn.dataset.cssName = cssName;
+  clearBtn.dataset.regionName = regionName;
+  clearBtn.textContent = "Revérifier";
+  cssMain.appendChild(clearBtn);
+}
+
+// --- actions
+const cssActions = document.createElement("div");
+cssActions.className = "css-actions";
+
+function buildCssActionRow(label, mode) {
+  const row = document.createElement("div");
+  row.className = "css-action-row";
+
+  const labelSpan = document.createElement("span");
+  labelSpan.className = "css-action-label";
+  labelSpan.textContent = label;
+  row.appendChild(labelSpan);
+
+  ["ND", "Ouvert", "Fermé"].forEach(val => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.dataset.action = "css-batch";
+    btn.dataset.mode = mode;
+    btn.dataset.css = cid;
+    btn.dataset.val = val;
+    btn.textContent = val;
+    row.appendChild(btn);
+  });
+
+  return row;
+}
+
+cssActions.appendChild(buildCssActionRow("Cours", "cours"));
+cssActions.appendChild(buildCssActionRow("Garde", "garde"));
+cssActions.appendChild(buildCssActionRow("Tout", "both"));
+
+h.appendChild(cssMain);
+h.appendChild(cssActions);
   });
 }
 
