@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-30T23:46:13.439Z",
+  "generatedAt": "2026-03-30T23:46:14.990Z",
   "rows": [
     {
       "name": "Centre de formation professionnelle Val-d'Or",
@@ -1728,7 +1728,7 @@
       "css": "Centre de services scolaire Charlevoix",
       "region": "Capitale-Nationale (Québec)",
       "statut_cours": "ND",
-      "statut_garde": "ND"
+      "statut_garde": "Ouvert"
     },
     {
       "name": "Centre de formation Charlevoix - Pavillon Saint-Aubin",
