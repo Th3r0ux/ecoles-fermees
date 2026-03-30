@@ -2342,15 +2342,32 @@ function formatGarde(status) {
   const regionClosedLabel = `${regionClosedCount} ${regionClosedCount > 1 ? "écoles fermées" : "école fermée"}`;
 
   // 3) Update region header HTML while keeping icon + name
-  const iconEl = document.getElementById(`${rid}-icon`);
+const iconEl = document.getElementById(`${rid}-icon`);
 const icon = iconEl ? iconEl.textContent : "▶";
-regionHeader.innerHTML = `
-  <div class="region-main">
-    <span id="${rid}-icon" class="region-icon">${icon}</span>
-    <span class="region-name">${regionName}</span>
-  </div>
-  <span class="region-count">(${regionClosedLabel})</span>
-`;
+
+regionHeader.replaceChildren();
+
+const regionMain = document.createElement("div");
+regionMain.className = "region-main";
+
+const iconSpan = document.createElement("span");
+iconSpan.id = `${rid}-icon`;
+iconSpan.className = "region-icon";
+iconSpan.textContent = icon;
+
+const nameSpan = document.createElement("span");
+nameSpan.className = "region-name";
+nameSpan.textContent = regionName;
+
+const countSpan = document.createElement("span");
+countSpan.className = "region-count";
+countSpan.textContent = `(${regionClosedLabel})`;
+
+regionMain.appendChild(iconSpan);
+regionMain.appendChild(nameSpan);
+
+regionHeader.appendChild(regionMain);
+regionHeader.appendChild(countSpan);
 
   // 4) Update each CSS header under this region
   const cssHeaders = list.querySelectorAll(`[data-kind="css"][data-region="${rid}"]`);
