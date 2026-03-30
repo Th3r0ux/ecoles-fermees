@@ -2239,11 +2239,9 @@ refreshBatchBar();
     );
   }
 
-  function cssCheckmarkHTML(regionName, cssName) {
-    return cssHasWindowUpdate(regionName, cssName)
-      ? `<span class="css-checkmark" title="Au moins une modification entre 15 h et 7 h 45">✔</span>`
-      : "";
-  }
+function cssHasCheckmark(regionName, cssName) {
+  return cssHasWindowUpdate(regionName, cssName);
+}
 
 
       const lockMaster = (locked) => {
@@ -2389,7 +2387,7 @@ regionHeader.appendChild(countSpan);
 
    const iconEl2 = document.getElementById(`${cid}-icon`);
 const icon2 = iconEl2 ? iconEl2.textContent : "▶";
-const cssCheck = cssCheckmarkHTML(regionName, cssName);
+const hasCheck = cssHasCheckmark(regionName, cssName);
 
 h.replaceChildren();
 
@@ -2410,11 +2408,12 @@ cssMain.appendChild(iconSpan);
 cssMain.appendChild(nameSpan);
 
 // on garde ton HTML de crochet tel quel, mais on l'isole
-if (cssCheck) {
-  const checkWrap = document.createElement("span");
-  checkWrap.className = "css-check-wrap";
-  checkWrap.innerHTML = cssCheck;
-  cssMain.appendChild(checkWrap);
+if (hasCheck) {
+  const checkSpan = document.createElement("span");
+  checkSpan.className = "css-checkmark";
+  checkSpan.title = "Au moins une modification entre 15 h et 7 h 45";
+  checkSpan.textContent = "✔";
+  cssMain.appendChild(checkSpan);
 }
 
 const countSpan = document.createElement("span");
@@ -2422,7 +2421,7 @@ countSpan.className = "css-count";
 countSpan.textContent = `(${cssClosedLabel})`;
 cssMain.appendChild(countSpan);
 
-if (cssCheck) {
+if (hasCheck) {
   const clearBtn = document.createElement("button");
   clearBtn.type = "button";
   clearBtn.className = "clear-check-btn";
