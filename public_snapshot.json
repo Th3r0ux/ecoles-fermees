@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-30T23:46:31.154Z",
+  "generatedAt": "2026-03-30T23:46:33.362Z",
   "rows": [
     {
       "name": "Centre de formation professionnelle Val-d'Or",
@@ -1727,127 +1727,127 @@
       "name": "Centre de formation Charlevoix - Pavillon Les Cimes",
       "css": "Centre de services scolaire Charlevoix",
       "region": "Capitale-Nationale (Québec)",
-      "statut_cours": "Fermé",
-      "statut_garde": "Fermé"
+      "statut_cours": "ND",
+      "statut_garde": "ND"
     },
     {
       "name": "Centre de formation Charlevoix - Pavillon Saint-Aubin",
       "css": "Centre de services scolaire Charlevoix",
       "region": "Capitale-Nationale (Québec)",
-      "statut_cours": "Fermé",
-      "statut_garde": "Fermé"
+      "statut_cours": "ND",
+      "statut_garde": "ND"
     },
     {
       "name": "Centre éducatif Saint-Aubin",
       "css": "Centre de services scolaire Charlevoix",
       "region": "Capitale-Nationale (Québec)",
-      "statut_cours": "Fermé",
-      "statut_garde": "Fermé"
+      "statut_cours": "ND",
+      "statut_garde": "ND"
     },
     {
       "name": "École Beau-Soleil",
       "css": "Centre de services scolaire Charlevoix",
       "region": "Capitale-Nationale (Québec)",
-      "statut_cours": "Fermé",
-      "statut_garde": "Fermé"
+      "statut_cours": "ND",
+      "statut_garde": "ND"
     },
     {
       "name": "École des Eaux-Vives",
       "css": "Centre de services scolaire Charlevoix",
       "region": "Capitale-Nationale (Québec)",
-      "statut_cours": "Fermé",
-      "statut_garde": "Fermé"
+      "statut_cours": "ND",
+      "statut_garde": "ND"
     },
     {
       "name": "École Dominique-Savio (primaire)",
       "css": "Centre de services scolaire Charlevoix",
       "region": "Capitale-Nationale (Québec)",
-      "statut_cours": "Fermé",
-      "statut_garde": "Fermé"
+      "statut_cours": "ND",
+      "statut_garde": "ND"
     },
     {
       "name": "École Fernand-Saindon",
       "css": "Centre de services scolaire Charlevoix",
       "region": "Capitale-Nationale (Québec)",
-      "statut_cours": "Fermé",
-      "statut_garde": "Fermé"
+      "statut_cours": "ND",
+      "statut_garde": "ND"
     },
     {
       "name": "École Laure-Gaudreault",
       "css": "Centre de services scolaire Charlevoix",
       "region": "Capitale-Nationale (Québec)",
-      "statut_cours": "Fermé",
-      "statut_garde": "Fermé"
+      "statut_cours": "ND",
+      "statut_garde": "ND"
     },
     {
       "name": "École Léonce-Boivin",
       "css": "Centre de services scolaire Charlevoix",
       "region": "Capitale-Nationale (Québec)",
-      "statut_cours": "Fermé",
-      "statut_garde": "Fermé"
+      "statut_cours": "ND",
+      "statut_garde": "ND"
     },
     {
       "name": "École Marie-Reine",
       "css": "Centre de services scolaire Charlevoix",
       "region": "Capitale-Nationale (Québec)",
-      "statut_cours": "Fermé",
-      "statut_garde": "Fermé"
+      "statut_cours": "ND",
+      "statut_garde": "ND"
     },
     {
       "name": "École Marie-Victorin",
       "css": "Centre de services scolaire Charlevoix",
       "region": "Capitale-Nationale (Québec)",
-      "statut_cours": "Fermé",
-      "statut_garde": "Fermé"
+      "statut_cours": "ND",
+      "statut_garde": "ND"
     },
     {
       "name": "École Notre-Dame-de-Lorette",
       "css": "Centre de services scolaire Charlevoix",
       "region": "Capitale-Nationale (Québec)",
-      "statut_cours": "Fermé",
-      "statut_garde": "Fermé"
+      "statut_cours": "ND",
+      "statut_garde": "ND"
     },
     {
       "name": "École Notre-Dame-Du-Bon-Conseil",
       "css": "Centre de services scolaire Charlevoix",
       "region": "Capitale-Nationale (Québec)",
-      "statut_cours": "Fermé",
-      "statut_garde": "Fermé"
+      "statut_cours": "ND",
+      "statut_garde": "ND"
     },
     {
       "name": "École secondaire du Plateau",
       "css": "Centre de services scolaire Charlevoix",
       "region": "Capitale-Nationale (Québec)",
-      "statut_cours": "Fermé",
-      "statut_garde": "Fermé"
+      "statut_cours": "ND",
+      "statut_garde": "ND"
     },
     {
       "name": "École Sir-Rodolphe-Forget",
       "css": "Centre de services scolaire Charlevoix",
       "region": "Capitale-Nationale (Québec)",
-      "statut_cours": "Fermé",
-      "statut_garde": "Fermé"
+      "statut_cours": "ND",
+      "statut_garde": "ND"
     },
     {
       "name": "École St-François",
       "css": "Centre de services scolaire Charlevoix",
       "region": "Capitale-Nationale (Québec)",
-      "statut_cours": "Fermé",
-      "statut_garde": "Fermé"
+      "statut_cours": "ND",
+      "statut_garde": "ND"
     },
     {
       "name": "École St-Pierre (primaire)",
       "css": "Centre de services scolaire Charlevoix",
       "region": "Capitale-Nationale (Québec)",
-      "statut_cours": "Fermé",
-      "statut_garde": "Fermé"
+      "statut_cours": "ND",
+      "statut_garde": "ND"
     },
     {
       "name": "École St-Pierre (secondaire)",
       "css": "Centre de services scolaire Charlevoix",
       "region": "Capitale-Nationale (Québec)",
-      "statut_cours": "Fermé",
-      "statut_garde": "Fermé"
+      "statut_cours": "ND",
+      "statut_garde": "ND"
     },
     {
       "name": "Centre de formation professionnelle de Limoilou",
