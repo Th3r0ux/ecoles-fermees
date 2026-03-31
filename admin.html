@@ -1874,8 +1874,9 @@ await logSecurityEvent("login_success", { email });
 resetLoginAttempts();
 msg.textContent = "";
 await refreshUI();
+});
 
-  changePasswordBtn?.addEventListener("click", async () => {
+changePasswordBtn?.addEventListener("click", async () => {
   const currentPassword = changePasswordCurrent.value;
   const password = changePasswordNew.value.trim();
   const confirmPassword = changePasswordConfirm.value.trim();
