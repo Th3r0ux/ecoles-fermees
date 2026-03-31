@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-31T02:50:41.930Z",
+  "generatedAt": "2026-03-31T02:51:00.479Z",
   "rows": [
     {
       "name": "Centre de formation professionnelle Val-d'Or",
@@ -7671,7 +7671,7 @@
       "css": "Centre de services scolaire des Affluents",
       "region": "Lanaudière",
       "statut_cours": "ND",
-      "statut_garde": "ND"
+      "statut_garde": "Fermé"
     },
     {
       "name": "École aux-Quatre-Vents (St-Sulpice)",
