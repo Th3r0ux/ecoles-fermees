@@ -1523,6 +1523,7 @@ const okBox = document.getElementById("okBox");
 const adminUI = document.getElementById("adminUI");
 const masterBox = document.getElementById("masterBox");
 
+const enableMfaBtn = document.getElementById("enableMfaBtn");
 const openPasswordModalBtn = document.getElementById("openPasswordModalBtn");
 const passwordModal = document.getElementById("passwordModal");
 const closePasswordModalBtn = document.getElementById("closePasswordModalBtn");
@@ -1990,6 +1991,9 @@ function closePasswordModal() {
 
 openPasswordModalBtn?.addEventListener("click", openPasswordModal);
 closePasswordModalBtn?.addEventListener("click", closePasswordModal);
+    enableMfaBtn?.addEventListener("click", () => {
+  alert("MFA setup démarré");
+});
 
 passwordModal?.addEventListener("click", (e) => {
   if (e.target === passwordModal) {
