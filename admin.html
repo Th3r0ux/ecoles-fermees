@@ -1715,7 +1715,7 @@ async function reauthenticateCurrentUser(currentPassword) {
   }
 }    
 
-async function getVerifiedTotpFactor() {
+async function getVerifiedTotpFactors() {
   const { data: factorsData, error: factorsError } = await supabase.auth.mfa.listFactors();
 
   if (factorsError) {
@@ -1726,9 +1726,8 @@ async function getVerifiedTotpFactor() {
   }
 
   const verifiedTotpFactors = (factorsData?.totp || []).filter(f => f.status === "verified");
-  const factor = verifiedTotpFactors[0];
 
-  if (!factor) {
+  if (verifiedTotpFactors.length === 0) {
     return {
       ok: false,
       message: "Aucun facteur MFA vérifié n'est activé sur ce compte."
@@ -1737,7 +1736,7 @@ async function getVerifiedTotpFactor() {
 
   return {
     ok: true,
-    factor
+    factors: verifiedTotpFactors
   };
 }
 
@@ -1752,7 +1751,7 @@ async function syncMfaButtons() {
     return;
   }
 
-  const factorResult = await getVerifiedTotpFactor();
+  const factorResult = await getVerifiedTotpFactors();
 
   if (factorResult.ok) {
     enableMfaBtn.style.display = "none";
@@ -1850,10 +1849,6 @@ if (session) {
 } else {
   document.body.classList.remove("authenticated");
   loginBox.style.display = "block";
-    if (localStorage.getItem("mfaJustDisabled") === "1") {
-    localStorage.removeItem("mfaJustDisabled");
-    msg.textContent = "MFA désactivé. Veuillez vous reconnecter.";
-  }
   okBox.style.display = "none";
   adminUI.style.display = "none";
   masterBox.style.display = "none";
@@ -1862,14 +1857,21 @@ if (session) {
   document.getElementById("list").innerHTML = "";
   const q = document.getElementById("q");
   if (q) q.value = "";
-  msg.textContent = "";
+
+  let loginMessage = "";
+  if (localStorage.getItem("mfaJustDisabled") === "1") {
+    localStorage.removeItem("mfaJustDisabled");
+    loginMessage = "MFA désactivé. Veuillez vous reconnecter.";
+  }
+
   document.getElementById("email").value = "";
   document.getElementById("password").value = "";
   clearAutoLogoutTimer();
   localStorage.removeItem(AUTO_LOGOUT_KEY);
   if (enableMfaBtn) enableMfaBtn.style.display = "none";
   if (disableMfaBtn) disableMfaBtn.style.display = "none";
-  
+
+  msg.textContent = loginMessage;
 }
 
 setTimeout(updateScrollHint, 0);
@@ -1945,7 +1947,16 @@ if (aalData?.nextLevel === "aal2") {
   }
 
   const verifiedTotpFactors = (factorsData?.totp || []).filter(f => f.status === "verified");
-  const factorId = verifiedTotpFactors[0]?.id;
+
+if (verifiedTotpFactors.length === 0) {
+  alert("Aucun facteur MFA vérifié n'est disponible.");
+  await supabase.auth.signOut();
+  loginBtn.disabled = false;
+  loginBtn.textContent = "Se connecter";
+  return;
+}
+
+const factorId = verifiedTotpFactors[0].id;
 
   if (!factorId) {
     alert("Aucun facteur MFA vérifié n'est disponible.");
@@ -2335,7 +2346,7 @@ disableMfaBtn?.addEventListener("click", async () => {
       return;
     }
 
-    const factorResult = await getVerifiedTotpFactor();
+    const factorResult = await getVerifiedTotpFactors();
 
     if (!factorResult.ok) {
       await logSecurityEvent("mfa_unenroll_no_factor", {});
@@ -2343,8 +2354,12 @@ disableMfaBtn?.addEventListener("click", async () => {
       return;
     }
 
+    const count = factorResult.factors.length;
+
     const confirmed = await askConfirm(
-      "Voulez-vous vraiment désactiver l’authentification multifacteur pour ce compte? Vous serez ensuite déconnecté."
+      count === 1
+        ? "Voulez-vous vraiment désactiver l’authentification multifacteur pour ce compte? Vous serez ensuite déconnecté."
+        : `Il y a ${count} facteurs MFA vérifiés sur ce compte. Ils seront tous supprimés, puis vous serez déconnecté. Continuer?`
     );
 
     if (!confirmed) {
@@ -2354,26 +2369,28 @@ disableMfaBtn?.addEventListener("click", async () => {
 
     disableMfaBtn.textContent = "Désactivation...";
 
-    const factorId = factorResult.factor.id;
-
-    const { error: unenrollError } = await supabase.auth.mfa.unenroll({
-      factorId
-    });
-
-    if (unenrollError) {
-      await logSecurityEvent("mfa_unenroll_failed", {
-        factorId,
-        reason: unenrollError.message || "unknown"
+    for (const factor of factorResult.factors) {
+      const { error: unenrollError } = await supabase.auth.mfa.unenroll({
+        factorId: factor.id
       });
-      alert("Erreur MFA: " + unenrollError.message);
-      return;
+
+      if (unenrollError) {
+        await logSecurityEvent("mfa_unenroll_failed", {
+          factorId: factor.id,
+          reason: unenrollError.message || "unknown"
+        });
+        alert("Erreur MFA: " + unenrollError.message);
+        return;
+      }
     }
 
-    // Ne plus faire de calls dépendants de la session après ceci.
     localStorage.setItem("mfaJustDisabled", "1");
 
-    // Déconnexion locale immédiate pour éviter de continuer avec un JWT stale
-    await supabase.auth.signOut({ scope: "local" });
+    try {
+      await supabase.auth.signOut({ scope: "local" });
+    } catch (_) {
+      // session potentiellement déjà invalidée après unenroll
+    }
 
     alert("MFA désactivé avec succès. Veuillez vous reconnecter.");
     location.reload();
