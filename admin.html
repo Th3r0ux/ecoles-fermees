@@ -1692,12 +1692,13 @@ async function reauthenticateCurrentUser(currentPassword) {
   }
 
   const reauthClient = createClient(SUPABASE_URL, SUPABASE_KEY, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-      detectSessionInUrl: false
-    }
-  });
+  auth: {
+    persistSession: false,
+    autoRefreshToken: false,
+    detectSessionInUrl: false,
+    storageKey: "reauth-session" // 🔥 CRITIQUE
+  }
+});
 
   try {
     const { error } = await reauthClient.auth.signInWithPassword({
@@ -2095,12 +2096,13 @@ changePasswordBtn?.addEventListener("click", async () => {
     }
 
     const reauthClient = createClient(SUPABASE_URL, SUPABASE_KEY, {
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false,
-        detectSessionInUrl: false
-      }
-    });
+  auth: {
+    persistSession: false,
+    autoRefreshToken: false,
+    detectSessionInUrl: false,
+    storageKey: "reauth-session" // 🔥 CRITIQUE
+  }
+});
 
     const { error: reauthError } = await reauthClient.auth.signInWithPassword({
       email,
