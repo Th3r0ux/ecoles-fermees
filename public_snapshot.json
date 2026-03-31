@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-31T02:51:01.817Z",
+  "generatedAt": "2026-03-31T02:51:05.366Z",
   "rows": [
     {
       "name": "Centre de formation professionnelle Val-d'Or",
@@ -7670,8 +7670,8 @@
       "name": "École Aux 4 Vents (Mascouche)",
       "css": "Centre de services scolaire des Affluents",
       "region": "Lanaudière",
-      "statut_cours": "Ouvert",
-      "statut_garde": "Fermé"
+      "statut_cours": "ND",
+      "statut_garde": "ND"
     },
     {
       "name": "École aux-Quatre-Vents (St-Sulpice)",
