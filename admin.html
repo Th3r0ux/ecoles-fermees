@@ -1825,11 +1825,38 @@ if (error) {
   return;
 }
 
-// 🔐 Vérifier si MFA est requis seulement si le login a réussi
-const { data: factorsData } = await supabase.auth.mfa.listFactors();
+// 🔐 Vérifier le niveau d'assurance MFA après login
+const { data: aalData, error: aalError } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
 
-if (factorsData && factorsData.totp && factorsData.totp.length > 0) {
-  const factorId = factorsData.totp[0].id;
+if (aalError) {
+  alert("Erreur MFA: " + aalError.message);
+  await supabase.auth.signOut();
+  loginBtn.disabled = false;
+  loginBtn.textContent = "Se connecter";
+  return;
+}
+
+if (aalData?.nextLevel === "aal2") {
+  const { data: factorsData, error: factorsError } = await supabase.auth.mfa.listFactors();
+
+  if (factorsError) {
+    alert("Erreur MFA: " + factorsError.message);
+    await supabase.auth.signOut();
+    loginBtn.disabled = false;
+    loginBtn.textContent = "Se connecter";
+    return;
+  }
+
+  const verifiedTotpFactors = (factorsData?.totp || []).filter(f => f.status === "verified");
+  const factorId = verifiedTotpFactors[0]?.id;
+
+  if (!factorId) {
+    alert("Aucun facteur MFA vérifié n'est disponible.");
+    await supabase.auth.signOut();
+    loginBtn.disabled = false;
+    loginBtn.textContent = "Se connecter";
+    return;
+  }
 
   const code = prompt("Entrez votre code MFA");
 
@@ -1847,6 +1874,7 @@ if (factorsData && factorsData.totp && factorsData.totp.length > 0) {
 
   if (challengeError) {
     alert("Erreur MFA: " + challengeError.message);
+    await supabase.auth.signOut();
     loginBtn.disabled = false;
     loginBtn.textContent = "Se connecter";
     return;
