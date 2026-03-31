@@ -1991,8 +1991,23 @@ function closePasswordModal() {
 
 openPasswordModalBtn?.addEventListener("click", openPasswordModal);
 closePasswordModalBtn?.addEventListener("click", closePasswordModal);
-    enableMfaBtn?.addEventListener("click", () => {
-  alert("MFA setup démarré");
+    enableMfaBtn?.addEventListener("click", async () => {
+  const { data, error } = await supabase.auth.mfa.enroll({
+    factorType: "totp"
+  });
+
+  if (error) {
+    alert("Erreur MFA: " + error.message);
+    return;
+  }
+
+  const qr = data.totp.qr_code;
+  const secret = data.totp.secret;
+
+  console.log("QR:", qr);
+  console.log("Secret:", secret);
+
+  alert("QR généré (check console)");
 });
 
 passwordModal?.addEventListener("click", (e) => {
