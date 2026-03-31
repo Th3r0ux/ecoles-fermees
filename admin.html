@@ -2268,7 +2268,7 @@ const { data, error } = await supabase.auth.mfa.enroll({
       return;
     }
 
-    const qrDataUrl = `data:image/svg+xml;utf8,${encodeURIComponent(qr)}`;
+    
 
     win.document.write(`
       <!doctype html>
@@ -2283,15 +2283,22 @@ const { data, error } = await supabase.auth.mfa.enroll({
             line-height: 1.4;
             color: #111827;
           }
-          img {
-            max-width: 260px;
-            display: block;
-            margin: 16px 0;
-            border: 1px solid #ddd;
-            border-radius: 12px;
-            padding: 12px;
-            background: white;
-          }
+          .qr-wrap{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 16px 0;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 12px;
+  background: white;
+}
+
+.qr-wrap svg{
+  display: block;
+  width: 260px;
+  height: 260px;
+}
           input {
             width: 100%;
             box-sizing: border-box;
@@ -2317,9 +2324,9 @@ const { data, error } = await supabase.auth.mfa.enroll({
       </head>
       <body>
         <h2>Activer l’authentification multifacteur</h2>
-        <p>Scanne ce code QR dans ton application Authenticator.</p>
-        <img src="${qrDataUrl}" alt="QR code MFA" />
-        <p>Ou entre cette clé manuellement :</p>
+        <p>Scannez ce code QR dans ton application d'authentification.</p>
+        <div class="qr-wrap">${qr}</div>
+        <p>Ou entrez cette clé manuellement :</p>
         <div class="secret">${secret}</div>
 
         <label for="mfaCode">Code à 6 chiffres</label>
