@@ -1693,29 +1693,26 @@ async function reauthenticateCurrentUser(currentPassword) {
     return { ok: false, message: "Impossible de vérifier la session actuelle." };
   }
 
-  const reauthClient = createClient(SUPABASE_URL, SUPABASE_KEY, {
+ const reauthStorageKey = `reauth-session-${crypto.randomUUID()}`;
+
+const reauthClient = createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: {
     persistSession: false,
     autoRefreshToken: false,
     detectSessionInUrl: false,
-    storageKey: "reauth-session" // 🔥 CRITIQUE
+    storageKey: reauthStorageKey
   }
 });
+const { error } = await reauthClient.auth.signInWithPassword({
+    email,
+    password
+  });
 
-  try {
-    const { error } = await reauthClient.auth.signInWithPassword({
-      email,
-      password
-    });
-
-    if (error) {
-      return { ok: false, message: "Mot de passe actuel invalide." };
-    }
-
-    return { ok: true, email };
-  } finally {
-    await reauthClient.auth.signOut();
+  if (error) {
+    return { ok: false, message: "Mot de passe actuel invalide." };
   }
+
+  return { ok: true, email };
 }    
 
 async function getVerifiedTotpFactors() {
@@ -2084,12 +2081,14 @@ changePasswordBtn?.addEventListener("click", async () => {
       return;
     }
 
-    const reauthClient = createClient(SUPABASE_URL, SUPABASE_KEY, {
+   const reauthStorageKey = `reauth-session-${crypto.randomUUID()}`;
+
+const reauthClient = createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: {
     persistSession: false,
     autoRefreshToken: false,
     detectSessionInUrl: false,
-    storageKey: "reauth-session" // 🔥 CRITIQUE
+    storageKey: reauthStorageKey
   }
 });
 
@@ -2098,7 +2097,7 @@ changePasswordBtn?.addEventListener("click", async () => {
       password: currentPassword
     });
 
-    await reauthClient.auth.signOut();
+  
 
     if (reauthError) {
       changePasswordMsg.textContent = "Mot de passe actuel invalide.";
