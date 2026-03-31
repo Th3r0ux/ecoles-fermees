@@ -1991,7 +1991,7 @@ function closePasswordModal() {
 
 openPasswordModalBtn?.addEventListener("click", openPasswordModal);
 closePasswordModalBtn?.addEventListener("click", closePasswordModal);
-    enableMfaBtn?.addEventListener("click", async () => {
+   enableMfaBtn?.addEventListener("click", async () => {
   const { data, error } = await supabase.auth.mfa.enroll({
     factorType: "totp"
   });
@@ -2003,11 +2003,84 @@ closePasswordModalBtn?.addEventListener("click", closePasswordModal);
 
   const qr = data.totp.qr_code;
   const secret = data.totp.secret;
+  const factorId = data.id;
 
-  console.log("QR:", qr);
-  console.log("Secret:", secret);
+  const win = window.open("", "_blank", "width=520,height=720");
 
-  alert("QR généré (check console)");
+  if (!win) {
+    alert("Impossible d’ouvrir la fenêtre MFA.");
+    return;
+  }
+
+  const qrDataUrl = `data:image/svg+xml;utf8,${encodeURIComponent(qr)}`;
+
+  win.document.write(`
+    <!doctype html>
+    <html lang="fr">
+    <head>
+      <meta charset="utf-8" />
+      <title>Configurer MFA</title>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          padding: 24px;
+          line-height: 1.4;
+          color: #111827;
+        }
+        img {
+          max-width: 260px;
+          display: block;
+          margin: 16px 0;
+          border: 1px solid #ddd;
+          border-radius: 12px;
+          padding: 12px;
+          background: white;
+        }
+        input {
+          width: 100%;
+          box-sizing: border-box;
+          height: 44px;
+          padding: 0 12px;
+          font-size: 16px;
+          margin-top: 8px;
+          margin-bottom: 12px;
+        }
+        button {
+          height: 44px;
+          padding: 0 16px;
+          font-size: 15px;
+          cursor: pointer;
+        }
+        .secret {
+          word-break: break-all;
+          background: #f3f4f6;
+          padding: 10px;
+          border-radius: 8px;
+        }
+      </style>
+    </head>
+    <body>
+      <h2>Activer l’authentification multifacteur</h2>
+      <p>Scanne ce code QR dans ton application Authenticator.</p>
+      <img src="${qrDataUrl}" alt="QR code MFA" />
+      <p>Ou entre cette clé manuellement :</p>
+      <div class="secret">${secret}</div>
+
+      <label for="mfaCode">Code à 6 chiffres</label>
+      <input id="mfaCode" inputmode="numeric" autocomplete="one-time-code" placeholder="123456" />
+
+      <button id="verifyBtn" type="button">Valider le code</button>
+
+      <script>
+        document.getElementById("verifyBtn").addEventListener("click", async () => {
+          const code = document.getElementById("mfaCode").value.trim();
+          const result = await window.opener.verifyMfaCode("${factorId}", code);
+          alert(result);
+        });
+      </script>
+    </body>
+    </html>
+  `);
 });
 
 passwordModal?.addEventListener("click", (e) => {
@@ -2262,6 +2335,28 @@ refreshBatchBar();
 function cssHasCheckmark(regionName, cssName) {
   return cssHasWindowUpdate(regionName, cssName);
 }
+
+      window.verifyMfaCode = async function(factorId, code) {
+  const { data: challengeData, error: challengeError } = await supabase.auth.mfa.challenge({
+    factorId
+  });
+
+  if (challengeError) {
+    return "Erreur challenge MFA: " + challengeError.message;
+  }
+
+  const { error: verifyError } = await supabase.auth.mfa.verify({
+    factorId,
+    challengeId: challengeData.id,
+    code
+  });
+
+  if (verifyError) {
+    return "Erreur vérification MFA: " + verifyError.message;
+  }
+
+  return "MFA activé avec succès 🎉";
+};
 
 
       const lockMaster = (locked) => {
