@@ -1315,6 +1315,7 @@ body.authenticated .auth-shell{
 
    <div class="admin-topbar-actions">
   <button id="enableMfaBtn" class="admin-btn admin-btn-soft" type="button">Activer MFA</button>
+  <button id="disableMfaBtn" class="admin-btn admin-btn-soft" type="button">Désactiver MFA</button>
   <button id="openPasswordModalBtn" class="admin-btn admin-btn-ghost" type="button">Mot de passe</button>
   <button id="logoutBtn" class="admin-btn admin-btn-soft" type="button">Se déconnecter</button>
 </div>
@@ -1524,6 +1525,7 @@ const adminUI = document.getElementById("adminUI");
 const masterBox = document.getElementById("masterBox");
 
 const enableMfaBtn = document.getElementById("enableMfaBtn");
+const disableMfaBtn = document.getElementById("disableMfaBtn");
 const openPasswordModalBtn = document.getElementById("openPasswordModalBtn");
 const passwordModal = document.getElementById("passwordModal");
 const closePasswordModalBtn = document.getElementById("closePasswordModalBtn");
@@ -1713,6 +1715,54 @@ async function reauthenticateCurrentUser(currentPassword) {
   }
 }    
 
+async function getVerifiedTotpFactor() {
+  const { data: factorsData, error: factorsError } = await supabase.auth.mfa.listFactors();
+
+  if (factorsError) {
+    return {
+      ok: false,
+      message: factorsError.message || "Impossible de récupérer les facteurs MFA."
+    };
+  }
+
+  const verifiedTotpFactors = (factorsData?.totp || []).filter(f => f.status === "verified");
+  const factor = verifiedTotpFactors[0];
+
+  if (!factor) {
+    return {
+      ok: false,
+      message: "Aucun facteur MFA vérifié n'est activé sur ce compte."
+    };
+  }
+
+  return {
+    ok: true,
+    factor
+  };
+}
+
+async function syncMfaButtons() {
+  if (!enableMfaBtn || !disableMfaBtn) return;
+
+  const { data: { session } } = await supabase.auth.getSession();
+
+  if (!session) {
+    enableMfaBtn.style.display = "none";
+    disableMfaBtn.style.display = "none";
+    return;
+  }
+
+  const factorResult = await getVerifiedTotpFactor();
+
+  if (factorResult.ok) {
+    enableMfaBtn.style.display = "none";
+    disableMfaBtn.style.display = "";
+  } else {
+    enableMfaBtn.style.display = "";
+    disableMfaBtn.style.display = "none";
+  }
+}    
+    
 async function logSecurityEvent(eventType, details = {}) {
   try {
     const { data: { user } } = await supabase.auth.getUser();
@@ -1788,6 +1838,8 @@ if (session) {
   adminUI.style.display = "block";
   masterBox.style.display = "block";
 
+  await syncMfaButtons();
+
   if (!adminUI.dataset.loaded) {
     await loadAllWithButtons();
     adminUI.dataset.loaded = "1";
@@ -1811,6 +1863,8 @@ if (session) {
   document.getElementById("password").value = "";
   clearAutoLogoutTimer();
   localStorage.removeItem(AUTO_LOGOUT_KEY);
+  if (enableMfaBtn) enableMfaBtn.style.display = "none";
+  if (disableMfaBtn) disableMfaBtn.style.display = "none";
 }
 
 setTimeout(updateScrollHint, 0);
@@ -2240,7 +2294,71 @@ enableMfaBtn?.addEventListener("click", async () => {
     enableMfaBtn.textContent = originalText;
   }
 });
-  
+
+disableMfaBtn?.addEventListener("click", async () => {
+  const currentPassword = prompt("Entrez votre mot de passe actuel pour désactiver le MFA");
+
+  if (!currentPassword) {
+    alert("Désactivation MFA annulée.");
+    return;
+  }
+
+  disableMfaBtn.disabled = true;
+  const originalText = disableMfaBtn.textContent;
+  disableMfaBtn.textContent = "Vérification...";
+
+  try {
+    const reauth = await reauthenticateCurrentUser(currentPassword);
+
+    if (!reauth.ok) {
+      await logSecurityEvent("mfa_unenroll_reauth_failed", {
+        reason: reauth.message
+      });
+      alert(reauth.message);
+      return;
+    }
+
+    const factorResult = await getVerifiedTotpFactor();
+
+    if (!factorResult.ok) {
+      alert(factorResult.message);
+      return;
+    }
+
+    const confirmed = await askConfirm(
+      "Voulez-vous vraiment désactiver l’authentification multifacteur pour ce compte?"
+    );
+
+    if (!confirmed) {
+      await logSecurityEvent("mfa_unenroll_cancelled", {});
+      return;
+    }
+
+    disableMfaBtn.textContent = "Désactivation...";
+
+    const factorId = factorResult.factor.id;
+
+    const { error } = await supabase.auth.mfa.unenroll({
+      factorId
+    });
+
+    if (error) {
+      await logSecurityEvent("mfa_unenroll_failed", {
+        factorId,
+        reason: error.message || "unknown"
+      });
+      alert("Erreur MFA: " + error.message);
+      return;
+    }
+
+    await logSecurityEvent("mfa_disabled", { factorId });
+    await syncMfaButtons();
+    alert("MFA désactivé avec succès.");
+  } finally {
+    disableMfaBtn.disabled = false;
+    disableMfaBtn.textContent = originalText;
+  }
+});    
 
 passwordModal?.addEventListener("click", (e) => {
   if (e.target === passwordModal) {
@@ -2521,7 +2639,7 @@ function cssHasCheckmark(regionName, cssName) {
   }
 
   await logSecurityEvent("mfa_enabled", { factorId });      
-
+await syncMfaButtons();
   return "MFA activé avec succès 🎉";
 };
 
