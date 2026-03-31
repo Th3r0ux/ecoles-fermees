@@ -2409,6 +2409,12 @@ function cssHasCheckmark(regionName, cssName) {
   return cssHasWindowUpdate(regionName, cssName);
 }
 
+      function cssCheckmarkHTML(regionName, cssName) {
+  return cssHasCheckmark(regionName, cssName)
+    ? '<span class="css-checkmark" title="Au moins une modification entre 15 h et 7 h 45">✔</span>'
+    : "";
+}
+
       window.verifyMfaCode = async function(factorId, code) {
   const { data: challengeData, error: challengeError } = await supabase.auth.mfa.challenge({
     factorId
