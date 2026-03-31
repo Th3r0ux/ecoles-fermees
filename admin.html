@@ -2351,9 +2351,13 @@ disableMfaBtn?.addEventListener("click", async () => {
       return;
     }
 
-    await logSecurityEvent("mfa_disabled", { factorId });
-    await syncMfaButtons();
-    alert("MFA désactivé avec succès.");
+   await logSecurityEvent("mfa_disabled", { factorId });
+
+alert("MFA désactivé avec succès. Vous allez être déconnecté pour sécuriser la session.");
+
+await supabase.auth.signOut({ scope: "local" });
+return;
+    
   } finally {
     disableMfaBtn.disabled = false;
     disableMfaBtn.textContent = originalText;
