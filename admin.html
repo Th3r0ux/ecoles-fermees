@@ -2226,30 +2226,32 @@ enableMfaBtn?.addEventListener("click", async () => {
       return;
     }
 
-    const { data: factorsData, error: factorsError } = await supabase.auth.mfa.listFactors();
+const { data: factorsData, error: factorsError } = await supabase.auth.mfa.listFactors();
 
-    if (factorsError) {
-      alert("Erreur MFA: " + factorsError.message);
-      return;
-    }
+if (factorsError) {
+  alert("Erreur MFA: " + factorsError.message);
+  return;
+}
 
-    const hasVerifiedTotp = (factorsData?.totp || []).some(f => f.status === "verified");
+const existingTotpFactors = factorsData?.totp || [];
+const hasVerifiedTotp = existingTotpFactors.some(f => f.status === "verified");
 
-    if (hasVerifiedTotp) {
-      alert("Un facteur MFA est déjà activé sur ce compte.");
-      return;
-    }
+if (hasVerifiedTotp) {
+  alert("Un facteur MFA est déjà activé sur ce compte.");
+  return;
+}
 
-    await logSecurityEvent("mfa_enroll_reauth_success", {
-      email: reauth.email
-    });
+await logSecurityEvent("mfa_enroll_reauth_success", {
+  email: reauth.email
+});
 
-    enableMfaBtn.textContent = "Préparation...";
+enableMfaBtn.textContent = "Préparation...";
 
-    const { data, error } = await supabase.auth.mfa.enroll({
-      factorType: "totp"
-    });
-
+const { data, error } = await supabase.auth.mfa.enroll({
+  factorType: "totp",
+  friendlyName: `Admin-${Date.now()}`
+});
+    
     if (error) {
       alert("Erreur MFA: " + error.message);
       return;
