@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-31T02:50:23.122Z",
+  "generatedAt": "2026-03-31T02:50:24.976Z",
   "rows": [
     {
       "name": "Centre de formation professionnelle Val-d'Or",
@@ -166,120 +166,120 @@
       "name": "Centre d'éducation des adultes La Passerelle",
       "css": "Centre de services scolaire Harricana",
       "region": "Abitibi-Témiscamingue",
-      "statut_cours": "Fermé",
-      "statut_garde": "Fermé"
+      "statut_cours": "ND",
+      "statut_garde": "ND"
     },
     {
       "name": "Centre de formation professionnelle Harricana",
       "css": "Centre de services scolaire Harricana",
       "region": "Abitibi-Témiscamingue",
-      "statut_cours": "Fermé",
-      "statut_garde": "Fermé"
+      "statut_cours": "ND",
+      "statut_garde": "ND"
     },
     {
       "name": "École alternative Harricana",
       "css": "Centre de services scolaire Harricana",
       "region": "Abitibi-Témiscamingue",
-      "statut_cours": "Fermé",
-      "statut_garde": "Fermé"
+      "statut_cours": "ND",
+      "statut_garde": "ND"
     },
     {
       "name": "École Christ-Roi",
       "css": "Centre de services scolaire Harricana",
       "region": "Abitibi-Témiscamingue",
-      "statut_cours": "Fermé",
-      "statut_garde": "Fermé"
+      "statut_cours": "ND",
+      "statut_garde": "ND"
     },
     {
       "name": "École de Berry",
       "css": "Centre de services scolaire Harricana",
       "region": "Abitibi-Témiscamingue",
-      "statut_cours": "Fermé",
-      "statut_garde": "Fermé"
+      "statut_cours": "ND",
+      "statut_garde": "ND"
     },
     {
       "name": "École Launay-Trécesson",
       "css": "Centre de services scolaire Harricana",
       "region": "Abitibi-Témiscamingue",
-      "statut_cours": "Fermé",
-      "statut_garde": "Fermé"
+      "statut_cours": "ND",
+      "statut_garde": "ND"
     },
     {
       "name": "École Notre-Dame-de-Fatima",
       "css": "Centre de services scolaire Harricana",
       "region": "Abitibi-Témiscamingue",
-      "statut_cours": "Fermé",
-      "statut_garde": "Fermé"
+      "statut_cours": "ND",
+      "statut_garde": "ND"
     },
     {
       "name": "École Notre-Dame-du-Sacré-Cœur",
       "css": "Centre de services scolaire Harricana",
       "region": "Abitibi-Témiscamingue",
-      "statut_cours": "Fermé",
-      "statut_garde": "Fermé"
+      "statut_cours": "ND",
+      "statut_garde": "ND"
     },
     {
       "name": "École Sacré-Cœur–Saint-Viateur",
       "css": "Centre de services scolaire Harricana",
       "region": "Abitibi-Témiscamingue",
-      "statut_cours": "Fermé",
-      "statut_garde": "Fermé"
+      "statut_cours": "ND",
+      "statut_garde": "ND"
     },
     {
       "name": "École Saint-Félix­–Saint-Dominique",
       "css": "Centre de services scolaire Harricana",
       "region": "Abitibi-Témiscamingue",
-      "statut_cours": "Fermé",
-      "statut_garde": "Fermé"
+      "statut_cours": "ND",
+      "statut_garde": "ND"
     },
     {
       "name": "École Saint-Joseph",
       "css": "Centre de services scolaire Harricana",
       "region": "Abitibi-Témiscamingue",
-      "statut_cours": "Fermé",
-      "statut_garde": "Fermé"
+      "statut_cours": "ND",
+      "statut_garde": "ND"
     },
     {
       "name": "École Saint-Marc–La Corne",
       "css": "Centre de services scolaire Harricana",
       "region": "Abitibi-Témiscamingue",
-      "statut_cours": "Fermé",
-      "statut_garde": "Fermé"
+      "statut_cours": "ND",
+      "statut_garde": "ND"
     },
     {
       "name": "École Saint-Mathieu–La Motte",
       "css": "Centre de services scolaire Harricana",
       "region": "Abitibi-Témiscamingue",
-      "statut_cours": "Fermé",
-      "statut_garde": "Fermé"
+      "statut_cours": "ND",
+      "statut_garde": "ND"
     },
     {
       "name": "École Sainte-Thérèse",
       "css": "Centre de services scolaire Harricana",
       "region": "Abitibi-Témiscamingue",
-      "statut_cours": "Fermé",
-      "statut_garde": "Fermé"
+      "statut_cours": "ND",
+      "statut_garde": "ND"
     },
     {
       "name": "École secondaire d'Amos",
       "css": "Centre de services scolaire Harricana",
       "region": "Abitibi-Témiscamingue",
-      "statut_cours": "Fermé",
-      "statut_garde": "Fermé"
+      "statut_cours": "ND",
+      "statut_garde": "ND"
     },
     {
       "name": "École secondaire Natagan",
       "css": "Centre de services scolaire Harricana",
       "region": "Abitibi-Témiscamingue",
-      "statut_cours": "Fermé",
-      "statut_garde": "Fermé"
+      "statut_cours": "ND",
+      "statut_garde": "ND"
     },
     {
       "name": "Écoles primaires Saint-Paul–Sainte-Gertrude",
       "css": "Centre de services scolaire Harricana",
       "region": "Abitibi-Témiscamingue",
-      "statut_cours": "Fermé",
-      "statut_garde": "Fermé"
+      "statut_cours": "ND",
+      "statut_garde": "ND"
     },
     {
       "name": "École Bellefeuille",
