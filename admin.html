@@ -1478,7 +1478,8 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: { persistSession: true, storage: window.localStorage, autoRefreshToken: true, detectSessionInUrl: true }
 })
 
-  supabase.auth.onAuthStateChange((_event, _session) => {
+ supabase.auth.onAuthStateChange((_event, _session) => {
+  if (mfaLoginInProgress) return;
   refreshUI();
 });
 
@@ -1590,6 +1591,7 @@ function askConfirm(message) {
     const AUTO_LOGOUT_MS = 2 * 60 * 60 * 1000; // 2h
 const AUTO_LOGOUT_KEY = "autoLogoutAt";
 let autoLogoutTimer = null;
+let mfaLoginInProgress = false;
     
 function clearAutoLogoutTimer() {
   if (autoLogoutTimer) {
@@ -1845,6 +1847,23 @@ async function refreshUI() {
   const { data: { session } } = await supabase.auth.getSession();
 
 if (session) {
+  
+const { data: aalData, error: aalError } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+
+  if (
+    !aalError &&
+    aalData?.nextLevel === "aal2" &&
+    aalData?.currentLevel !== "aal2"
+  ) {
+    document.body.classList.remove("authenticated");
+    loginBox.style.display = "block";
+    okBox.style.display = "none";
+    adminUI.style.display = "none";
+    masterBox.style.display = "none";
+    msg.textContent = "Code MFA requis pour terminer la connexion.";
+    return;
+  }
+  
   document.body.classList.add("authenticated");
   const allowed = await isAdminAllowed();
 
@@ -1925,132 +1944,102 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
   }
 
   const loginBtn = document.getElementById("loginBtn");
-loginBtn.disabled = true;
-loginBtn.textContent = "Connexion...";
+  loginBtn.disabled = true;
+  loginBtn.textContent = "Connexion...";
+  mfaLoginInProgress = true;
 
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  try {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
 
-if (error) {
-  loginBtn.disabled = false;
-  loginBtn.textContent = "Se connecter";
+    if (error) {
+      recordFailedAttempt();
+      await logSecurityEvent("login_failed", {
+        email,
+        reason: error.message || "unknown"
+      });
 
-  recordFailedAttempt();
-  await logSecurityEvent("login_failed", {
-    email,
-    reason: error.message || "unknown"
-  });
+      const raw = (error.message || "").toLowerCase();
 
-  const raw = (error.message || "").toLowerCase();
+      if (raw.includes("invalid login credentials") || raw.includes("invalid credentials")) {
+        msg.textContent = "Identifiants invalides.";
+      } else if (raw.includes("email not confirmed")) {
+        msg.textContent = "Ce compte doit être confirmé avant de se connecter.";
+      } else if (raw.includes("too many requests") || raw.includes("rate limit")) {
+        msg.textContent = "Trop de tentatives. Réessayez dans quelques minutes.";
+      } else {
+        msg.textContent = "Connexion impossible pour le moment.";
+      }
 
-  if (
-    raw.includes("invalid login credentials") ||
-    raw.includes("invalid credentials")
-  ) {
-    msg.textContent = "Identifiants invalides.";
-  } else if (raw.includes("email not confirmed")) {
-    msg.textContent = "Ce compte doit être confirmé avant de se connecter.";
-  } else if (raw.includes("too many requests") || raw.includes("rate limit")) {
-    msg.textContent = "Trop de tentatives. Réessayez dans quelques minutes.";
-  } else {
-    msg.textContent = "Connexion impossible pour le moment.";
-  }
+      return;
+    }
 
-  return;
-}
+    const { data: aalData, error: aalError } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
 
-// 🔐 Vérifier le niveau d'assurance MFA après login
-const { data: aalData, error: aalError } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (aalError) {
+      alert("Erreur MFA: " + aalError.message);
+      await supabase.auth.signOut();
+      return;
+    }
 
-if (aalError) {
-  alert("Erreur MFA: " + aalError.message);
-  await supabase.auth.signOut();
-  loginBtn.disabled = false;
-  loginBtn.textContent = "Se connecter";
-  return;
-}
+    if (aalData?.nextLevel === "aal2") {
+      const { data: factorsData, error: factorsError } = await supabase.auth.mfa.listFactors();
 
-console.log("AAL after password login:", {
-  currentLevel: aalData?.currentLevel,
-  nextLevel: aalData?.nextLevel
-});
+      if (factorsError) {
+        alert("Erreur MFA: " + factorsError.message);
+        await supabase.auth.signOut();
+        return;
+      }
 
-await debugListFactors("MFA DEBUG - after password login");
-  
-if (aalData?.nextLevel === "aal2") {
-  const { data: factorsData, error: factorsError } = await supabase.auth.mfa.listFactors();
+      const verifiedTotpFactors = (factorsData?.totp || []).filter(f => f.status === "verified");
 
-  if (factorsError) {
-    alert("Erreur MFA: " + factorsError.message);
-    await supabase.auth.signOut();
+      if (verifiedTotpFactors.length === 0) {
+        alert("Aucun facteur MFA vérifié n'est disponible.");
+        await supabase.auth.signOut();
+        return;
+      }
+
+      const factorId = verifiedTotpFactors[0].id;
+      const code = prompt("Entrez votre code MFA");
+
+      if (!code) {
+        alert("Code MFA requis");
+        await supabase.auth.signOut();
+        return;
+      }
+
+      const { data: challengeData, error: challengeError } = await supabase.auth.mfa.challenge({
+        factorId
+      });
+
+      if (challengeError) {
+        alert("Erreur MFA: " + challengeError.message);
+        await supabase.auth.signOut();
+        return;
+      }
+
+      const { error: verifyError } = await supabase.auth.mfa.verify({
+        factorId,
+        challengeId: challengeData.id,
+        code
+      });
+
+      if (verifyError) {
+        alert("Code MFA invalide");
+        await supabase.auth.signOut();
+        return;
+      }
+    }
+
+    await logSecurityEvent("login_success", { email });
+    resetLoginAttempts();
+    msg.textContent = "";
+  } finally {
+    mfaLoginInProgress = false;
     loginBtn.disabled = false;
     loginBtn.textContent = "Se connecter";
-    return;
   }
 
-  const verifiedTotpFactors = (factorsData?.totp || []).filter(f => f.status === "verified");
-
-if (verifiedTotpFactors.length === 0) {
-  alert("Aucun facteur MFA vérifié n'est disponible.");
-  await supabase.auth.signOut();
-  loginBtn.disabled = false;
-  loginBtn.textContent = "Se connecter";
-  return;
-}
-
-const factorId = verifiedTotpFactors[0].id;
-
-  if (!factorId) {
-    alert("Aucun facteur MFA vérifié n'est disponible.");
-    await supabase.auth.signOut();
-    loginBtn.disabled = false;
-    loginBtn.textContent = "Se connecter";
-    return;
-  }
-
-  const code = prompt("Entrez votre code MFA");
-
-  if (!code) {
-    alert("Code MFA requis");
-    await supabase.auth.signOut();
-    loginBtn.disabled = false;
-    loginBtn.textContent = "Se connecter";
-    return;
-  }
-
-  const { data: challengeData, error: challengeError } = await supabase.auth.mfa.challenge({
-    factorId
-  });
-
-  if (challengeError) {
-    alert("Erreur MFA: " + challengeError.message);
-    await supabase.auth.signOut();
-    loginBtn.disabled = false;
-    loginBtn.textContent = "Se connecter";
-    return;
-  }
-
-  const { error: verifyError } = await supabase.auth.mfa.verify({
-    factorId,
-    challengeId: challengeData.id,
-    code
-  });
-
-  if (verifyError) {
-    alert("Code MFA invalide");
-    await supabase.auth.signOut();
-    loginBtn.disabled = false;
-    loginBtn.textContent = "Se connecter";
-    return;
-  }
-}
-
-loginBtn.disabled = false;
-loginBtn.textContent = "Se connecter";
-
-await logSecurityEvent("login_success", { email });
-resetLoginAttempts();
-msg.textContent = "";
-await refreshUI();
+  await refreshUI();
 });
 
 changePasswordBtn?.addEventListener("click", async () => {
