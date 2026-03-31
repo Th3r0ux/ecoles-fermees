@@ -1675,6 +1675,44 @@ function validatePassword(password) {
   return "";
 }
 
+async function reauthenticateCurrentUser(currentPassword) {
+  const password = (currentPassword || "").trim();
+
+  if (!password) {
+    return { ok: false, message: "Entrez votre mot de passe actuel." };
+  }
+
+  const { data: userData } = await supabase.auth.getUser();
+  const email = userData?.user?.email?.trim().toLowerCase();
+
+  if (!email) {
+    return { ok: false, message: "Impossible de vérifier la session actuelle." };
+  }
+
+  const reauthClient = createClient(SUPABASE_URL, SUPABASE_KEY, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false
+    }
+  });
+
+  try {
+    const { error } = await reauthClient.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) {
+      return { ok: false, message: "Mot de passe actuel invalide." };
+    }
+
+    return { ok: true, email };
+  } finally {
+    await reauthClient.auth.signOut();
+  }
+}    
+
 async function logSecurityEvent(eventType, details = {}) {
   try {
     const { data: { user } } = await supabase.auth.getUser();
@@ -2064,97 +2102,145 @@ function closePasswordModal() {
 
 openPasswordModalBtn?.addEventListener("click", openPasswordModal);
 closePasswordModalBtn?.addEventListener("click", closePasswordModal);
-   enableMfaBtn?.addEventListener("click", async () => {
-  const { data, error } = await supabase.auth.mfa.enroll({
-    factorType: "totp"
-  });
 
-  if (error) {
-    alert("Erreur MFA: " + error.message);
+enableMfaBtn?.addEventListener("click", async () => {
+  const currentPassword = prompt("Entrez votre mot de passe actuel pour activer le MFA");
+
+  if (!currentPassword) {
+    alert("Activation MFA annulée.");
     return;
   }
 
-  const qr = data.totp.qr_code;
-  const secret = data.totp.secret;
-  const factorId = data.id;
+  enableMfaBtn.disabled = true;
+  const originalText = enableMfaBtn.textContent;
+  enableMfaBtn.textContent = "Vérification...";
 
-  const win = window.open("", "_blank", "width=520,height=720");
+  try {
+    const reauth = await reauthenticateCurrentUser(currentPassword);
 
-  if (!win) {
-    alert("Impossible d’ouvrir la fenêtre MFA.");
-    return;
+    if (!reauth.ok) {
+      await logSecurityEvent("mfa_enroll_reauth_failed", {
+        reason: reauth.message
+      });
+      alert(reauth.message);
+      return;
+    }
+
+    const { data: factorsData, error: factorsError } = await supabase.auth.mfa.listFactors();
+
+    if (factorsError) {
+      alert("Erreur MFA: " + factorsError.message);
+      return;
+    }
+
+    const hasVerifiedTotp = (factorsData?.totp || []).some(f => f.status === "verified");
+
+    if (hasVerifiedTotp) {
+      alert("Un facteur MFA est déjà activé sur ce compte.");
+      return;
+    }
+
+    await logSecurityEvent("mfa_enroll_reauth_success", {
+      email: reauth.email
+    });
+
+    enableMfaBtn.textContent = "Préparation...";
+
+    const { data, error } = await supabase.auth.mfa.enroll({
+      factorType: "totp"
+    });
+
+    if (error) {
+      alert("Erreur MFA: " + error.message);
+      return;
+    }
+
+    const qr = data.totp.qr_code;
+    const secret = data.totp.secret;
+    const factorId = data.id;
+
+    const win = window.open("", "_blank", "width=520,height=720");
+
+    if (!win) {
+      alert("Impossible d’ouvrir la fenêtre MFA.");
+      return;
+    }
+
+    const qrDataUrl = `data:image/svg+xml;utf8,${encodeURIComponent(qr)}`;
+
+    win.document.write(`
+      <!doctype html>
+      <html lang="fr">
+      <head>
+        <meta charset="utf-8" />
+        <title>Configurer MFA</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            padding: 24px;
+            line-height: 1.4;
+            color: #111827;
+          }
+          img {
+            max-width: 260px;
+            display: block;
+            margin: 16px 0;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            padding: 12px;
+            background: white;
+          }
+          input {
+            width: 100%;
+            box-sizing: border-box;
+            height: 44px;
+            padding: 0 12px;
+            font-size: 16px;
+            margin-top: 8px;
+            margin-bottom: 12px;
+          }
+          button {
+            height: 44px;
+            padding: 0 16px;
+            font-size: 15px;
+            cursor: pointer;
+          }
+          .secret {
+            word-break: break-all;
+            background: #f3f4f6;
+            padding: 10px;
+            border-radius: 8px;
+          }
+        </style>
+      </head>
+      <body>
+        <h2>Activer l’authentification multifacteur</h2>
+        <p>Scanne ce code QR dans ton application Authenticator.</p>
+        <img src="${qrDataUrl}" alt="QR code MFA" />
+        <p>Ou entre cette clé manuellement :</p>
+        <div class="secret">${secret}</div>
+
+        <label for="mfaCode">Code à 6 chiffres</label>
+        <input id="mfaCode" inputmode="numeric" autocomplete="one-time-code" placeholder="123456" />
+
+        <button id="verifyBtn" type="button">Valider le code</button>
+
+        <script>
+          document.getElementById("verifyBtn").addEventListener("click", async () => {
+            const code = document.getElementById("mfaCode").value.trim();
+            const result = await window.opener.verifyMfaCode("${factorId}", code);
+            alert(result);
+          });
+        <\/script>
+      </body>
+      </html>
+    `);
+  } finally {
+    enableMfaBtn.disabled = false;
+    enableMfaBtn.textContent = originalText;
   }
-
-  const qrDataUrl = `data:image/svg+xml;utf8,${encodeURIComponent(qr)}`;
-
-  win.document.write(`
-    <!doctype html>
-    <html lang="fr">
-    <head>
-      <meta charset="utf-8" />
-      <title>Configurer MFA</title>
-      <style>
-        body {
-          font-family: Arial, sans-serif;
-          padding: 24px;
-          line-height: 1.4;
-          color: #111827;
-        }
-        img {
-          max-width: 260px;
-          display: block;
-          margin: 16px 0;
-          border: 1px solid #ddd;
-          border-radius: 12px;
-          padding: 12px;
-          background: white;
-        }
-        input {
-          width: 100%;
-          box-sizing: border-box;
-          height: 44px;
-          padding: 0 12px;
-          font-size: 16px;
-          margin-top: 8px;
-          margin-bottom: 12px;
-        }
-        button {
-          height: 44px;
-          padding: 0 16px;
-          font-size: 15px;
-          cursor: pointer;
-        }
-        .secret {
-          word-break: break-all;
-          background: #f3f4f6;
-          padding: 10px;
-          border-radius: 8px;
-        }
-      </style>
-    </head>
-    <body>
-      <h2>Activer l’authentification multifacteur</h2>
-      <p>Scanne ce code QR dans ton application Authenticator.</p>
-      <img src="${qrDataUrl}" alt="QR code MFA" />
-      <p>Ou entre cette clé manuellement :</p>
-      <div class="secret">${secret}</div>
-
-      <label for="mfaCode">Code à 6 chiffres</label>
-      <input id="mfaCode" inputmode="numeric" autocomplete="one-time-code" placeholder="123456" />
-
-      <button id="verifyBtn" type="button">Valider le code</button>
-
-      <script>
-        document.getElementById("verifyBtn").addEventListener("click", async () => {
-          const code = document.getElementById("mfaCode").value.trim();
-          const result = await window.opener.verifyMfaCode("${factorId}", code);
-          alert(result);
-        });
-      <\/script>
-    </body>
-    </html>
-  `);
 });
+  
 
 passwordModal?.addEventListener("click", (e) => {
   if (e.target === passwordModal) {
@@ -2433,6 +2519,8 @@ function cssHasCheckmark(regionName, cssName) {
   if (verifyError) {
     return "Erreur vérification MFA: " + verifyError.message;
   }
+
+  await logSecurityEvent("mfa_enabled", { factorId });      
 
   return "MFA activé avec succès 🎉";
 };
