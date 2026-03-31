@@ -1740,6 +1740,39 @@ async function getVerifiedTotpFactors() {
   };
 }
 
+async function debugListFactors(label = "MFA DEBUG") {
+  try {
+    const { data, error } = await supabase.auth.mfa.listFactors();
+
+    console.group(label);
+    if (error) {
+      console.error("listFactors error:", error);
+      console.groupEnd();
+      return { ok: false, error };
+    }
+
+    const totp = data?.totp || [];
+    console.log("totp raw:", totp);
+    console.log(
+      "totp simplified:",
+      totp.map(f => ({
+        id: f.id,
+        status: f.status,
+        friendlyName: f.friendly_name ?? null,
+        factorType: f.factor_type ?? null
+      }))
+    );
+    console.groupEnd();
+
+    return { ok: true, data };
+  } catch (err) {
+    console.group(label);
+    console.error("debugListFactors exception:", err);
+    console.groupEnd();
+    return { ok: false, error: err };
+  }
+}    
+
 async function syncMfaButtons() {
   if (!enableMfaBtn || !disableMfaBtn) return;
 
@@ -1753,14 +1786,14 @@ async function syncMfaButtons() {
 
   const factorResult = await getVerifiedTotpFactors();
 
-  if (factorResult.ok) {
+  if (factorResult.ok && factorResult.factors.length > 0) {
     enableMfaBtn.style.display = "none";
     disableMfaBtn.style.display = "";
   } else {
     enableMfaBtn.style.display = "";
     disableMfaBtn.style.display = "none";
   }
-}    
+}
     
 async function logSecurityEvent(eventType, details = {}) {
   try {
@@ -1935,6 +1968,13 @@ if (aalError) {
   return;
 }
 
+console.log("AAL after password login:", {
+  currentLevel: aalData?.currentLevel,
+  nextLevel: aalData?.nextLevel
+});
+
+await debugListFactors("MFA DEBUG - after password login");
+  
 if (aalData?.nextLevel === "aal2") {
   const { data: factorsData, error: factorsError } = await supabase.auth.mfa.listFactors();
 
@@ -2341,6 +2381,13 @@ disableMfaBtn?.addEventListener("click", async () => {
       return;
     }
 
+    console.log("AAL before unenroll:", {
+  currentLevel: aalData?.currentLevel,
+  nextLevel: aalData?.nextLevel
+});
+
+await debugListFactors("MFA DEBUG - before unenroll");
+    
     if (aalData?.currentLevel !== "aal2") {
       alert("Cette session n'est pas suffisamment élevée pour désactiver le MFA. Reconnectez-vous et complétez le MFA, puis réessayez.");
       return;
@@ -2370,20 +2417,33 @@ disableMfaBtn?.addEventListener("click", async () => {
     disableMfaBtn.textContent = "Désactivation...";
 
     for (const factor of factorResult.factors) {
-      const { error: unenrollError } = await supabase.auth.mfa.unenroll({
-        factorId: factor.id
-      });
+  console.log("Trying to unenroll factor:", {
+    id: factor.id,
+    status: factor.status,
+    friendlyName: factor.friendly_name ?? null
+  });
 
-      if (unenrollError) {
-        await logSecurityEvent("mfa_unenroll_failed", {
-          factorId: factor.id,
-          reason: unenrollError.message || "unknown"
-        });
-        alert("Erreur MFA: " + unenrollError.message);
-        return;
-      }
-    }
+  const { error: unenrollError } = await supabase.auth.mfa.unenroll({
+    factorId: factor.id
+  });
 
+  if (unenrollError) {
+    console.error("unenroll error for factor:", factor.id, unenrollError);
+
+    await logSecurityEvent("mfa_unenroll_failed", {
+      factorId: factor.id,
+      reason: unenrollError.message || "unknown"
+    });
+
+    alert("Erreur MFA: " + unenrollError.message);
+    return;
+  }
+
+  await debugListFactors(`MFA DEBUG - after unenroll ${factor.id}`);
+}
+
+    await debugListFactors("MFA DEBUG - final before signOut");
+    
     localStorage.setItem("mfaJustDisabled", "1");
 
     try {
